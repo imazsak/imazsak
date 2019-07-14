@@ -22,6 +22,7 @@ trait Services[F[_]] {
   implicit val dateTimeService: DateTimeUtil[F]
   implicit val tracerService: TracerService[F]
   implicit val amqpService: AmqpService[F]
+  implicit val jwtService: JwtServiceImpl[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -53,5 +54,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val idGenerator: IdGenerator[Future]               = new IdGeneratorImpl[Future]
   implicit lazy val dateTimeService: DateTimeUtil[Future]          = new DateTimeUtilImpl[Future]
   implicit lazy val tracerService: TracerService[Future]           = new TracerService[Future]()
-  implicit val amqpService: AmqpService[Future]                    = new AmqpServiceImpl[Future]()
+  implicit lazy val amqpService: AmqpService[Future]               = new AmqpServiceImpl[Future]()
+  implicit lazy val jwtService: JwtServiceImpl[Future]             = new JwtServiceImpl[Future]()
 }

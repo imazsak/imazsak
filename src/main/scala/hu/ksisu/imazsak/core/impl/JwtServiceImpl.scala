@@ -12,7 +12,7 @@ import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
 import spray.json._
 
-class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](config: JwtConfig) extends JwtService[F] {
+class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConfig) extends JwtService[F] {
 
   import cats.syntax.flatMap._
   import cats.syntax.functor._

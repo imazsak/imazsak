@@ -2,9 +2,9 @@ package hu.ksisu.imazsak
 
 import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
-import hu.ksisu.imazsak.core.dao.MongoDatabaseService
+import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoDatabaseServiceImpl}
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
-import hu.ksisu.imazsak.core.dao.MongoDatabaseServiceImpl
+import hu.ksisu.imazsak.core.impl.JwtServiceImpl
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.MongoDriver
 
@@ -24,4 +24,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
 
   override implicit val tracerService: TracerService[Future] = new TracerService[Future]()
   override implicit val amqpService: AmqpService[Future]     = null
+  override implicit val jwtService: JwtServiceImpl[Future]   = new JwtServiceImpl[Future]()
 }
