@@ -37,16 +37,16 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
 
     "UserDao" when {
       "#findUserData" in {
-        val data = UserData("secret_id", "nickname")
+        val data = UserData("secret_id", Some("nickname"))
         await(userDao.findUserData(data.id).value) shouldEqual None
         await(userCollection.insert.one(data))
         await(userDao.findUserData(data.id).value) shouldEqual Some(data)
       }
       "#updateUserData" in {
-        val userData = UserData("secret_id", "nickname")
+        val userData = UserData("secret_id", Some("nickname"))
         val data     = BSON.write(userData) ++ BSONDocument("extra_data" -> BSONBoolean(true))
         await(userCollection.insert.one(data))
-        await(userDao.updateUserData(userData.copy(name = "new_name")))
+        await(userDao.updateUserData(userData.copy(name = Some("new_name"))))
         val result2 = await(userCollection.find(byId(userData.id), None).one[BSONDocument])
         result2 shouldBe a[Some[_]]
         result2.get.get("id") shouldEqual Some(BSONString(userData.id))

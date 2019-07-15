@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
+import hu.ksisu.imazsak.me.MeApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import hu.ksisu.imazsak.util.TracingDirectives._
 import io.opentracing.Tracer
@@ -13,7 +14,7 @@ import org.slf4j.Logger
 import scala.concurrent.Future
 
 trait Api {
-  private val tracer: Tracer                                    = GlobalTracer.get()
+  protected val tracer: Tracer                                  = GlobalTracer.get()
   protected def withTrace(name: String): Directive1[LogContext] = trace(tracer, name).map(new LogContext(tracer, _))
 
   def route(): Route
@@ -36,7 +37,9 @@ object Api {
 
     val api = modules.collect {
       case "health" => new HealthCheckApi()
-    }
+    } ++ Seq(
+      new MeApi()
+    )
 
     cors() {
       createRoute(api)

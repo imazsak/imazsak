@@ -10,7 +10,7 @@ trait UserDao[F[_]] {
 }
 
 object UserDao {
-  case class UserData(id: String, name: String)
+  case class UserData(id: String, name: Option[String])
 
   implicit def userDataWriter: BSONDocumentWriter[UserData] = Macros.writer[UserData]
   implicit def userDataReader: BSONDocumentReader[UserData] = Macros.reader[UserData]

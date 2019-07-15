@@ -33,6 +33,9 @@ object LoggerUtil {
     }
   }
 
+  class UserLogContext(val userId: String, override val tracer: Tracer, override val span: Span)
+      extends LogContext(tracer, span)
+
   class Logger(name: String) {
     private lazy val logger = LoggerFactory.getLogger(name)
 

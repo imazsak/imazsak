@@ -1,10 +1,10 @@
 package hu.ksisu.imazsak.core
 
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
-import akka.http.scaladsl.server.AuthenticationFailedRejection
+import akka.http.scaladsl.server.{AuthenticationFailedRejection, Route}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import hu.ksisu.imazsak.TestBase
+import hu.ksisu.imazsak.{Api, TestBase}
 import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
@@ -21,11 +21,12 @@ class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAnd
   }
 
   trait TestScope {
-    val authDirectives = new AuthDirectives {
+    val authDirectives = new AuthDirectives with Api {
       override val jwtService: JwtService[Future] = jwtServiceMock
+      override def route(): Route                 = ???
     }
 
-    val route = authDirectives.userAuth { userId =>
+    def route(): Route = authDirectives.userAuth { userId =>
       complete(userId)
     }
   }
