@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
+import hu.ksisu.imazsak.group.GroupApi
 import hu.ksisu.imazsak.me.MeApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import hu.ksisu.imazsak.util.TracingDirectives._
@@ -38,7 +39,8 @@ object Api {
     val api = modules.collect {
       case "health" => new HealthCheckApi()
     } ++ Seq(
-      new MeApi()
+      new MeApi(),
+      new GroupApi()
     )
 
     cors() {

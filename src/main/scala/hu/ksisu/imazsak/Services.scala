@@ -5,9 +5,10 @@ import akka.stream.Materializer
 import cats.MonadError
 import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
-import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoDatabaseServiceImpl, UserDao, UserDaoImpl}
+import hu.ksisu.imazsak.core.dao._
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import hu.ksisu.imazsak.core.impl._
+import hu.ksisu.imazsak.group.{GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.me.{MeService, MeServiceImpl}
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
@@ -26,6 +27,8 @@ trait Services[F[_]] {
   implicit val jwtService: JwtService[F]
   implicit val userDao: UserDao[F]
   implicit val meService: MeService[F]
+  implicit val groupDao: GroupDao[F]
+  implicit val groupService: GroupService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -61,4 +64,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val jwtService: JwtServiceImpl[Future]             = new JwtServiceImpl[Future]()
   implicit lazy val userDao: UserDao[Future]                       = new UserDaoImpl()
   implicit lazy val meService: MeService[Future]                   = new MeServiceImpl[Future]()
+  implicit lazy val groupDao: GroupDao[Future]                     = new GroupDaoImpl()
+  implicit lazy val groupService: GroupService[Future]             = new GroupServiceImpl()
 }
