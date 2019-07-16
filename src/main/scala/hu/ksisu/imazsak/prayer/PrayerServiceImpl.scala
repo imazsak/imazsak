@@ -3,7 +3,7 @@ package hu.ksisu.imazsak.prayer
 import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.Response
-import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, MinePrayerListData}
+import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, MinePrayerListData, GroupPrayerListData}
 import hu.ksisu.imazsak.core.dao.{GroupDao, PrayerDao}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
@@ -22,6 +22,15 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MinePrayerListData]] = {
     EitherT.right(prayerDao.findPrayerByUser(ctx.userId))
+  }
+
+  override def listGroupPrayers(
+      groupId: String
+  )(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]] = {
+    for {
+      _      <- checkGroups(Seq(groupId))
+      result <- EitherT.right(prayerDao.findByGroup(groupId))
+    } yield result
   }
 
   private def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {

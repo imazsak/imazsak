@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
-import hu.ksisu.imazsak.core.dao.PrayerDao.MinePrayerListData
+import hu.ksisu.imazsak.core.dao.PrayerDao.{GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
@@ -33,6 +33,12 @@ class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtServ
           service.listMyPrayers().toComplete
         }
       }
+    } ~ {
+      path("groups" / Segment / "prayers") { groupId =>
+        userAuthAndTrace("Prayer_ListGroup") { implicit ctx =>
+          service.listGroupPrayers(groupId).toComplete
+        }
+      }
     }
   }
 }
@@ -40,4 +46,5 @@ class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtServ
 object PrayerApi {
   implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest] = jsonFormat2(CreatePrayerRequest)
   implicit val minePrayerListDataFormat: RootJsonFormat[MinePrayerListData]   = jsonFormat3(MinePrayerListData)
+  implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData] = jsonFormat3(GroupPrayerListData)
 }
