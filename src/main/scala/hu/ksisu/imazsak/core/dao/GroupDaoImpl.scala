@@ -15,10 +15,10 @@ class GroupDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[Future], 
     val memberId = document("members.id" -> userId)
     for {
       collection <- collectionF
-      userData <- collection
+      groups <- collection
         .find(memberId, groupListDataProjector)
         .cursor[GroupListData]()
         .collect[Seq](-1, Cursor.FailOnError[Seq[GroupListData]]())
-    } yield userData
+    } yield groups
   }
 }

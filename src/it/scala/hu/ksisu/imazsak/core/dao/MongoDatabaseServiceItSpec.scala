@@ -4,7 +4,7 @@ import hu.ksisu.imazsak.AwaitUtil
 import hu.ksisu.imazsak.core.dao.GroupDao.GroupListData
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
-import hu.ksisu.imazsak.core.dao.PrayerDao.CreatePrayerData
+import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, MinePrayerListData}
 import hu.ksisu.imazsak.core.dao.UserDao.UserData
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
@@ -125,6 +125,25 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         resultMap("3").get("userId") shouldEqual Some(BSONString("user_2"))
         resultMap("3").get("message") shouldEqual Some(BSONString("message3"))
         resultMap("3").get("groupIds") shouldEqual Some(BSONArray(BSONString("group_2"), BSONString("group_3")))
+      }
+      "#listMinePrayers" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        val prayer3 = CreatePrayerData("user_2", "message3", Seq("group_2", "group_3"))
+        await(prayerDao.createPrayer(prayer1)) shouldEqual "1"
+        await(prayerDao.createPrayer(prayer2)) shouldEqual "2"
+        await(prayerDao.createPrayer(prayer3)) shouldEqual "3"
+
+        val result1 = await(prayerDao.findPrayerByUser("user_1"))
+        result1 shouldEqual Seq(
+          MinePrayerListData("1", "message1", Seq("group_1", "group_2")),
+          MinePrayerListData("2", "message2", Seq("group_2"))
+        )
+
+        val result2 = await(prayerDao.findPrayerByUser("user_2"))
+        result2 shouldEqual Seq(
+          MinePrayerListData("3", "message3", Seq("group_2", "group_3"))
+        )
       }
     }
   }

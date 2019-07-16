@@ -5,10 +5,12 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
+import hu.ksisu.imazsak.core.dao.PrayerDao.MinePrayerListData
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
+import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
 
 import scala.concurrent.Future
@@ -19,12 +21,16 @@ class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtServ
   implicit val logger = new Logger("PrayerApi")
 
   def route(): Route = {
-    path("me" / "prayer") {
+    path("prayers") {
       post {
         userAuthAndTrace("Prayer_Create") { implicit ctx =>
           entity(as[CreatePrayerRequest]) { data =>
             service.createPrayer(data).toComplete
           }
+        }
+      } ~ get {
+        userAuthAndTrace("Prayer_ListMine") { implicit ctx =>
+          service.listMyPrayers().toComplete
         }
       }
     }
@@ -32,6 +38,6 @@ class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtServ
 }
 
 object PrayerApi {
-  import spray.json.DefaultJsonProtocol._
   implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest] = jsonFormat2(CreatePrayerRequest)
+  implicit val minePrayerListDataFormat: RootJsonFormat[MinePrayerListData]   = jsonFormat3(MinePrayerListData)
 }
