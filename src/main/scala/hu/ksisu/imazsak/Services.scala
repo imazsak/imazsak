@@ -10,6 +10,7 @@ import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckService
 import hu.ksisu.imazsak.core.impl._
 import hu.ksisu.imazsak.group.{GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.me.{MeService, MeServiceImpl}
+import hu.ksisu.imazsak.prayer.{PrayerService, PrayerServiceImpl}
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
 import reactivemongo.api.MongoDriver
@@ -20,7 +21,7 @@ trait Services[F[_]] {
   implicit val configService: ServerConfig[F]
   implicit val healthCheckService: HealthCheckService[F]
   implicit val databaseService: MongoDatabaseService[F]
-  implicit val idGenerator: IdGenerator[F]
+  implicit val idGenerator: IdGenerator
   implicit val dateTimeService: DateTimeUtil[F]
   implicit val tracerService: TracerService[F]
   implicit val amqpService: AmqpService[F]
@@ -29,6 +30,8 @@ trait Services[F[_]] {
   implicit val meService: MeService[F]
   implicit val groupDao: GroupDao[F]
   implicit val groupService: GroupService[F]
+  implicit val prayerDao: PrayerDao[F]
+  implicit val prayerService: PrayerService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -57,7 +60,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val mongoDriver: MongoDriver                       = new MongoDriver()
   implicit lazy val databaseService: MongoDatabaseService[Future]  = new MongoDatabaseServiceImpl()
   implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
-  implicit lazy val idGenerator: IdGenerator[Future]               = new IdGeneratorImpl[Future]
+  implicit lazy val idGenerator: IdGenerator                       = new IdGeneratorImpl
   implicit lazy val dateTimeService: DateTimeUtil[Future]          = new DateTimeUtilImpl[Future]
   implicit lazy val tracerService: TracerService[Future]           = new TracerService[Future]()
   implicit lazy val amqpService: AmqpService[Future]               = new AmqpServiceImpl[Future]()
@@ -66,4 +69,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val meService: MeService[Future]                   = new MeServiceImpl[Future]()
   implicit lazy val groupDao: GroupDao[Future]                     = new GroupDaoImpl()
   implicit lazy val groupService: GroupService[Future]             = new GroupServiceImpl()
+  implicit lazy val prayerDao: PrayerDao[Future]                   = new PrayerDaoImpl()
+  implicit lazy val prayerService: PrayerService[Future]           = new PrayerServiceImpl[Future]()
 }

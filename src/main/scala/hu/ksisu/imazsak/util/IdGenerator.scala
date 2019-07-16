@@ -2,13 +2,10 @@ package hu.ksisu.imazsak.util
 
 import java.util.UUID
 
-import cats.Applicative
-
-trait IdGenerator[F[_]] {
-  def generate(): F[String]
+trait IdGenerator {
+  def generate(): String
 }
 
-class IdGeneratorImpl[F[_]: Applicative] extends IdGenerator[F] {
-  import cats.syntax.applicative._
-  override def generate(): F[String] = UUID.randomUUID().toString.pure
+class IdGeneratorImpl extends IdGenerator {
+  override def generate(): String = UUID.randomUUID().toString
 }

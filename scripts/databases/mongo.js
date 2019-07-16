@@ -8,3 +8,8 @@ db.getSiblingDB("imazsak");
 db.createCollection("groups");
 db.groups.createIndex({"id": 1}, {"unique": true});
 db.groups.createIndex({"members.id": 1});
+
+db.createCollection("prayers");
+db.prayers.createIndex({"id": 1}, {"unique": true});
+db.prayers.createIndex({"user": 1});
+db.prayers.createIndex({"groups": 1});
