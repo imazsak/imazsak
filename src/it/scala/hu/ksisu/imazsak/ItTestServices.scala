@@ -1,5 +1,6 @@
 package hu.ksisu.imazsak
 
+import hu.ksisu.imazsak.admin.{AdminService, AdminServiceImpl}
 import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
@@ -34,4 +35,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   override implicit lazy val groupService: GroupService[Future]   = new GroupServiceImpl()
   implicit lazy val prayerDao: PrayerDao[Future]                  = new PrayerDaoImpl()
   implicit lazy val prayerService: PrayerService[Future]          = new PrayerServiceImpl[Future]()
+  implicit lazy val adminService: AdminService[Future]            = new AdminServiceImpl[Future]()
 }

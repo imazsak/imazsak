@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.core.dao
 import cats.data.OptionT
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.UserDao._
+import reactivemongo.api.Cursor
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSON, BSONDocument}
 
@@ -27,5 +28,15 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[Future], e
       collection <- collectionF
       _          <- collection.update.one(byId(userData.id), modifier, upsert = false, multi = false)
     } yield ()
+  }
+
+  override def allUser(): Future[Seq[UserAdminListData]] = {
+    for {
+      collection <- collectionF
+      result <- collection
+        .find(all, userAdminListDataProjector)
+        .cursor[UserAdminListData]()
+        .collect[Seq](-1, Cursor.FailOnError[Seq[UserAdminListData]]())
+    } yield result
   }
 }

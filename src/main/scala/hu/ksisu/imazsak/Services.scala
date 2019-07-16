@@ -3,6 +3,7 @@ package hu.ksisu.imazsak
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import cats.MonadError
+import hu.ksisu.imazsak.admin.{AdminService, AdminServiceImpl}
 import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
@@ -32,6 +33,7 @@ trait Services[F[_]] {
   implicit val groupService: GroupService[F]
   implicit val prayerDao: PrayerDao[F]
   implicit val prayerService: PrayerService[F]
+  implicit val adminService: AdminService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -71,4 +73,5 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val groupService: GroupService[Future]             = new GroupServiceImpl()
   implicit lazy val prayerDao: PrayerDao[Future]                   = new PrayerDaoImpl()
   implicit lazy val prayerService: PrayerService[Future]           = new PrayerServiceImpl[Future]()
+  implicit lazy val adminService: AdminService[Future]             = new AdminServiceImpl[Future]()
 }

@@ -3,6 +3,7 @@ package hu.ksisu.imazsak
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import hu.ksisu.imazsak.admin.AdminApi
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
 import hu.ksisu.imazsak.group.GroupApi
 import hu.ksisu.imazsak.me.MeApi
@@ -42,7 +43,8 @@ object Api {
     } ++ Seq(
       new MeApi(),
       new GroupApi(),
-      new PrayerApi()
+      new PrayerApi(),
+      new AdminApi()
     )
 
     cors() {

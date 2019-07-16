@@ -33,7 +33,10 @@ object LoggerUtil {
     }
   }
 
-  class UserLogContext(val userId: String, override val tracer: Tracer, override val span: Span)
+  case class UserLogContext(userId: String, override val tracer: Tracer, override val span: Span)
+      extends LogContext(tracer, span)
+
+  case class AdminLogContext(adminId: String, override val tracer: Tracer, override val span: Span)
       extends LogContext(tracer, span)
 
   class Logger(name: String) {
