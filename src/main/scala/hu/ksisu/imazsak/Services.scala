@@ -34,6 +34,7 @@ trait Services[F[_]] {
   implicit val prayerDao: PrayerDao[F]
   implicit val prayerService: PrayerService[F]
   implicit val adminService: AdminService[F]
+  implicit val fileStoreService: FileStoreService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -45,6 +46,7 @@ trait Services[F[_]] {
       _ <- initialize(configService, "config")
       _ <- initialize(tracerService, "tracer")
       _ <- initialize(databaseService, "database")
+      _ <- initialize(fileStoreService, "filestore")
       _ <- initialize(amqpService, "ampq")
     } yield ()
   }
@@ -74,4 +76,5 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val prayerDao: PrayerDao[Future]                   = new PrayerDaoImpl()
   implicit lazy val prayerService: PrayerService[Future]           = new PrayerServiceImpl[Future]()
   implicit lazy val adminService: AdminService[Future]             = new AdminServiceImpl[Future]()
+  implicit lazy val fileStoreService: FileStoreService[Future]     = new S3FileStoreService()
 }

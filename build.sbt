@@ -36,7 +36,7 @@ lazy val core = (project in file("."))
     libraryDependencies ++= {
       val akkaHttpV = "10.1.8"
       val akkaV     = "2.5.23"
-      val slickV    = "3.3.2"
+      val alpakkaV  = "1.1.0"
       val jwtV      = "3.1.0"
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0-M4",
@@ -59,7 +59,8 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "0.35.5",
         "org.reactivemongo"    %% "reactivemongo"            % "0.18.1",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.0",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % alpakkaV,
+        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % alpakkaV,
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.62",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",

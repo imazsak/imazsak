@@ -36,4 +36,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   implicit lazy val prayerDao: PrayerDao[Future]                  = new PrayerDaoImpl()
   implicit lazy val prayerService: PrayerService[Future]          = new PrayerServiceImpl[Future]()
   implicit lazy val adminService: AdminService[Future]            = new AdminServiceImpl[Future]()
+  implicit lazy val fileStoreService: FileStoreService[Future]    = null
 }

@@ -31,3 +31,10 @@ services:
     ports:
     - 5672:5672
     - 15672:15672
+  minio:
+    image: minio/minio
+    ports:
+      - 9999:9000/udp
+    environment:
+      - MINIO_ACCESS_KEY=minio_admin
+      - MINIO_SECRET_KEY=minio_adminpw
