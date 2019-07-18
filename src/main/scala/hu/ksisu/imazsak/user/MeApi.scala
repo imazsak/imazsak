@@ -4,29 +4,28 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
+import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.user.MeApi._
 import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
-import spray.json.{JsObject, RootJsonFormat}
+import hu.ksisu.imazsak.util.LoggerUtil.Logger
+import spray.json.RootJsonFormat
 
 import scala.concurrent.Future
 
 class MeApi(implicit service: MeService[Future], val jwtService: JwtService[Future]) extends Api with AuthDirectives {
+  implicit val logger = new Logger("MeApi")
 
   def route(): Route = {
     path("me") {
       get {
         userAuthAndTrace("Me_Get") { implicit ctx =>
-          onSuccess(service.getUserData()) { result =>
-            complete(result)
-          }
+          service.getUserData().toComplete
         }
       } ~ post {
         userAuthAndTrace("Me_Update") { implicit ctx =>
           entity(as[UpdateMeUserData]) { data =>
-            onSuccess(service.updateUserData(data)) {
-              complete(JsObject())
-            }
+            service.updateUserData(data).toComplete
           }
         }
       }

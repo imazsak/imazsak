@@ -1,21 +1,27 @@
 package hu.ksisu.imazsak.user
 
 import cats.Monad
+import cats.data.EitherT
+import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
 import hu.ksisu.imazsak.user.UserDao.UserData
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 class MeServiceImpl[F[_]: Monad](implicit val userDao: UserDao[F]) extends MeService[F] {
 
-  override def getUserData()(implicit ctx: UserLogContext): F[MeUserData] = {
+  override def getUserData()(implicit ctx: UserLogContext): Response[F, MeUserData] = {
     userDao
       .findUserData(ctx.userId)
       .map(x => MeUserData(x.name))
-      .getOrElse(throw new Exception("User data not found!"))
+      .toRight(userDataNotFound)
   }
 
-  override def updateUserData(data: UpdateMeUserData)(implicit ctx: UserLogContext): F[Unit] = {
+  override def updateUserData(data: UpdateMeUserData)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val userData = UserData(ctx.userId, Option(data.name))
-    userDao.updateUserData(userData)
+    EitherT.right(userDao.updateUserData(userData))
+  }
+
+  private def userDataNotFound(implicit ctx: UserLogContext): Throwable = {
+    new NoSuchElementException(s"Not found user data for: ${ctx.userId}")
   }
 }
