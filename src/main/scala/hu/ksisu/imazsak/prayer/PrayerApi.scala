@@ -7,7 +7,7 @@ import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
-import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MinePrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
@@ -45,6 +45,6 @@ class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtServ
 
 object PrayerApi {
   implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest] = jsonFormat2(CreatePrayerRequest)
-  implicit val minePrayerListDataFormat: RootJsonFormat[MinePrayerListData]   = jsonFormat3(MinePrayerListData)
+  implicit val minePrayerListDataFormat: RootJsonFormat[MyPrayerListData]     = jsonFormat3(MyPrayerListData)
   implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData] = jsonFormat3(GroupPrayerListData)
 }

@@ -8,7 +8,7 @@ import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, Gro
 import hu.ksisu.imazsak.group.GroupDaoImpl
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationDaoImpl
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
 import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
 import hu.ksisu.imazsak.user.UserDaoImpl
@@ -283,13 +283,13 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
 
         val result1 = await(prayerDao.findPrayerByUser("user_1"))
         result1 shouldEqual Seq(
-          MinePrayerListData("1", "message1", Seq("group_1", "group_2")),
-          MinePrayerListData("2", "message2", Seq("group_2"))
+          MyPrayerListData("1", "message1", Seq("group_1", "group_2")),
+          MyPrayerListData("2", "message2", Seq("group_2"))
         )
 
         val result2 = await(prayerDao.findPrayerByUser("user_2"))
         result2 shouldEqual Seq(
-          MinePrayerListData("3", "message3", Seq("group_2", "group_3"))
+          MyPrayerListData("3", "message3", Seq("group_2", "group_3"))
         )
       }
       "#findByGroup" in {

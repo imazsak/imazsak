@@ -4,7 +4,7 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.group.GroupDao
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
@@ -20,7 +20,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     } yield ()
   }
 
-  override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MinePrayerListData]] = {
+  override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
     EitherT.right(prayerDao.findPrayerByUser(ctx.userId))
   }
 

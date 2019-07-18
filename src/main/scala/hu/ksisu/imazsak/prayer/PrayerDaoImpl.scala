@@ -19,8 +19,8 @@ class PrayerDaoImpl(
     MongoQueryHelper.insert(data)
   }
 
-  override def findPrayerByUser(userId: String): Future[Seq[MinePrayerListData]] = {
-    MongoQueryHelper.list[MinePrayerListData](byUserId(userId), minePrayerListDataProjector)
+  override def findPrayerByUser(userId: String): Future[Seq[MyPrayerListData]] = {
+    MongoQueryHelper.list[MyPrayerListData](byUserId(userId), myPrayerListDataProjector)
   }
 
   override def findByGroup(groupId: String): Future[Seq[GroupPrayerListData]] = {
