@@ -7,9 +7,9 @@ import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.admin.AdminApi._
 import hu.ksisu.imazsak.admin.AdminService.{AddUserToGroupRequest, CreateGroupRequest}
-import hu.ksisu.imazsak.core.dao.GroupDao.{GroupAdminListData, GroupMember}
-import hu.ksisu.imazsak.core.dao.UserDao.UserAdminListData
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
+import hu.ksisu.imazsak.group.GroupDao.{GroupAdminListData, GroupMember}
+import hu.ksisu.imazsak.user.UserDao.UserAdminListData
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._

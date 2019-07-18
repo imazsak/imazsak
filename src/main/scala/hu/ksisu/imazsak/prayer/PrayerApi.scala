@@ -5,9 +5,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
-import hu.ksisu.imazsak.core.dao.PrayerDao.{GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
+import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._

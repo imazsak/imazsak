@@ -4,9 +4,10 @@ import cats.Monad
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.admin.AdminService.{AddUserToGroupRequest, CreateGroupRequest}
-import hu.ksisu.imazsak.core.dao.GroupDao.{CreateGroupData, GroupAdminListData, GroupMember}
-import hu.ksisu.imazsak.core.dao.UserDao.UserAdminListData
-import hu.ksisu.imazsak.core.dao.{GroupDao, UserDao}
+import hu.ksisu.imazsak.group.GroupDao
+import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupMember}
+import hu.ksisu.imazsak.user.UserDao
+import hu.ksisu.imazsak.user.UserDao.UserAdminListData
 import hu.ksisu.imazsak.util.LoggerUtil.AdminLogContext
 
 class AdminServiceImpl[F[_]: Monad](implicit userDao: UserDao[F], groupDao: GroupDao[F]) extends AdminService[F] {

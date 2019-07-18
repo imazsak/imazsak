@@ -3,8 +3,8 @@ package hu.ksisu.imazsak.prayer
 import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.Response
-import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, MinePrayerListData, GroupPrayerListData}
-import hu.ksisu.imazsak.core.dao.{GroupDao, PrayerDao}
+import hu.ksisu.imazsak.group.GroupDao
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 

@@ -1,12 +1,12 @@
-package hu.ksisu.imazsak.me
+package hu.ksisu.imazsak.user
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
-import hu.ksisu.imazsak.me.MeApi._
-import hu.ksisu.imazsak.me.MeService.{MeUserData, UpdateMeUserData}
+import hu.ksisu.imazsak.user.MeApi._
+import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
 import spray.json.{JsObject, RootJsonFormat}
 
 import scala.concurrent.Future

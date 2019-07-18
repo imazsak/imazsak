@@ -1,7 +1,8 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.prayer
 
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
-import hu.ksisu.imazsak.core.dao.PrayerDao._
+import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
+import hu.ksisu.imazsak.prayer.PrayerDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
 

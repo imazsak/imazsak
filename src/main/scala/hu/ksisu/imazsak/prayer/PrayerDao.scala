@@ -1,6 +1,6 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.prayer
 
-import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait PrayerDao[F[_]] {

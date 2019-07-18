@@ -1,7 +1,8 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.notification
 
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
-import hu.ksisu.imazsak.core.dao.NotificationDao._
+import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
+import hu.ksisu.imazsak.notification.NotificationDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSON, document}

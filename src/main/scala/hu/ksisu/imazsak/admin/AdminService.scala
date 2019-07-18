@@ -2,8 +2,8 @@ package hu.ksisu.imazsak.admin
 
 import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.admin.AdminService.{AddUserToGroupRequest, CreateGroupRequest}
-import hu.ksisu.imazsak.core.dao.GroupDao.GroupAdminListData
-import hu.ksisu.imazsak.core.dao.UserDao.UserAdminListData
+import hu.ksisu.imazsak.group.GroupDao.GroupAdminListData
+import hu.ksisu.imazsak.user.UserDao.UserAdminListData
 import hu.ksisu.imazsak.util.LoggerUtil.AdminLogContext
 
 trait AdminService[F[_]] {

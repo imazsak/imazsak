@@ -1,9 +1,10 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.group
 
 import cats.data.OptionT
-import hu.ksisu.imazsak.core.dao.GroupDao._
 import hu.ksisu.imazsak.core.dao.MongoProjectors._
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
+import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
+import hu.ksisu.imazsak.group.GroupDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSON, BSONDocument, document}

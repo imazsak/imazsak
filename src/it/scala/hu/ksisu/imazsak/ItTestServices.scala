@@ -6,9 +6,9 @@ import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl
-import hu.ksisu.imazsak.group.{GroupService, GroupServiceImpl}
-import hu.ksisu.imazsak.me.{MeService, MeServiceImpl}
-import hu.ksisu.imazsak.prayer.{PrayerService, PrayerServiceImpl}
+import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
+import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
+import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.MongoDriver
 

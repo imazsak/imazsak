@@ -1,6 +1,6 @@
-package hu.ksisu.imazsak.me
+package hu.ksisu.imazsak.user
 
-import hu.ksisu.imazsak.me.MeService.{MeUserData, UpdateMeUserData}
+import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 trait MeService[F[_]] {

@@ -2,12 +2,16 @@ package hu.ksisu.imazsak.core.dao
 
 import hu.ksisu.imazsak.AwaitUtil
 import hu.ksisu.imazsak.core.dao.BsonHelper._
-import hu.ksisu.imazsak.core.dao.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
-import hu.ksisu.imazsak.core.dao.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
-import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
-import hu.ksisu.imazsak.core.dao.UserDao.{UserAdminListData, UserData}
+import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
+import hu.ksisu.imazsak.group.GroupDaoImpl
+import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
+import hu.ksisu.imazsak.notification.NotificationDaoImpl
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDaoImpl
+import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
+import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.{Cursor, MongoDriver}

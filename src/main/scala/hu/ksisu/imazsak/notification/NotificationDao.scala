@@ -1,6 +1,6 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.notification
 
-import hu.ksisu.imazsak.core.dao.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
+import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait NotificationDao[F[_]] {

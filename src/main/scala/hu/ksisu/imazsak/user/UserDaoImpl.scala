@@ -1,8 +1,9 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.user
 
 import cats.data.OptionT
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
-import hu.ksisu.imazsak.core.dao.UserDao._
+import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
+import hu.ksisu.imazsak.user.UserDao._
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSON, document}
 

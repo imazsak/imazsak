@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.prayer
 
 import hu.ksisu.imazsak.Errors.Response
-import hu.ksisu.imazsak.core.dao.PrayerDao.{MinePrayerListData, GroupPrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 

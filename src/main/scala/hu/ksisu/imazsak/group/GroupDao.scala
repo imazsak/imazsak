@@ -1,7 +1,7 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.group
 
 import cats.data.OptionT
-import hu.ksisu.imazsak.core.dao.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
+import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait GroupDao[F[_]] {

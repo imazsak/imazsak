@@ -4,9 +4,9 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hu.ksisu.imazsak.Api
-import hu.ksisu.imazsak.core.dao.GroupDao.GroupListData
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.group.GroupApi._
+import hu.ksisu.imazsak.group.GroupDao._
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
 

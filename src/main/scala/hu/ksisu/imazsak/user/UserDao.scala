@@ -1,7 +1,7 @@
-package hu.ksisu.imazsak.core.dao
+package hu.ksisu.imazsak.user
 
 import cats.data.OptionT
-import hu.ksisu.imazsak.core.dao.UserDao.{UserAdminListData, UserData}
+import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait UserDao[F[_]] {

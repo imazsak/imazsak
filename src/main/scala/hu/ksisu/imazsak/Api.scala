@@ -6,7 +6,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hu.ksisu.imazsak.admin.AdminApi
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
 import hu.ksisu.imazsak.group.GroupApi
-import hu.ksisu.imazsak.me.MeApi
+import hu.ksisu.imazsak.user.MeApi
 import hu.ksisu.imazsak.prayer.PrayerApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import hu.ksisu.imazsak.util.TracingDirectives._
