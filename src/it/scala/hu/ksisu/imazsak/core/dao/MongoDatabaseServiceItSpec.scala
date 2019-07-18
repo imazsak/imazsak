@@ -130,8 +130,8 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         await(groupCollection.insert.one(group1))
         await(groupCollection.insert.one(group2))
 
-        await(groupDao.findGroupByName("Group #1")) shouldEqual Some(GroupListData("group_1", "Group #1"))
-        await(groupDao.findGroupByName("Group")) shouldEqual None
+        await(groupDao.findGroupByName("Group #1").value) shouldEqual Some(GroupListData("group_1", "Group #1"))
+        await(groupDao.findGroupByName("Group").value) shouldEqual None
       }
       "#allGroup" in {
         val group1 = BSONDocument(

@@ -1,11 +1,10 @@
 package hu.ksisu.imazsak.core.dao
 
-import hu.ksisu.imazsak.core.dao.BsonHelper._
+import cats.data.OptionT
 import hu.ksisu.imazsak.core.dao.GroupDao._
 import hu.ksisu.imazsak.core.dao.MongoProjectors._
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.api.Cursor
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSON, BSONDocument, document}
 
@@ -16,59 +15,32 @@ class GroupDaoImpl(
     idGenerator: IdGenerator,
     ec: ExecutionContext
 ) extends GroupDao[Future] {
-  protected val collectionF: Future[BSONCollection] = mongoDatabaseService.getCollection("groups")
+  import cats.instances.future._
+
+  protected implicit val collectionF: Future[BSONCollection] = mongoDatabaseService.getCollection("groups")
 
   override def findGroupsByUser(userId: String): Future[Seq[GroupListData]] = {
-    for {
-      collection <- collectionF
-      groups <- collection
-        .find(memberIdsContains(userId), groupListDataProjector)
-        .cursor[GroupListData]()
-        .collect[Seq](-1, Cursor.FailOnError[Seq[GroupListData]]())
-    } yield groups
+    MongoQueryHelper.list[GroupListData](memberIdsContains(userId), groupListDataProjector)
   }
 
-  override def findGroupByName(name: String): Future[Option[GroupListData]] = {
-    for {
-      collection <- collectionF
-      groups <- collection
-        .find(byName(name), groupListDataProjector)
-        .one[GroupListData]
-    } yield groups
+  override def findGroupByName(name: String): OptionT[Future, GroupListData] = {
+    MongoQueryHelper.findOne[GroupListData](byName(name), groupListDataProjector)
   }
 
   override def allGroup(): Future[Seq[GroupAdminListData]] = {
-    for {
-      collection <- collectionF
-      groups <- collection
-        .find(all, groupAdminListDataProjector)
-        .cursor[GroupAdminListData]()
-        .collect[Seq](-1, Cursor.FailOnError[Seq[GroupAdminListData]]())
-    } yield groups
+    MongoQueryHelper.list[GroupAdminListData](all, groupAdminListDataProjector)
   }
 
   override def isMember(groupId: String, userId: String): Future[Boolean] = {
-    for {
-      collection <- collectionF
-      group <- collection
-        .find(byId(groupId) ++ memberIdsContains(userId), existsProjector)
-        .one[BSONDocument]
-    } yield group.isDefined
+    MongoQueryHelper.findOne[BSONDocument](byId(groupId) ++ memberIdsContains(userId), existsProjector).isDefined
   }
 
   override def addMemberToGroup(groupId: String, member: GroupMember): Future[Unit] = {
     val modifier = document("$push" -> document("members" -> BSON.write(member)))
-    for {
-      collection <- collectionF
-      _          <- collection.update.one(byId(groupId), modifier)
-    } yield ()
+    MongoQueryHelper.updateOne(byId(groupId), modifier)
   }
 
   override def createGroup(data: CreateGroupData): Future[String] = {
-    for {
-      collection <- collectionF
-      model = data.toBsonWithNewId
-      _ <- collection.insert(false).one(model)
-    } yield model.getId
+    MongoQueryHelper.insert(data)
   }
 }

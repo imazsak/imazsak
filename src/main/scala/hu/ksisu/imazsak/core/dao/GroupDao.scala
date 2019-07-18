@@ -1,11 +1,12 @@
 package hu.ksisu.imazsak.core.dao
 
+import cats.data.OptionT
 import hu.ksisu.imazsak.core.dao.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait GroupDao[F[_]] {
   def findGroupsByUser(userId: String): F[Seq[GroupListData]]
-  def findGroupByName(name: String): F[Option[GroupListData]]
+  def findGroupByName(name: String): OptionT[F, GroupListData]
   def isMember(groupId: String, userId: String): F[Boolean]
   def addMemberToGroup(groupId: String, member: GroupMember): F[Unit]
   def allGroup(): F[Seq[GroupAdminListData]]
