@@ -24,6 +24,11 @@ class NotificationDaoImpl(
     MongoQueryHelper.list[NotificationListData](byUserId(userId), notificationListDataProjector)
   }
 
+  override def findByUserOrderByDateDesc(userId: String, limit: Option[Int]): Future[Seq[NotificationListData]] = {
+    val order = document("createdAt" -> -1)
+    MongoQueryHelper.sortedList[NotificationListData](byUserId(userId), order, notificationListDataProjector, limit)
+  }
+
   override def updateMeta(id: String, meta: NotificationMeta): Future[Unit] = {
     val modifier = document("$set" -> document("meta" -> BSON.writeDocument(meta)))
     MongoQueryHelper.updateOne(byId(id), modifier)

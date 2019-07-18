@@ -23,7 +23,7 @@ object MongoQueryHelper {
     } yield model.getId
   }
 
-  def list[T](selector: BSONDocument, projector: Option[BSONDocument] = None)(
+  def list[T](selector: BSONDocument, projector: Option[BSONDocument] = None, limit: Option[Int] = None)(
       implicit collectionF: Future[BSONCollection],
       reader: BSONDocumentReader[T],
       ec: ExecutionContext
@@ -33,7 +33,27 @@ object MongoQueryHelper {
       groups <- collection
         .find(selector, projector)
         .cursor[T]()
-        .collect[Seq](-1, Cursor.FailOnError[Seq[T]]())
+        .collect[Seq](limit.getOrElse(-1), Cursor.FailOnError[Seq[T]]())
+    } yield groups
+  }
+
+  def sortedList[T](
+      selector: BSONDocument,
+      sorter: BSONDocument,
+      projector: Option[BSONDocument] = None,
+      limit: Option[Int] = None
+  )(
+      implicit collectionF: Future[BSONCollection],
+      reader: BSONDocumentReader[T],
+      ec: ExecutionContext
+  ): Future[Seq[T]] = {
+    for {
+      collection <- collectionF
+      groups <- collection
+        .find(selector, projector)
+        .sort(sorter)
+        .cursor[T]()
+        .collect[Seq](limit.getOrElse(-1), Cursor.FailOnError[Seq[T]]())
     } yield groups
   }
 

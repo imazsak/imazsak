@@ -27,7 +27,8 @@ class NotificationServiceImpl[F[_]: MonadError[?[_], Throwable]](
   }
 
   override def listUserNotifications()(implicit ctx: UserLogContext): Response[F, Seq[NotificationListData]] = {
-    EitherT.right[Throwable](notificationDao.findByUser(ctx.userId))
+    val limit = Some(10)
+    EitherT.right[Throwable](notificationDao.findByUserOrderByDateDesc(ctx.userId, limit))
   }
 
   override def deleteUserNotifications(ids: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {

@@ -320,7 +320,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
     }
 
     "NotificationDao" when {
-      "#createNotification and #findByUser" in {
+      "#createNotification and #findByUser(OrderByDateDesc)" in {
         val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
         val data2 = CreateNotificationData("user_id1", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
         val data3 =
@@ -330,6 +330,13 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         await(notificationDao.createNotification(data3)) shouldEqual "3"
         await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
           NotificationListData("1", "message1", createdAt = 1, NotificationMeta(false, None)),
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        )
+        await(notificationDao.findByUserOrderByDateDesc("user_id1")) shouldEqual Seq(
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1"))),
+          NotificationListData("1", "message1", createdAt = 1, NotificationMeta(false, None))
+        )
+        await(notificationDao.findByUserOrderByDateDesc("user_id1", limit = Some(1))) shouldEqual Seq(
           NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
         )
         await(notificationDao.findByUser("user_id2")) shouldEqual Seq(
