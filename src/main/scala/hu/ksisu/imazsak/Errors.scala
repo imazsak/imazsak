@@ -40,6 +40,7 @@ object Errors {
   type ErrorHandler = PartialFunction[Throwable, Route]
 
   private def defaultHandler(implicit logger: Logger, ctx: LogContext): ErrorHandler = {
+    case ex: NoSuchElementException   => complete((StatusCodes.NotFound, ErrorResponse.fromEx(ex)))
     case ex: IllegalAccessError       => complete((StatusCodes.Forbidden, ErrorResponse.fromEx(ex)))
     case ex: IllegalArgumentException => complete((StatusCodes.BadRequest, ErrorResponse.fromEx(ex)))
     case ex =>

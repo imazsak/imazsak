@@ -7,7 +7,8 @@ trait NotificationDao[F[_]] {
   def createNotification(data: CreateNotificationData): F[String]
   def findByUser(userId: String): F[Seq[NotificationListData]]
   def updateMeta(id: String, meta: NotificationMeta): F[Unit]
-  def delete(id: String): F[Unit]
+  def setRead(ids: Seq[String], userId: String): F[Unit]
+  def deleteByIds(ids: Seq[String], userId: Option[String] = None): F[Int]
 }
 
 object NotificationDao {

@@ -23,7 +23,7 @@ trait Services[F[_]] {
   implicit val healthCheckService: HealthCheckService[F]
   implicit val databaseService: MongoDatabaseService[F]
   implicit val idGenerator: IdGenerator
-  implicit val dateTimeService: DateTimeUtil[F]
+  implicit val dateTimeService: DateTimeUtil
   implicit val tracerService: TracerService[F]
   implicit val amqpService: AmqpService[F]
   implicit val jwtService: JwtService[F]
@@ -65,7 +65,7 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val databaseService: MongoDatabaseService[Future]  = new MongoDatabaseServiceImpl()
   implicit lazy val httpWrapper: HttpWrapper[Future]               = new AkkaHttpWrapper()
   implicit lazy val idGenerator: IdGenerator                       = new IdGeneratorImpl
-  implicit lazy val dateTimeService: DateTimeUtil[Future]          = new DateTimeUtilImpl[Future]
+  implicit lazy val dateTimeService: DateTimeUtil                  = new DateTimeUtilImpl
   implicit lazy val tracerService: TracerService[Future]           = new TracerService[Future]()
   implicit lazy val amqpService: AmqpService[Future]               = new AmqpServiceImpl[Future]()
   implicit lazy val jwtService: JwtServiceImpl[Future]             = new JwtServiceImpl[Future]()

@@ -344,14 +344,58 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           NotificationListData("1", "message1", createdAt = 1, NotificationMeta(true, Some("type999")))
         )
       }
-      "#delete" in {
+      "#deleteById - without user" in {
         val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
         val data2 = CreateNotificationData("user_id1", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        val data3 = CreateNotificationData("user_id1", "message3", createdAt = 3, NotificationMeta(true, Some("type2")))
         await(notificationDao.createNotification(data1)) shouldEqual "1"
         await(notificationDao.createNotification(data2)) shouldEqual "2"
-        await(notificationDao.delete("1"))
+        await(notificationDao.createNotification(data3)) shouldEqual "3"
+        await(notificationDao.deleteByIds(Seq("1", "3", "999"))) shouldEqual 2
+        await(notificationDao.deleteByIds(Seq("1", "3", "999"))) shouldEqual 0
         await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
           NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        )
+      }
+      "#deleteById - with user" in {
+        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
+        val data2 = CreateNotificationData("user_id2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        val data3 = CreateNotificationData("user_id2", "message3", createdAt = 3, NotificationMeta(true, Some("type2")))
+        await(notificationDao.createNotification(data1)) shouldEqual "1"
+        await(notificationDao.createNotification(data2)) shouldEqual "2"
+        await(notificationDao.createNotification(data3)) shouldEqual "3"
+        await(notificationDao.deleteByIds(Seq("1", "2", "3"), Some("user_id1"))) shouldEqual 1
+        await(notificationDao.findByUser("user_id1")) shouldEqual Seq()
+        await(notificationDao.findByUser("user_id2")) shouldEqual Seq(
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1"))),
+          NotificationListData("3", "message3", createdAt = 3, NotificationMeta(true, Some("type2")))
+        )
+      }
+      "#setRead" in {
+        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
+        val data2 =
+          CreateNotificationData("user_id2", "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
+        val data3 =
+          CreateNotificationData("user_id1", "message3", createdAt = 3, NotificationMeta(false, Some("type2")))
+        val data4 =
+          CreateNotificationData("user_id1", "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
+        await(notificationDao.createNotification(data1)) shouldEqual "1"
+        await(notificationDao.createNotification(data2)) shouldEqual "2"
+        await(notificationDao.createNotification(data3)) shouldEqual "3"
+        await(notificationDao.createNotification(data4)) shouldEqual "4"
+        await(notificationDao.setRead(Seq("1", "3"), "user_id1"))
+        await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
+          NotificationListData("1", "message1", createdAt = 1, NotificationMeta(true, None)),
+          NotificationListData("3", "message3", createdAt = 3, NotificationMeta(true, Some("type2"))),
+          NotificationListData("4", "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
+        )
+        /*
+        List(NotificationListData(1,message1,1,NotificationMeta(false,None)),
+        NotificationListData(3,message3,3,NotificationMeta(false,Some(type2))),
+        NotificationListData(4,message4,4,NotificationMeta(false,Some(type3))))
+         */
+        await(notificationDao.findByUser("user_id2")) shouldEqual Seq(
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
         )
       }
 

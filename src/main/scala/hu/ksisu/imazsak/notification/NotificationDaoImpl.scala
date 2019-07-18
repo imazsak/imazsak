@@ -1,6 +1,6 @@
 package hu.ksisu.imazsak.notification
 
-import hu.ksisu.imazsak.core.dao.MongoSelectors._
+import hu.ksisu.imazsak.core.dao.MongoSelectors.{byOptionalUserId, _}
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.notification.NotificationDao._
 import hu.ksisu.imazsak.util.IdGenerator
@@ -29,7 +29,14 @@ class NotificationDaoImpl(
     MongoQueryHelper.updateOne(byId(id), modifier)
   }
 
-  override def delete(id: String): Future[Unit] = {
-    MongoQueryHelper.deleteOne(byId(id))
+  override def deleteByIds(ids: Seq[String], userId: Option[String]): Future[Int] = {
+    val selector = byIds(ids) ++ byOptionalUserId(userId)
+    MongoQueryHelper.deleteMultiple(selector)
+  }
+
+  override def setRead(ids: Seq[String], userId: String): Future[Unit] = {
+    val selector = byIds(ids) ++ byUserId(userId)
+    val modifier = document("$set" -> document("meta.isRead" -> true))
+    MongoQueryHelper.updateMultiple(selector, modifier)
   }
 }

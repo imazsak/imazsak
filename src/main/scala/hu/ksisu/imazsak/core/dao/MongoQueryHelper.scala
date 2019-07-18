@@ -58,13 +58,23 @@ object MongoQueryHelper {
     } yield ()
   }
 
-  def deleteOne(selector: BSONDocument)(
+  def updateMultiple(selector: BSONDocument, modifier: BSONDocument)(
       implicit collectionF: Future[BSONCollection],
       ec: ExecutionContext
   ): Future[Unit] = {
     for {
       collection <- collectionF
-      _          <- collection.delete.one(selector, limit = Some(1))
+      _          <- collection.update.one(selector, modifier, upsert = false, multi = true)
     } yield ()
+  }
+
+  def deleteMultiple(selector: BSONDocument)(
+      implicit collectionF: Future[BSONCollection],
+      ec: ExecutionContext
+  ): Future[Int] = {
+    for {
+      collection <- collectionF
+      result     <- collection.delete.one(selector, limit = None)
+    } yield result.n
   }
 }

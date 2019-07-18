@@ -22,9 +22,9 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   implicit lazy val mongoDriver                                             = new MongoDriver()
   override implicit lazy val databaseService: MongoDatabaseService[Future]  = new MongoDatabaseServiceImpl()
 
-  override implicit lazy val idGenerator: IdGenerator              = new IdGeneratorCounterImpl
-  override implicit lazy val dateTimeService: DateTimeUtil[Future] = new DateTimeUtilCounterImpl[Future]
-  implicit lazy val httpWrapper: HttpWrapper[Future]               = null
+  override implicit lazy val idGenerator: IdGenerator      = new IdGeneratorCounterImpl
+  override implicit lazy val dateTimeService: DateTimeUtil = new DateTimeUtilCounterImpl
+  implicit lazy val httpWrapper: HttpWrapper[Future]       = null
 
   override implicit lazy val tracerService: TracerService[Future] = new TracerService[Future]()
   override implicit lazy val amqpService: AmqpService[Future]     = null
