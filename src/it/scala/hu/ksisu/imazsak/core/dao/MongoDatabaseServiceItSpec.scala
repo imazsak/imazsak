@@ -5,6 +5,7 @@ import hu.ksisu.imazsak.core.dao.BsonHelper._
 import hu.ksisu.imazsak.core.dao.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
+import hu.ksisu.imazsak.core.dao.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
 import hu.ksisu.imazsak.core.dao.PrayerDao.{CreatePrayerData, GroupPrayerListData, MinePrayerListData}
 import hu.ksisu.imazsak.core.dao.UserDao.{UserAdminListData, UserData}
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
@@ -24,10 +25,12 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
   private val userDao               = new UserDaoImpl()
   private val groupDao              = new GroupDaoImpl()
   private val prayerDao             = new PrayerDaoImpl()
+  private val notificationDao       = new NotificationDaoImpl()
 
-  private val userCollection   = await(mongoService.getCollection("users"))
-  private val groupCollection  = await(mongoService.getCollection("groups"))
-  private val prayerCollection = await(mongoService.getCollection("prayers"))
+  private val userCollection          = await(mongoService.getCollection("users"))
+  private val groupCollection         = await(mongoService.getCollection("groups"))
+  private val prayerCollection        = await(mongoService.getCollection("prayers"))
+  private val notificationsCollection = await(mongoService.getCollection("notifications"))
 
   override def beforeEach(): Unit = {
     idGenerator.reset()
@@ -41,6 +44,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
       _ <- userCollection.delete.one(BSONDocument())
       _ <- groupCollection.delete.one(BSONDocument())
       _ <- prayerCollection.delete.one(BSONDocument())
+      _ <- notificationsCollection.delete.one(BSONDocument())
     } yield ())
   }
 
@@ -309,6 +313,44 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           GroupPrayerListData("3", "user_2", "message3")
         )
       }
+    }
+
+    "NotificationDao" when {
+      "#createNotification and #findByUser" in {
+        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
+        val data2 = CreateNotificationData("user_id1", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        val data3 =
+          CreateNotificationData("user_id2", "message3", createdAt = 3, NotificationMeta(false, Some("type2")))
+        await(notificationDao.createNotification(data1)) shouldEqual "1"
+        await(notificationDao.createNotification(data2)) shouldEqual "2"
+        await(notificationDao.createNotification(data3)) shouldEqual "3"
+        await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
+          NotificationListData("1", "message1", createdAt = 1, NotificationMeta(false, None)),
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        )
+        await(notificationDao.findByUser("user_id2")) shouldEqual Seq(
+          NotificationListData("3", "message3", createdAt = 3, NotificationMeta(false, Some("type2")))
+        )
+      }
+      "#updateMeta" in {
+        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
+        await(notificationDao.createNotification(data1)) shouldEqual "1"
+        await(notificationDao.updateMeta("1", NotificationMeta(true, Some("type999"))))
+        await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
+          NotificationListData("1", "message1", createdAt = 1, NotificationMeta(true, Some("type999")))
+        )
+      }
+      "#delete" in {
+        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
+        val data2 = CreateNotificationData("user_id1", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        await(notificationDao.createNotification(data1)) shouldEqual "1"
+        await(notificationDao.createNotification(data2)) shouldEqual "2"
+        await(notificationDao.delete("1"))
+        await(notificationDao.findByUser("user_id1")) shouldEqual Seq(
+          NotificationListData("2", "message2", createdAt = 2, NotificationMeta(true, Some("type1")))
+        )
+      }
+
     }
   }
 }

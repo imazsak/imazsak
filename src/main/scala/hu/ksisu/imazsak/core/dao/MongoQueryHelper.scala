@@ -57,4 +57,14 @@ object MongoQueryHelper {
       _          <- collection.update.one(selector, modifier, upsert = false, multi = false)
     } yield ()
   }
+
+  def deleteOne(selector: BSONDocument)(
+      implicit collectionF: Future[BSONCollection],
+      ec: ExecutionContext
+  ): Future[Unit] = {
+    for {
+      collection <- collectionF
+      _          <- collection.delete.one(selector, limit = Some(1))
+    } yield ()
+  }
 }

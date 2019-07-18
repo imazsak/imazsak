@@ -13,3 +13,7 @@ db.createCollection("prayers");
 db.prayers.createIndex({"id": 1}, {"unique": true});
 db.prayers.createIndex({"userId": 1});
 db.prayers.createIndex({"groupIds": 1});
+
+db.createCollection("notifications");
+db.notifications.createIndex({"id": 1}, {"unique": true});
+db.notifications.createIndex({"userId": 1});
