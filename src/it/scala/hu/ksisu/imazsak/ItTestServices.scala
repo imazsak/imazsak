@@ -6,9 +6,10 @@ import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl
+import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService, FeedbackServiceImpl}
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
-import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
+import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.MongoDriver
 
@@ -37,4 +38,6 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[Future] {
   implicit lazy val prayerService: PrayerService[Future]          = new PrayerServiceImpl[Future]()
   implicit lazy val adminService: AdminService[Future]            = new AdminServiceImpl[Future]()
   implicit lazy val fileStoreService: FileStoreService[Future]    = null
+  implicit lazy val feedbackDao: FeedbackDao[Future]              = new FeedbackDaoImpl()
+  implicit lazy val feedbackService: FeedbackService[Future]      = new FeedbackServiceImpl[Future]()
 }

@@ -9,9 +9,10 @@ import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
 import hu.ksisu.imazsak.core.impl._
+import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService, FeedbackServiceImpl}
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
-import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
+import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
 import reactivemongo.api.MongoDriver
@@ -35,6 +36,8 @@ trait Services[F[_]] {
   implicit val prayerService: PrayerService[F]
   implicit val adminService: AdminService[F]
   implicit val fileStoreService: FileStoreService[F]
+  implicit val feedbackDao: FeedbackDao[F]
+  implicit val feedbackService: FeedbackService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -77,4 +80,6 @@ class RealServices(implicit ec: ExecutionContext, actorSystem: ActorSystem, mate
   implicit lazy val prayerService: PrayerService[Future]           = new PrayerServiceImpl[Future]()
   implicit lazy val adminService: AdminService[Future]             = new AdminServiceImpl[Future]()
   implicit lazy val fileStoreService: FileStoreService[Future]     = new S3FileStoreService()
+  implicit lazy val feedbackDao: FeedbackDao[Future]               = new FeedbackDaoImpl()
+  implicit lazy val feedbackService: FeedbackService[Future]       = new FeedbackServiceImpl[Future]()
 }

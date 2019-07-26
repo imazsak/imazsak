@@ -4,6 +4,8 @@ import hu.ksisu.imazsak.AwaitUtil
 import hu.ksisu.imazsak.core.dao.BsonHelper._
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
+import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
+import hu.ksisu.imazsak.feedback.FeedbackDaoImpl
 import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
 import hu.ksisu.imazsak.group.GroupDaoImpl
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
@@ -15,7 +17,7 @@ import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.{Cursor, MongoDriver}
-import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONString}
+import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONLong, BSONString}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
@@ -30,11 +32,13 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
   private val groupDao              = new GroupDaoImpl()
   private val prayerDao             = new PrayerDaoImpl()
   private val notificationDao       = new NotificationDaoImpl()
+  private val feedbackDao           = new FeedbackDaoImpl()
 
   private val userCollection          = await(mongoService.getCollection("users"))
   private val groupCollection         = await(mongoService.getCollection("groups"))
   private val prayerCollection        = await(mongoService.getCollection("prayers"))
   private val notificationsCollection = await(mongoService.getCollection("notifications"))
+  private val feedbackCollection      = await(mongoService.getCollection("feedback"))
 
   override def beforeEach(): Unit = {
     idGenerator.reset()
@@ -49,6 +53,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
       _ <- groupCollection.delete.one(BSONDocument())
       _ <- prayerCollection.delete.one(BSONDocument())
       _ <- notificationsCollection.delete.one(BSONDocument())
+      _ <- feedbackCollection.delete.one(BSONDocument())
     } yield ())
   }
 
@@ -406,6 +411,29 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         )
       }
 
+    }
+    "FeedbackDao" when {
+      "#create" in {
+        val data1 = CreateFeedbackData("user_1", "message1", 1)
+        val data2 = CreateFeedbackData("user_2", "message2", 2)
+        await(feedbackDao.create(data1)) shouldEqual "1"
+        await(feedbackDao.create(data2)) shouldEqual "2"
+
+        val result = await(
+          feedbackCollection
+            .find(BSONDocument(), None)
+            .cursor[BSONDocument]()
+            .collect[Seq](-1, Cursor.FailOnError[Seq[BSONDocument]]())
+        )
+
+        val resultMap = result.map(doc => doc.getId -> doc).toMap
+        resultMap("1").get("userId") shouldEqual Some(BSONString("user_1"))
+        resultMap("1").get("message") shouldEqual Some(BSONString("message1"))
+        resultMap("1").get("createdAt") shouldEqual Some(BSONLong(1))
+        resultMap("2").get("userId") shouldEqual Some(BSONString("user_2"))
+        resultMap("2").get("message") shouldEqual Some(BSONString("message2"))
+        resultMap("2").get("createdAt") shouldEqual Some(BSONLong(2))
+      }
     }
   }
 }
