@@ -2,7 +2,6 @@ package hu.ksisu.imazsak.core.dao
 
 import cats.data.EitherT
 import hu.ksisu.imazsak.core.Errors.WrongConfig
-import hu.ksisu.imazsak.core.dao.MongoDatabaseService
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
@@ -17,7 +16,7 @@ class MongoDatabaseServiceImpl(implicit config: MongoConfig, ec: ExecutionContex
     val result: EitherT[Future, Throwable, DefaultDB] = for {
       uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
       dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
-      connection <- EitherT.fromEither(driver.connection(config.uri).toEither)
+      connection <- EitherT.fromEither(driver.connection(uri, None, strictUri = false).toEither)
       db         <- EitherT.right(connection.database(dbname))
     } yield db
 

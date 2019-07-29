@@ -8,6 +8,9 @@ import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl.JwtConfig
 
+import scala.io.Source
+import scala.util.Try
+
 trait ServerConfig[F[_]] extends Initable[F] {
   def getEnabledModules: Seq[String]
 
@@ -42,7 +45,7 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
   override implicit def getMongoConfig: MongoConfig = {
     val config = conf.getConfig("database.mongo")
     MongoConfig(
-      config.getString("uri")
+      readFromFileOrConf(config, "uri")
     )
   }
 
@@ -57,14 +60,18 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
     val config = conf.getConfig(s"jwt")
     JwtConfig(
       config.getString("algorithm"),
-      config.getString("secret")
+      readFromFileOrConf(config, "secret")
     )
   }
 
   override implicit def getAmqpConfig: AmqpConfig = {
     val config = conf.getConfig("amqp")
     AmqpConfig(
-      config.getString("uri")
+      readFromFileOrConf(config, "uri")
     )
+  }
+
+  private def readFromFileOrConf(config: Config, key: String): String = {
+    Try(Source.fromFile(config.getString(s"${key}File")).mkString).getOrElse(config.getString(key))
   }
 }
