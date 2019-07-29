@@ -1,11 +1,5 @@
-FROM hseeberger/scala-sbt:11.0.3_1.2.8_2.13.0 as builder
-COPY build.sbt /app/build.sbt
-COPY project /app/project
-WORKDIR /app
-RUN sbt update test:update it:update
-COPY . .
-RUN sbt stage
-
+ARG COMPOSE_PROJECT_NAME
+FROM imazsak-build:${COMPOSE_PROJECT_NAME} as builder
 
 FROM openjdk:11
 WORKDIR /app

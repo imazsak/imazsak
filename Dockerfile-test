@@ -1,0 +1,7 @@
+FROM hseeberger/scala-sbt:11.0.3_1.2.8_2.13.0
+COPY build.sbt /app/build.sbt
+COPY project /app/project
+WORKDIR /app
+RUN sbt update test:update it:update
+COPY . .
+RUN sbt compile test:compile it:compile stage

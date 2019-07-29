@@ -1,0 +1,18 @@
+version: '3'
+services:
+  db:
+    image: mongo:4.0.9
+    volumes:
+    - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
+  imazsak:
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+    image: imazsak-build:${COMPOSE_PROJECT_NAME}
+    command: sleep 9999
+    depends_on:
+      - db
+    environment:
+      - DB_URI=mongodb://db/imazsak
+    volumes:
+      - ${WORKSPACE}:${WORKSPACE}

@@ -1,6 +1,7 @@
 package hu.ksisu.imazsak.core.dao
 
 import hu.ksisu.imazsak.AwaitUtil
+import hu.ksisu.imazsak.core.config.ServerConfigImpl
 import hu.ksisu.imazsak.core.dao.BsonHelper._
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
@@ -20,13 +21,15 @@ import reactivemongo.api.{Cursor, MongoDriver}
 import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONLong, BSONString}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
+import scala.util.{Success, Try}
 
 class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterEach {
+  import cats.instances.try_._
+  private val conf = new ServerConfigImpl[Try]
 
   private implicit val idGenerator  = new IdGeneratorCounterImpl
   private implicit val mongoDriver  = new MongoDriver()
-  private implicit val mongoConfig  = MongoConfig("mongodb://localhost/imazsak")
+  private implicit val mongoConfig  = MongoConfig(conf.getMongoConfig.uri)
   private implicit val mongoService = new MongoDatabaseServiceImpl()
   private val userDao               = new UserDaoImpl()
   private val groupDao              = new GroupDaoImpl()
