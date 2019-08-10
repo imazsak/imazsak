@@ -17,13 +17,17 @@ pipeline {
       }
     }
     stage('Test') {
-      steps {
-        sh "docker-compose exec -T imazsak sbt test"
-      }
-    }
-    stage('IT Test') {
-      steps {
-        sh "docker-compose exec -T imazsak sbt it:test"
+      parallel {
+        stage('Unit') {
+          steps {
+            sh "docker-compose exec -T imazsak sbt test"
+          }
+        }
+        stage('IT') {
+          steps {
+            sh "docker-compose exec -T imazsak sbt it:test"
+          }
+        }
       }
     }
     stage('Build image') {
