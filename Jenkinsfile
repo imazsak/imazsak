@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    label 'docker-compose'
+  }
   environment {
     COMPOSE_PROJECT_NAME = "${env.BUILD_TAG}"
   }
