@@ -72,11 +72,9 @@ pipeline {
       steps {
         timeout(time: 2, unit: 'MINUTES') {
           waitUntil {
-            try {
-              sh """curl --silent https://stage.imazsak.hu/api/healthCheck | grep ${env.GIT_COMMIT} | grep '"success":true'"""
-              return true
-            } catch (Exception e) {
-              return false
+            script {
+              def r = sh script: """curl --silent https://stage.imazsak.hu/api/healthCheck | grep ${env.GIT_COMMIT} | grep '"success":true'""", returnStatus: true
+              return (r == 0);
             }
           }
         }
