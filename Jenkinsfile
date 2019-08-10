@@ -28,15 +28,15 @@ pipeline {
     }
     stage('Build image') {
       steps {
-        sh "docker build -t imazsak-core:${env.BUILD_ID} --build-arg COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} -f Dockerfile-build ."
+        sh "docker build -t imazsak-core:${env.GIT_COMMIT} --build-arg COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} -f Dockerfile-build ."
       }
     }
     stage('Tag & Push') {
       steps {
-        sh "docker tag imazsak-core:${env.BUILD_ID} rg.fr-par.scw.cloud/imazsak/imazsak-core:${env.GIT_COMMIT}"
+        sh "docker tag imazsak-core:${env.GIT_COMMIT} 002545499693.dkr.ecr.eu-central-1.amazonaws.com/imazsak-core:${env.GIT_COMMIT}"
         script {
-          withDockerRegistry(credentialsId: 'scaleway-imazsak-registry', url: 'https://rg.fr-par.scw.cloud/imazsak') {
-            docker.image("rg.fr-par.scw.cloud/imazsak/imazsak-core:${env.GIT_COMMIT}").push()
+          withDockerRegistry(credentialsId: 'ecr:eu-central-1:imazsak-ci-aws', url: 'https://002545499693.dkr.ecr.eu-central-1.amazonaws.com') {
+            docker.image("002545499693.dkr.ecr.eu-central-1.amazonaws.com/imazsak-core:${env.GIT_COMMIT}").push()
           }
         }
       }
@@ -48,7 +48,7 @@ pipeline {
             sh """
               rm -R infra || true
               GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:Ksisu/imazsak-stage-infra.git infra && cd infra
-              sed -i "s|\\(image: rg.fr-par.scw.cloud/imazsak/imazsak-core\\).*|\\1:${env.GIT_COMMIT}|" ./core/core.yml
+              sed -i "s|\\(image: 002545499693.dkr.ecr.eu-central-1.amazonaws.com/imazsak-core\\).*|\\1:${env.GIT_COMMIT}|" ./core/core.yml
               git add ./core/core.yml
               git config user.email "ci@imazsak.hu"
               git config user.name "Jenkins"
@@ -58,7 +58,7 @@ pipeline {
           }
           sshagent (credentials: ['imazsak-stage-vm']) {
             sh """
-              ssh -o StrictHostKeyChecking=no root@stage.imazsak.hu "cd /opt/imazsak-stage && git pull && docker stack deploy --compose-file ./core/core.yml --with-registry-auth --prune core"
+              ssh -o StrictHostKeyChecking=no root@stage.imazsak.hu "eval \$(aws ecr get-login --region eu-central-1 --no-include-email) && cd /opt/imazsak-stage && git pull && docker stack deploy --compose-file ./core/core.yml --with-registry-auth --prune core"
             """
           }
         }
