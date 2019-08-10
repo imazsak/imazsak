@@ -68,9 +68,9 @@ pipeline {
         }
       }
     }
-    timeout(time: 2, type: 'MINUTES') {
-      stage('Check Availability') {
-        steps {
+    stage('Check Availability') {
+      steps {
+        timeout(time: 2, unit: 'MINUTES') {
           waitUntil {
             try {
               sh """curl --silent https://stage.imazsak.hu/api/healthCheck | grep ${env.GIT_COMMIT} | grep '"success":true'"""
