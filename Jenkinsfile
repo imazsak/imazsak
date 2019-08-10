@@ -41,6 +41,29 @@ pipeline {
         }
       }
     }
+    stage('Stage Deploy') {
+      steps {
+        script {
+          sshagent (credentials: ['github-jenkins-imazsak']) {
+            sh """
+              rm -R infra || true
+              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:Ksisu/imazsak-stage-infra.git infra && cd infra
+              sed -i "s|\\(image: rg.fr-par.scw.cloud/imazsak/imazsak-core\\).*|\\1:${env.GIT_COMMIT}|" ./core/core.yml
+              git add ./core/core.yml
+              git config user.email "ci@imazsak.hu"
+              git config user.name "Jenkins"
+              git commit -m "Upgrade core ${env.GIT_COMMIT}" || true
+              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git push git@github.com:Ksisu/imazsak-stage-infra.git master
+            """
+          }
+          sshagent (credentials: ['imazsak-stage-vm']) {
+            sh """
+              ssh -o StrictHostKeyChecking=no root@stage.imazsak.hu "cd /opt/imazsak-stage && git pull && docker stack deploy --compose-file ./core/core.yml --with-registry-auth --prune core"
+            """
+          }
+        }
+      }
+    }
   }
   post {
     always {
