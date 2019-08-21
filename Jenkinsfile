@@ -45,65 +45,6 @@ pipeline {
         }
       }
     }
-    stage('Stage Deploy') {
-      steps {
-        script {
-          env.PREVIOUS_VERSION = sh script: """curl --silent https://stage.imazsak.hu/api/healthCheck | sed -E 's/.*"commitHash":"?([^,"]*)"?.*/\\1/'""", returnStdout: true
-
-          sshagent (credentials: ['github-jenkins-imazsak']) {
-            sh """
-              rm -R infra || true
-              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:Ksisu/imazsak-stage-infra.git infra && cd infra
-              sed -i "s|\\(image: 002545499693.dkr.ecr.eu-central-1.amazonaws.com/imazsak-core\\).*|\\1:${env.GIT_COMMIT}|" ./core/core.yml
-              git add ./core/core.yml
-              git config user.email "ci@imazsak.hu"
-              git config user.name "Jenkins"
-              git commit -m "Upgrade core ${env.GIT_COMMIT}" || true
-              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git push git@github.com:Ksisu/imazsak-stage-infra.git master
-            """
-          }
-          sshagent (credentials: ['imazsak-stage-vm']) {
-            sh """
-              ssh -o StrictHostKeyChecking=no root@stage.imazsak.hu "eval \$(aws ecr get-login --region eu-central-1 --no-include-email) && cd /opt/imazsak-stage && git pull && docker stack deploy --compose-file ./core/core.yml --with-registry-auth --prune core"
-            """
-          }
-        }
-      }
-    }
-    stage('Check Availability') {
-      steps {
-        script {
-          try {
-            timeout(time: 2, unit: 'MINUTES') {
-              waitUntil {
-                def r = sh script: """curl --silent https://stage.imazsak.hu/api/healthCheck | grep ${env.GIT_COMMIT} | grep '"success":true'""", returnStatus: true
-                return (r == 0);
-              }
-            }
-          } catch(e) {
-            echo "ROLLBACK: ${env.PREVIOUS_VERSION}"
-            sshagent (credentials: ['github-jenkins-imazsak']) {
-              sh """
-                rm -R infra || true
-                GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:Ksisu/imazsak-stage-infra.git infra && cd infra
-                sed -i "s|\\(image: 002545499693.dkr.ecr.eu-central-1.amazonaws.com/imazsak-core\\).*|\\1:${env.PREVIOUS_VERSION}|" ./core/core.yml
-                git add ./core/core.yml
-                git config user.email "ci@imazsak.hu"
-                git config user.name "Jenkins"
-                git commit -m "ROLLBACK core ${env.PREVIOUS_VERSION}" || true
-                GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git push git@github.com:Ksisu/imazsak-stage-infra.git master
-              """
-            }
-            sshagent (credentials: ['imazsak-stage-vm']) {
-              sh """
-                ssh -o StrictHostKeyChecking=no root@stage.imazsak.hu "eval \$(aws ecr get-login --region eu-central-1 --no-include-email) && cd /opt/imazsak-stage && git pull && docker stack deploy --compose-file ./core/core.yml --with-registry-auth --prune core"
-              """
-            }
-            error("DEPLOY FAILED - rollback done")
-          }
-        }
-      }
-    }
   }
   post {
     always {
