@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.notification
 
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
-import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
+import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait NotificationDao[F[_]] {
   def createNotification(data: CreateNotificationData): F[String]
@@ -17,10 +17,9 @@ object NotificationDao {
   case class CreateNotificationData(userId: String, message: String, createdAt: Long, meta: NotificationMeta)
   case class NotificationListData(id: String, message: String, createdAt: Long, meta: NotificationMeta)
 
-  implicit def notificationMetaReader: BSONDocumentReader[NotificationMeta]     = Macros.reader[NotificationMeta]
-  implicit def notificationMetaWriter: BSONDocumentWriter[NotificationMeta]     = Macros.writer[NotificationMeta]
-  implicit def createNotiDataWriter: BSONDocumentWriter[CreateNotificationData] = Macros.writer[CreateNotificationData]
-  implicit def notiListDataReader: BSONDocumentReader[NotificationListData]     = Macros.reader[NotificationListData]
+  implicit val notificationMetaHandler: BSONDocumentHandler[NotificationMeta]   = Macros.handler[NotificationMeta]
+  implicit val createNotiDataWriter: BSONDocumentWriter[CreateNotificationData] = Macros.writer[CreateNotificationData]
+  implicit val notiListDataReader: BSONDocumentReader[NotificationListData]     = Macros.reader[NotificationListData]
 
   val notificationListDataProjector: Option[BSONDocument] = Option(
     document("id" -> 1, "message" -> 1, "createdAt" -> 1, "meta" -> 1)

@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.group
 
 import cats.data.OptionT
 import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
-import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, Macros, document}
+import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONDocumentReader, BSONDocumentWriter, Macros, document}
 
 trait GroupDao[F[_]] {
   def findGroupsByUser(userId: String): F[Seq[GroupListData]]
@@ -19,12 +19,10 @@ object GroupDao {
   case class GroupAdminListData(id: String, name: String, members: Seq[GroupMember])
   case class CreateGroupData(name: String, members: Seq[GroupMember])
 
-  implicit def groupListDataReader: BSONDocumentReader[GroupListData]           = Macros.reader[GroupListData]
-  implicit def groupMemberReader: BSONDocumentReader[GroupMember]               = Macros.reader[GroupMember]
-  implicit def groupMemberWriter: BSONDocumentWriter[GroupMember]               = Macros.writer[GroupMember]
-  implicit def groupAdminListDataReader: BSONDocumentReader[GroupAdminListData] = Macros.reader[GroupAdminListData]
-  implicit def groupAdminListDataWriter: BSONDocumentWriter[GroupAdminListData] = Macros.writer[GroupAdminListData]
-  implicit def createGroupDataWriter: BSONDocumentWriter[CreateGroupData]       = Macros.writer[CreateGroupData]
+  implicit val groupListDataReader: BSONDocumentReader[GroupListData]             = Macros.reader[GroupListData]
+  implicit val groupMemberHandler: BSONDocumentHandler[GroupMember]               = Macros.handler[GroupMember]
+  implicit val groupAdminListDataHandler: BSONDocumentHandler[GroupAdminListData] = Macros.handler[GroupAdminListData]
+  implicit val createGroupDataWriter: BSONDocumentWriter[CreateGroupData]         = Macros.writer[CreateGroupData]
 
   val groupListDataProjector: Option[BSONDocument]      = Option(document("id" -> 1, "name" -> 1))
   val groupAdminListDataProjector: Option[BSONDocument] = Option(document("id" -> 1, "name" -> 1, "members" -> 1))

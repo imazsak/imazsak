@@ -9,5 +9,5 @@ trait FeedbackDao[F[_]] {
 
 object FeedbackDao {
   case class CreateFeedbackData(userId: String, message: String, createdAt: Long)
-  implicit def createFeedbackDataWriter: BSONDocumentWriter[CreateFeedbackData] = Macros.writer[CreateFeedbackData]
+  implicit val createFeedbackDataWriter: BSONDocumentWriter[CreateFeedbackData] = Macros.writer[CreateFeedbackData]
 }

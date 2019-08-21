@@ -14,9 +14,9 @@ object PrayerDao {
   case class MyPrayerListData(id: String, message: String, groupIds: Seq[String])
   case class GroupPrayerListData(id: String, userId: String, message: String)
 
-  implicit def createPrayerDataWriter: BSONDocumentWriter[CreatePrayerData]       = Macros.writer[CreatePrayerData]
-  implicit def myPrayerListDataReader: BSONDocumentReader[MyPrayerListData]       = Macros.reader[MyPrayerListData]
-  implicit def groupPrayerListDataReader: BSONDocumentReader[GroupPrayerListData] = Macros.reader[GroupPrayerListData]
+  implicit val createPrayerDataWriter: BSONDocumentWriter[CreatePrayerData]       = Macros.writer[CreatePrayerData]
+  implicit val myPrayerListDataReader: BSONDocumentReader[MyPrayerListData]       = Macros.reader[MyPrayerListData]
+  implicit val groupPrayerListDataReader: BSONDocumentReader[GroupPrayerListData] = Macros.reader[GroupPrayerListData]
 
   val myPrayerListDataProjector: Option[BSONDocument]     = Option(document("id" -> 1, "groupIds" -> 1, "message" -> 1))
   val prayerListDataReaderProjector: Option[BSONDocument] = Option(document("id" -> 1, "userId"   -> 1, "message" -> 1))
