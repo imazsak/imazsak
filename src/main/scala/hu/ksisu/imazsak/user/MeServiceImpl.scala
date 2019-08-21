@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.user
 
 import cats.Monad
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{AppError, NotFoundError, Response}
 import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
 import hu.ksisu.imazsak.user.UserDao.UserData
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
@@ -21,7 +21,7 @@ class MeServiceImpl[F[_]: Monad](implicit val userDao: UserDao[F]) extends MeSer
     EitherT.right(userDao.updateUserData(userData))
   }
 
-  private def userDataNotFound(implicit ctx: UserLogContext): Throwable = {
-    new NoSuchElementException(s"Not found user data for: ${ctx.userId}")
+  private def userDataNotFound(implicit ctx: UserLogContext): AppError = {
+    NotFoundError(s"Not found user data for: ${ctx.userId}")
   }
 }

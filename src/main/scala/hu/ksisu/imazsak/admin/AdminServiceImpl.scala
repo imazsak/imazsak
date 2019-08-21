@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.admin
 
 import cats.Monad
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{AppError, IllegalArgumentError, Response}
 import hu.ksisu.imazsak.admin.AdminService.{AddUserToGroupRequest, CreateGroupRequest}
 import hu.ksisu.imazsak.group.GroupDao
 import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupMember}
@@ -49,16 +49,16 @@ class AdminServiceImpl[F[_]: Monad](implicit userDao: UserDao[F], groupDao: Grou
     } yield ()
   }
 
-  private def nameIsUsed(name: String): Throwable = {
-    new IllegalArgumentException(s"Group name: $name is already used!")
+  private def nameIsUsed(name: String): AppError = {
+    IllegalArgumentError(s"Group name: $name is already used!")
   }
 
-  private def nameIsTooShort(name: String): Throwable = {
-    new IllegalArgumentException(s"Group name: $name is too short!")
+  private def nameIsTooShort(name: String): AppError = {
+    IllegalArgumentError(s"Group name: $name is too short!")
   }
 
-  private def userIsAlreadyMember(groupId: String, userId: String): Throwable = {
-    new IllegalArgumentException(s"User $userId is already member in $groupId!")
+  private def userIsAlreadyMember(groupId: String, userId: String): AppError = {
+    IllegalArgumentError(s"User $userId is already member in $groupId!")
   }
 
 }

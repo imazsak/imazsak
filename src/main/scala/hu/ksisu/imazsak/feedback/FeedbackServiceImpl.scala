@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.feedback
 
 import cats.MonadError
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{AppError, Response}
 import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
 import hu.ksisu.imazsak.feedback.FeedbackService.CreateFeedbackRequest
 import hu.ksisu.imazsak.util.DateTimeUtil
@@ -19,7 +19,7 @@ class FeedbackServiceImpl[F[_]: MonadError[?[_], Throwable]](
       data.message,
       date.getCurrentTimeMillis
     )
-    EitherT.right[Throwable](feedbackDao.create(model)).map(_ => ())
+    EitherT.right[AppError](feedbackDao.create(model)).map(_ => ())
   }
 
 }

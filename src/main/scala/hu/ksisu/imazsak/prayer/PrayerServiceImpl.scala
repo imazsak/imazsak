@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.prayer
 
 import cats.MonadError
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, Response}
 import hu.ksisu.imazsak.group.GroupDao
 import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
@@ -46,15 +46,15 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     EitherT.cond(message.trim.length > 5, (), noMessageError)
   }
 
-  private def noMessageError: Throwable = {
-    new IllegalArgumentException("Must have add message to create a new prayer!")
+  private def noMessageError: AppError = {
+    IllegalArgumentError("Must have add message to create a new prayer!")
   }
 
-  private def noGroupError: Throwable = {
-    new IllegalArgumentException("Must have at least one group to create a new prayer!")
+  private def noGroupError: AppError = {
+    IllegalArgumentError("Must have at least one group to create a new prayer!")
   }
 
-  private def illegalGroupError(groups: Set[String])(implicit ctx: UserLogContext): Throwable = {
-    new IllegalAccessError(s"User ${ctx.userId} not member in: ${groups.mkString("[,", ",", "]")}")
+  private def illegalGroupError(groups: Set[String])(implicit ctx: UserLogContext): AppError = {
+    AccessDeniedError(s"User ${ctx.userId} not member in: ${groups.mkString("[,", ",", "]")}")
   }
 }

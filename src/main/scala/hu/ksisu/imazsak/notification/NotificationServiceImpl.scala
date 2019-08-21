@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.notification
 
 import cats.MonadError
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{AppError, Response}
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationService.CreateNotificationRequest
 import hu.ksisu.imazsak.util.DateTimeUtil
@@ -23,12 +23,12 @@ class NotificationServiceImpl[F[_]: MonadError[?[_], Throwable]](
         data.meta.notificationType
       )
     )
-    EitherT.right[Throwable](notificationDao.createNotification(model)).map(_ => ())
+    EitherT.right[AppError](notificationDao.createNotification(model)).map(_ => ())
   }
 
   override def listUserNotifications()(implicit ctx: UserLogContext): Response[F, Seq[NotificationListData]] = {
     val limit = Some(10)
-    EitherT.right[Throwable](notificationDao.findByUserOrderByDateDesc(ctx.userId, limit))
+    EitherT.right[AppError](notificationDao.findByUserOrderByDateDesc(ctx.userId, limit))
   }
 
   override def deleteUserNotifications(ids: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {

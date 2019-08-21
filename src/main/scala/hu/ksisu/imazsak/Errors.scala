@@ -12,7 +12,12 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 object Errors {
-  type Response[F[_], T] = EitherT[F, Throwable, T]
+  trait AppError
+  case class IllegalArgumentError(message: String) extends AppError
+  case class AccessDeniedError(message: String)    extends AppError
+  case class NotFoundError(message: String)        extends AppError
+
+  type Response[F[_], T] = EitherT[F, AppError, T]
 
   implicit class ResponseWrapper[T](val response: Response[Future, T]) {
     def toComplete(implicit w: RootJsonWriter[T], logger: Logger, ctx: LogContext): Route = {
@@ -37,23 +42,15 @@ object Errors {
     }
   }
 
-  type ErrorHandler = PartialFunction[Throwable, Route]
+  type ErrorHandler = PartialFunction[AppError, Route]
 
-  private def defaultHandler(implicit logger: Logger, ctx: LogContext): ErrorHandler = {
-    case ex: NoSuchElementException   => complete((StatusCodes.NotFound, ErrorResponse.fromEx(ex)))
-    case ex: IllegalAccessError       => complete((StatusCodes.Forbidden, ErrorResponse.fromEx(ex)))
-    case ex: IllegalArgumentException => complete((StatusCodes.BadRequest, ErrorResponse.fromEx(ex)))
-    case ex =>
-      logger.warn("Unknown error!", ex)
-      complete(StatusCodes.InternalServerError)
+  private def defaultHandler: ErrorHandler = {
+    case NotFoundError(msg)        => complete((StatusCodes.NotFound, ErrorResponse(msg)))
+    case AccessDeniedError(msg)    => complete((StatusCodes.Forbidden, ErrorResponse(msg)))
+    case IllegalArgumentError(msg) => complete((StatusCodes.BadRequest, ErrorResponse(msg)))
   }
 
   case class ErrorResponse(error: String)
-  object ErrorResponse {
-    def fromEx(ex: Throwable): ErrorResponse = {
-      ErrorResponse(ex.getMessage)
-    }
-  }
   import spray.json.DefaultJsonProtocol._
   implicit val errorResponseFormat: RootJsonFormat[ErrorResponse] = jsonFormat1(ErrorResponse.apply)
   implicit val unitWriter: RootJsonWriter[Unit]                   = (_: Unit) => JsObject()
