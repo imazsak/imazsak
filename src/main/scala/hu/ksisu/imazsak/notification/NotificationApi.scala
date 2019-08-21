@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.notification
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
@@ -13,9 +14,7 @@ import spray.json.DefaultJsonProtocol._
 import spray.json._
 import hu.ksisu.imazsak.util.ApiHelper._
 
-import scala.concurrent.Future
-
-class NotificationApi(implicit service: NotificationService[Future], val jwtService: JwtService[Future])
+class NotificationApi(implicit service: NotificationService[IO], val jwtService: JwtService[IO])
     extends Api
     with AuthDirectives {
   implicit val logger = new Logger("NotificationApi")

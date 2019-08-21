@@ -5,10 +5,10 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.EitherT
+import cats.effect.IO
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger}
 import spray.json._
 
-import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 object Errors {
@@ -19,7 +19,7 @@ object Errors {
 
   type Response[F[_], T] = EitherT[F, AppError, T]
 
-  implicit class ResponseWrapper[T](val response: Response[Future, T]) {
+  implicit class ResponseWrapper[T](val response: Response[IO, T]) {
     def toComplete(implicit w: RootJsonWriter[T], logger: Logger, ctx: LogContext): Route = {
       toComplete(None)
     }
@@ -32,7 +32,7 @@ object Errors {
     )(implicit w: RootJsonWriter[T], logger: Logger, ctx: LogContext) = {
       val errorHandler = mbHandler.map(_.orElse(defaultHandler)).getOrElse(defaultHandler)
 
-      onComplete(response.value) {
+      onComplete(response.value.unsafeToFuture()) {
         case Success(Right(res))  => complete(res)
         case Success(Left(error)) => errorHandler(error)
         case Failure(error) =>

@@ -5,10 +5,10 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
+import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import spray.json.RootJsonReader
 
-import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 trait HttpWrapper[F[_]] {
@@ -17,19 +17,20 @@ trait HttpWrapper[F[_]] {
   def unmarshalEntityToString(resp: HttpResponse): F[String]
 }
 
-class AkkaHttpWrapper(implicit actorSystem: ActorSystem, materializer: Materializer) extends HttpWrapper[Future] {
+class AkkaHttpWrapper(implicit actorSystem: ActorSystem, materializer: Materializer, cs: ContextShift[IO])
+    extends HttpWrapper[IO] {
 
-  override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): Future[HttpResponse] = {
+  override def singleRequest(httpRequest: HttpRequest)(implicit ctx: LogContext): IO[HttpResponse] = {
     val requestWithTrace = httpRequest.copy(headers = httpRequest.headers ++ ctx.getInjectHeaders)
-    Http().singleRequest(requestWithTrace)
+    IO.fromFuture(IO(Http().singleRequest(requestWithTrace)))
   }
 
-  override def unmarshalEntityTo[T: ClassTag: RootJsonReader](resp: HttpResponse): Future[T] = {
+  override def unmarshalEntityTo[T: ClassTag: RootJsonReader](resp: HttpResponse): IO[T] = {
     import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-    Unmarshal(resp.entity).to[T]
+    IO.fromFuture(IO(Unmarshal(resp.entity).to[T]))
   }
 
-  override def unmarshalEntityToString(resp: HttpResponse): Future[String] = {
-    Unmarshal(resp.entity).to[String]
+  override def unmarshalEntityToString(resp: HttpResponse): IO[String] = {
+    IO.fromFuture(IO(Unmarshal(resp.entity).to[String]))
   }
 }

@@ -1,15 +1,21 @@
 package hu.ksisu.imazsak.core.dao
 
 import cats.data.EitherT
+import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
-class MongoDatabaseServiceImpl(implicit config: MongoConfig, ec: ExecutionContext, driver: MongoDriver)
-    extends MongoDatabaseService[Future] {
+class MongoDatabaseServiceImpl(
+    implicit config: MongoConfig,
+    ec: ExecutionContext,
+    cs: ContextShift[IO],
+    driver: MongoDriver
+) extends MongoDatabaseService[IO] {
   import cats.instances.future._
 
   private lazy val database: Future[DefaultDB] = {
@@ -23,13 +29,24 @@ class MongoDatabaseServiceImpl(implicit config: MongoConfig, ec: ExecutionContex
     result.foldF(Future.failed, Future.successful)
   }
 
-  override def init: Future[Unit] = {
-    database.map(_ => ())
+  private lazy val databaseIo: IO[DefaultDB] = IO.fromFuture(IO(database))
+
+  override def init: IO[Unit] = {
+    databaseIo.map(_ => ())
   }
 
-  override def checkStatus(): Future[Boolean] = {
-    database.map(_ => true).recover { case _ => false }
+  override def checkStatus(): IO[Boolean] = {
+    databaseIo.flatMap { db =>
+      IO.async { cb =>
+        db.ping().onComplete {
+          case Success(r) => cb(Right(r))
+          case Failure(_) => cb(Right(false))
+        }
+      }
+    }
   }
 
-  override def getCollection(name: String): Future[BSONCollection] = database.map(_.collection[BSONCollection](name))
+  override def getCollection(name: String): IO[BSONCollection] = {
+    databaseIo.map(_.collection[BSONCollection](name))
+  }
 }

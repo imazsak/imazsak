@@ -40,6 +40,7 @@ lazy val core = (project in file("."))
       val jwtV      = "3.1.0"
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0-RC1",
+        "org.typelevel"        %% "cats-effect"              % "2.0.0-RC1",
         "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-testkit"        % akkaHttpV % "it,test",

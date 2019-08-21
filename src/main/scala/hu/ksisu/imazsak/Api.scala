@@ -2,6 +2,7 @@ package hu.ksisu.imazsak
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive1, Route}
+import cats.effect.IO
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hu.ksisu.imazsak.admin.AdminApi
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
@@ -14,8 +15,6 @@ import hu.ksisu.imazsak.util.TracingDirectives._
 import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
 import org.slf4j.Logger
-
-import scala.concurrent.Future
 
 trait Api {
   protected val tracer: Tracer                                  = GlobalTracer.get()
@@ -33,7 +32,7 @@ object Api {
       .fold(Api.emptyRoute)(_ ~ _)
   }
 
-  def createApi(services: Services[Future])(implicit logger: Logger): Route = {
+  def createApi(services: Services[IO])(implicit logger: Logger): Route = {
     import services._
 
     val modules = configService.getEnabledModules

@@ -1,20 +1,22 @@
 package hu.ksisu.imazsak.feedback
 
+import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class FeedbackDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[Future],
+    implicit mongoDatabaseService: MongoDatabaseService[IO],
     idGenerator: IdGenerator,
-    ec: ExecutionContext
-) extends FeedbackDao[Future] {
-  protected implicit val collectionF: Future[BSONCollection] = mongoDatabaseService.getCollection("feedback")
+    ec: ExecutionContext,
+    cs: ContextShift[IO]
+) extends FeedbackDao[IO] {
+  protected implicit val collectionF: IO[BSONCollection] = mongoDatabaseService.getCollection("feedback")
 
-  override def create(data: CreateFeedbackData): Future[String] = {
+  override def create(data: CreateFeedbackData): IO[String] = {
     MongoQueryHelper.insert(data)
   }
 

@@ -6,40 +6,38 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{AuthenticationFailedRejection, Directive0, Directive1}
 import cats.data.OptionT
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.util.LoggerUtil.{AdminLogContext, LogContext, UserLogContext}
 import hu.ksisu.imazsak.util.TracingDirectives.trace
 import io.opentracing.{Span, Tracer}
 import spray.json.JsString
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait AuthDirectives {
   this: Api =>
 
-  import cats.instances.future._
-
-  val jwtService: JwtService[Future]
+  val jwtService: JwtService[IO]
 
   type AsyncAuthenticator[T] = Credentials => Future[Option[T]]
 
-  private def validateAndGetId(token: String)(implicit ec: ExecutionContext): Future[Option[String]] = {
+  private def validateAndGetId(token: String): Future[Option[String]] = {
     OptionT(jwtService.validateAndDecode(token))
       .subflatMap(_.fields.get("id"))
       .collect {
         case JsString(id) => id
       }
       .value
+      .unsafeToFuture()
   }
 
-  protected def userAuthenticator(implicit ec: ExecutionContext): AsyncAuthenticator[String] = {
+  protected def userAuthenticator: AsyncAuthenticator[String] = {
     case Credentials.Provided(token) => validateAndGetId(token)
     case _                           => Future.successful(None)
   }
 
-  def userAuth: Directive1[String] = extractExecutionContext.flatMap { implicit executor =>
-    authenticateOAuth2Async[String]("", userAuthenticator)
-  }
+  def userAuth: Directive1[String] = authenticateOAuth2Async[String]("", userAuthenticator)
 
   def adminAuth: Directive0 = {
     headerValueByName("X-Admin-Key").flatMap { key =>

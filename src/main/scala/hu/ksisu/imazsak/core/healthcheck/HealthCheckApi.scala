@@ -3,12 +3,11 @@ package hu.ksisu.imazsak.core.healthcheck
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 
-import scala.concurrent.Future
-
-class HealthCheckApi(implicit service: HealthCheckService[Future], val jwtService: JwtService[Future])
+class HealthCheckApi(implicit service: HealthCheckService[IO], val jwtService: JwtService[IO])
     extends Api
     with AuthDirectives {
 
@@ -16,7 +15,7 @@ class HealthCheckApi(implicit service: HealthCheckService[Future], val jwtServic
     path("healthCheck") {
       get {
         withTrace("HealthCheck") { _ =>
-          onSuccess(service.getStatus) { result =>
+          onSuccess(service.getStatus.unsafeToFuture()) { result =>
             complete(result)
           }
         }

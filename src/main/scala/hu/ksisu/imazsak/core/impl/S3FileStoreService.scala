@@ -6,22 +6,24 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.FileStoreService
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class S3FileStoreService(implicit ec: ExecutionContext, mat: Materializer) extends FileStoreService[Future] {
+class S3FileStoreService(implicit ec: ExecutionContext, mat: Materializer, cs: ContextShift[IO])
+    extends FileStoreService[IO] {
 
-  override def init: Future[Unit] = Future.successful({})
+  override def init: IO[Unit] = IO.pure(())
 
   override def store(
       bucket: String,
       fileName: String,
       contentType: ContentType,
       file: Source[ByteString, NotUsed]
-  ): Future[Uri] = {
+  ): IO[Uri] = {
     val s3Sink = S3.multipartUpload(bucket, fileName, contentType)
-    file.runWith(s3Sink).map(_.location)
+    IO.fromFuture(IO(file.runWith(s3Sink).map(_.location)))
   }
 
 }

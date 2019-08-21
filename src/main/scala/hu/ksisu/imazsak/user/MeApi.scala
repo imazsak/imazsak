@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.user
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
@@ -11,9 +12,7 @@ import hu.ksisu.imazsak.user.MeService.{MeUserData, UpdateMeUserData}
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.RootJsonFormat
 
-import scala.concurrent.Future
-
-class MeApi(implicit service: MeService[Future], val jwtService: JwtService[Future]) extends Api with AuthDirectives {
+class MeApi(implicit service: MeService[IO], val jwtService: JwtService[IO]) extends Api with AuthDirectives {
   implicit val logger = new Logger("MeApi")
 
   def route(): Route = {

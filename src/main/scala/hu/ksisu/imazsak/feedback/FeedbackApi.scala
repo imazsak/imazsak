@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.feedback
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
@@ -12,9 +13,7 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
-import scala.concurrent.Future
-
-class FeedbackApi(implicit service: FeedbackService[Future], val jwtService: JwtService[Future])
+class FeedbackApi(implicit service: FeedbackService[IO], val jwtService: JwtService[IO])
     extends Api
     with AuthDirectives {
   implicit val logger = new Logger("FeedbackApi")

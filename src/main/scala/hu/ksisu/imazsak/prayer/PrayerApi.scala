@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.prayer
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import cats.effect.IO
 import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
@@ -13,11 +14,7 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
 
-import scala.concurrent.Future
-
-class PrayerApi(implicit service: PrayerService[Future], val jwtService: JwtService[Future])
-    extends Api
-    with AuthDirectives {
+class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[IO]) extends Api with AuthDirectives {
   implicit val logger = new Logger("PrayerApi")
 
   def route(): Route = {
