@@ -9,6 +9,7 @@ import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckService
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl
 import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService, FeedbackServiceImpl}
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
+import hu.ksisu.imazsak.notification._
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
 import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
 import hu.ksisu.imazsak.util._
@@ -28,17 +29,19 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   override implicit lazy val dateTimeService: DateTimeUtil = new DateTimeUtilCounterImpl
   implicit lazy val httpWrapper: HttpWrapper[IO]           = null
 
-  override implicit lazy val tracerService: TracerService[IO] = new TracerService[IO]()
-  override implicit lazy val amqpService: AmqpService[IO]     = null
-  override implicit lazy val jwtService: JwtServiceImpl[IO]   = new JwtServiceImpl[IO]()
-  override implicit lazy val userDao: UserDao[IO]             = new UserDaoImpl()
-  override implicit lazy val meService: MeService[IO]         = new MeServiceImpl[IO]()
-  override implicit lazy val groupDao: GroupDao[IO]           = new GroupDaoImpl()
-  override implicit lazy val groupService: GroupService[IO]   = new GroupServiceImpl()
-  implicit lazy val prayerDao: PrayerDao[IO]                  = new PrayerDaoImpl()
-  implicit lazy val prayerService: PrayerService[IO]          = new PrayerServiceImpl[IO]()
-  implicit lazy val adminService: AdminService[IO]            = new AdminServiceImpl[IO]()
-  implicit lazy val fileStoreService: FileStoreService[IO]    = null
-  implicit lazy val feedbackDao: FeedbackDao[IO]              = new FeedbackDaoImpl()
-  implicit lazy val feedbackService: FeedbackService[IO]      = new FeedbackServiceImpl[IO]()
+  override implicit lazy val tracerService: TracerService[IO]        = new TracerService[IO]()
+  override implicit lazy val amqpService: AmqpService[IO]            = null
+  override implicit lazy val jwtService: JwtServiceImpl[IO]          = new JwtServiceImpl[IO]()
+  override implicit lazy val userDao: UserDao[IO]                    = new UserDaoImpl()
+  override implicit lazy val meService: MeService[IO]                = new MeServiceImpl[IO]()
+  override implicit lazy val groupDao: GroupDao[IO]                  = new GroupDaoImpl()
+  override implicit lazy val groupService: GroupService[IO]          = new GroupServiceImpl()
+  implicit lazy val prayerDao: PrayerDao[IO]                         = new PrayerDaoImpl()
+  implicit lazy val prayerService: PrayerService[IO]                 = new PrayerServiceImpl[IO]()
+  implicit lazy val adminService: AdminService[IO]                   = new AdminServiceImpl[IO]()
+  implicit lazy val fileStoreService: FileStoreService[IO]           = null
+  implicit lazy val feedbackDao: FeedbackDao[IO]                     = new FeedbackDaoImpl()
+  implicit lazy val feedbackService: FeedbackService[IO]             = new FeedbackServiceImpl[IO]()
+  override implicit val notificationDao: NotificationDao[IO]         = new NotificationDaoImpl()
+  override implicit val notificationService: NotificationService[IO] = new NotificationServiceImpl[IO]()
 }

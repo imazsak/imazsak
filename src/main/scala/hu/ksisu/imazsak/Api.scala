@@ -8,6 +8,7 @@ import hu.ksisu.imazsak.admin.AdminApi
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
 import hu.ksisu.imazsak.feedback.FeedbackApi
 import hu.ksisu.imazsak.group.GroupApi
+import hu.ksisu.imazsak.notification.NotificationApi
 import hu.ksisu.imazsak.user.MeApi
 import hu.ksisu.imazsak.prayer.PrayerApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
@@ -45,7 +46,8 @@ object Api {
       new GroupApi(),
       new PrayerApi(),
       new AdminApi(),
-      new FeedbackApi()
+      new FeedbackApi(),
+      new NotificationApi()
     )
 
     cors() {
