@@ -409,11 +409,6 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           NotificationListData("3", "message3", createdAt = 3, NotificationMeta(true, Some("type2"))),
           NotificationListData("4", "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
         )
-        /*
-        List(NotificationListData(1,message1,1,NotificationMeta(false,None)),
-        NotificationListData(3,message3,3,NotificationMeta(false,Some(type2))),
-        NotificationListData(4,message4,4,NotificationMeta(false,Some(type3))))
-         */
         notificationDao.findByUser("user_id2").unsafeRunSync() shouldEqual Seq(
           NotificationListData("2", "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
         )
