@@ -16,7 +16,7 @@ class UserApi(implicit service: UserService[IO], val jwtService: JwtService[IO])
   implicit val logger = new Logger("UserApi")
 
   def route(): Route = {
-    path("groups" / Segment / "prayers") { groupId =>
+    path("groups" / Segment / "members") { groupId =>
       userAuthAndTrace("Users_ListGroupMembers") { implicit ctx =>
         service.listGroupUsers(groupId).toComplete
       }
