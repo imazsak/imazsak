@@ -8,6 +8,7 @@ trait UserDao[F[_]] {
   def findUserData(id: String): OptionT[F, UserData]
   def updateUserData(userData: UserData): F[Unit]
   def allUser(): F[Seq[UserAdminListData]]
+  def findUsersByIds(ids: Seq[String]): F[Seq[UserAdminListData]]
 }
 
 object UserDao {

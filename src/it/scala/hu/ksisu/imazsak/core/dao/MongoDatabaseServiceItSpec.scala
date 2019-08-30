@@ -98,7 +98,19 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           UserAdminListData("secret_id3", Some("nickname3"))
         )
       }
-
+      "#findUsersByIds" in {
+        val user1 = UserData("secret_id1", Some("nickname1"))
+        val user2 = UserData("secret_id2", None)
+        val user3 = UserData("secret_id3", Some("nickname3"))
+        await(userCollection.insert.many(Seq(user1, user2, user3)))
+        userDao.findUsersByIds(Seq("secret_id1", "secret_id2")).unsafeRunSync() shouldEqual Seq(
+          UserAdminListData("secret_id1", Some("nickname1")),
+          UserAdminListData("secret_id2", None)
+        )
+        userDao.findUsersByIds(Seq("secret_id3")).unsafeRunSync() shouldEqual Seq(
+          UserAdminListData("secret_id3", Some("nickname3"))
+        )
+      }
     }
 
     "GroupDao" when {
@@ -153,6 +165,35 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           GroupListData("group_1", "Group #1")
         )
         groupDao.findGroupByName("Group").value.unsafeRunSync() shouldEqual None
+      }
+      "#findMembersByGroupId" in {
+        val group1 = BSONDocument(
+          "id"   -> BSONString("group_1"),
+          "name" -> BSONString("Group #1"),
+          "members" -> BSONArray(
+            BSONDocument("id" -> BSONString("user_1")),
+            BSONDocument("id" -> BSONString("user_2"))
+          )
+        )
+        val group2 = BSONDocument(
+          "id"   -> BSONString("group_2"),
+          "name" -> BSONString("Group #2"),
+          "members" -> BSONArray(
+            BSONDocument("id" -> BSONString("user_1")),
+            BSONDocument("id" -> BSONString("user_3"))
+          )
+        )
+        await(groupCollection.insert.one(group1))
+        await(groupCollection.insert.one(group2))
+
+        groupDao.findMembersByGroupId("group_1").unsafeRunSync() shouldEqual Seq(
+          GroupMember("user_1"),
+          GroupMember("user_2")
+        )
+        groupDao.findMembersByGroupId("group_2").unsafeRunSync() shouldEqual Seq(
+          GroupMember("user_1"),
+          GroupMember("user_3")
+        )
       }
       "#allGroup" in {
         val group1 = BSONDocument(

@@ -14,7 +14,7 @@ import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService,
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.notification._
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
-import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
+import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
 import reactivemongo.api.MongoDriver
@@ -42,6 +42,7 @@ trait Services[F[_]] {
   implicit val feedbackService: FeedbackService[F]
   implicit val notificationDao: NotificationDao[F]
   implicit val notificationService: NotificationService[F]
+  implicit val userService: UserService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -90,4 +91,5 @@ class RealServices(
   implicit lazy val feedbackService: FeedbackService[IO]         = new FeedbackServiceImpl[IO]()
   implicit lazy val notificationDao: NotificationDao[IO]         = new NotificationDaoImpl()
   implicit lazy val notificationService: NotificationService[IO] = new NotificationServiceImpl[IO]()
+  implicit lazy val userService: UserService[IO]                 = new UserServiceImpl[IO]()
 }

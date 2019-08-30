@@ -26,4 +26,8 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
   override def allUser(): IO[Seq[UserAdminListData]] = {
     MongoQueryHelper.list[UserAdminListData](all, userAdminListDataProjector)
   }
+
+  override def findUsersByIds(ids: Seq[String]): IO[Seq[UserAdminListData]] = {
+    MongoQueryHelper.list[UserAdminListData](byIds(ids), userAdminListDataProjector)
+  }
 }

@@ -29,6 +29,13 @@ class GroupDaoImpl(
     MongoQueryHelper.findOne[GroupListData](byName(name), groupListDataProjector)
   }
 
+  override def findMembersByGroupId(groupId: String): IO[Seq[GroupMember]] = {
+    MongoQueryHelper
+      .findOne[GroupMemberListData](byId(groupId), groupMemberListDataProjector)
+      .map(_.members)
+      .getOrElse(Seq.empty)
+  }
+
   override def allGroup(): IO[Seq[GroupAdminListData]] = {
     MongoQueryHelper.list[GroupAdminListData](all, groupAdminListDataProjector)
   }

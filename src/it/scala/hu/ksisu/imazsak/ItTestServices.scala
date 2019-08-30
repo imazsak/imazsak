@@ -11,7 +11,7 @@ import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService,
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.notification._
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
-import hu.ksisu.imazsak.user.{MeService, MeServiceImpl, UserDao, UserDaoImpl}
+import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.MongoDriver
 
@@ -44,4 +44,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val feedbackService: FeedbackService[IO]             = new FeedbackServiceImpl[IO]()
   override implicit val notificationDao: NotificationDao[IO]         = new NotificationDaoImpl()
   override implicit val notificationService: NotificationService[IO] = new NotificationServiceImpl[IO]()
+  override implicit val userService: UserService[IO]                 = new UserServiceImpl[IO]()
 }
