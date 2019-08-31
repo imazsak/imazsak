@@ -19,7 +19,7 @@ import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.{Cursor, MongoDriver}
-import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONLong, BSONString}
+import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONInteger, BSONLong, BSONString}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -370,6 +370,25 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         result3 shouldEqual Seq(
           GroupPrayerListData("3", "user_2", "message3")
         )
+      }
+      "#incrementPrayCount" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
+        prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        val result = await(
+          prayerCollection
+            .find(BSONDocument(), None)
+            .cursor[BSONDocument]()
+            .collect[Seq](-1, Cursor.FailOnError[Seq[BSONDocument]]())
+        )
+
+        val resultMap = result.map(doc => doc.getId -> doc).toMap
+        resultMap("1").get("prayCount") shouldEqual None
+        resultMap("2").get("prayCount") shouldEqual Some(BSONInteger(3))
       }
     }
 

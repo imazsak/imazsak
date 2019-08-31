@@ -33,6 +33,14 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     } yield result
   }
 
+  override def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
+    for {
+      prayers <- listGroupPrayers(groupId)
+      _       <- EitherT.cond(prayers.exists(_.id == prayerId), (), illegalAccessToPrayer(groupId, prayerId))
+      _       <- EitherT.right(prayerDao.incrementPrayCount(prayerId))
+    } yield ()
+  }
+
   private def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
       _      <- EitherT.cond(groupIds.nonEmpty, (), noGroupError)
@@ -56,5 +64,9 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
 
   private def illegalGroupError(groups: Set[String])(implicit ctx: UserLogContext): AppError = {
     AccessDeniedError(s"User ${ctx.userId} not member in: ${groups.mkString("[,", ",", "]")}")
+  }
+
+  private def illegalAccessToPrayer(groupId: String, prayerId: String): AppError = {
+    AccessDeniedError(s"Prayer $prayerId not in the group: $groupId")
   }
 }

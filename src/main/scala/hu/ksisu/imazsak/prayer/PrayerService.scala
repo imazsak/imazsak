@@ -9,6 +9,7 @@ trait PrayerService[F[_]] {
   def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit]
   def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]]
   def listGroupPrayers(groupId: String)(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]]
+  def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit]
 }
 
 object PrayerService {

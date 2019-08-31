@@ -6,6 +6,7 @@ import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.prayer.PrayerDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.bson.document
 
 import scala.concurrent.ExecutionContext
 
@@ -27,5 +28,10 @@ class PrayerDaoImpl(
 
   override def findByGroup(groupId: String): IO[Seq[GroupPrayerListData]] = {
     MongoQueryHelper.list[GroupPrayerListData](groupIdsContains(groupId), prayerListDataReaderProjector)
+  }
+
+  override def incrementPrayCount(prayerId: String): IO[Unit] = {
+    val incrementPrayCounter = document("$inc" -> document("prayCount" -> 1))
+    MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter)
   }
 }

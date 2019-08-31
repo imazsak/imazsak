@@ -7,6 +7,7 @@ trait PrayerDao[F[_]] {
   def createPrayer(data: CreatePrayerData): F[String]
   def findPrayerByUser(userId: String): F[Seq[MyPrayerListData]]
   def findByGroup(groupId: String): F[Seq[GroupPrayerListData]]
+  def incrementPrayCount(prayerId: String): F[Unit]
 }
 
 object PrayerDao {

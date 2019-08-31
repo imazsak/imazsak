@@ -30,10 +30,16 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
           service.listMyPrayers().toComplete
         }
       }
-    } ~ {
+    } ~ get {
       path("groups" / Segment / "prayers") { groupId =>
         userAuthAndTrace("Prayer_ListGroup") { implicit ctx =>
           service.listGroupPrayers(groupId).toComplete
+        }
+      }
+    } ~ post {
+      path("groups" / Segment / "prayers" / Segment / "pray") { (groupId, prayerId) =>
+        userAuthAndTrace("Prayer_Pray") { implicit ctx =>
+          service.pray(groupId, prayerId).toComplete
         }
       }
     }
