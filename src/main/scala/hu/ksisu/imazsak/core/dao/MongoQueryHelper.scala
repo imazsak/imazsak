@@ -25,23 +25,34 @@ object MongoQueryHelper {
     } yield model.getId
   }
 
-  def list[T](selector: BSONDocument, projector: Option[BSONDocument] = None, limit: Option[Int] = None)(
+  def list[T](
+      selector: BSONDocument,
+      projector: Option[BSONDocument] = None,
+      sort: Option[BSONDocument] = None,
+      limit: Option[Int] = None
+  )(
       implicit collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Seq[T]] = {
+    def createQuery(collection: BSONCollection) = {
+      val find   = collection.find(selector, projector)
+      val sorted = sort.fold(find)(find.sort)
+      limit match {
+        case Some(0) => IO.pure(Seq.empty[T])
+        case l =>
+          val query = sorted
+            .cursor[T]()
+            .collect[Seq](l.getOrElse(-1), Cursor.FailOnError[Seq[T]]())
+          IO.fromFuture(IO(query))
+      }
+    }
+
     for {
       collection <- collectionF
-      groups <- IO.fromFuture(
-        IO(
-          collection
-            .find(selector, projector)
-            .cursor[T]()
-            .collect[Seq](limit.getOrElse(-1), Cursor.FailOnError[Seq[T]]())
-        )
-      )
-    } yield groups
+      result     <- createQuery(collection)
+    } yield result
   }
 
   def sortedList[T](

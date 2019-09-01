@@ -10,6 +10,7 @@ import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
 import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.CreatePrayerRequest
+import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
@@ -40,6 +41,14 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
       path("groups" / Segment / "prayers" / Segment / "pray") { (groupId, prayerId) =>
         userAuthAndTrace("Prayer_Pray") { implicit ctx =>
           service.pray(groupId, prayerId).toComplete
+        }
+      }
+    } ~ post {
+      path("prayers" / "next-10") {
+        entity(as[Ids]) { data =>
+          userAuthAndTrace("Prayer_Next10") { implicit ctx =>
+            service.next10(data.ids).toComplete
+          }
         }
       }
     }

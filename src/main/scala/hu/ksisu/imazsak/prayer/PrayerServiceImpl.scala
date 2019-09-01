@@ -41,6 +41,13 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     } yield ()
   }
 
+  override def next10(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]] = {
+    for {
+      _      <- checkGroups(groupIds)
+      result <- EitherT.right(prayerDao.findByGroupIds(groupIds, Some(10)))
+    } yield result
+  }
+
   private def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
       _      <- EitherT.cond(groupIds.nonEmpty, (), noGroupError)

@@ -10,6 +10,7 @@ trait PrayerService[F[_]] {
   def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]]
   def listGroupPrayers(groupId: String)(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]]
   def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit]
+  def next10(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]]
 }
 
 object PrayerService {

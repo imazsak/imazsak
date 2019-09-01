@@ -6,7 +6,7 @@ import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.prayer.PrayerDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.document
+import reactivemongo.bson.{BSONNull, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -33,5 +33,29 @@ class PrayerDaoImpl(
   override def incrementPrayCount(prayerId: String): IO[Unit] = {
     val incrementPrayCounter = document("$inc" -> document("prayCount" -> 1))
     MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter)
+  }
+
+  override def findByGroupIds(groupIds: Seq[String], limit: Option[Int]): IO[Seq[GroupPrayerListData]] = {
+    val selector      = document("groupIds"  -> document("$in" -> groupIds))
+    val prayIsNull    = document("prayCount" -> BSONNull)
+    val prayIsNotNull = document("prayCount" -> document("$ne" -> BSONNull))
+    val byPrayCount   = document("prayCount" -> 1)
+
+    def firstPartQuery: IO[Seq[GroupPrayerListData]] =
+      MongoQueryHelper
+        .list[GroupPrayerListData](selector ++ prayIsNull, prayerListDataReaderProjector, limit = limit)
+    def secondPartQuery(limit: Option[Int]): IO[Seq[GroupPrayerListData]] = {
+      MongoQueryHelper
+        .list[GroupPrayerListData](selector ++ prayIsNotNull, prayerListDataReaderProjector, Some(byPrayCount), limit)
+    }
+    def secondPartLimit(firstPartCount: Int): Option[Int] = limit.map {
+      case oLimit if oLimit > firstPartCount => oLimit - firstPartCount
+      case _                                 => 0
+    }
+
+    for {
+      firstPart  <- firstPartQuery
+      secondPart <- secondPartQuery(secondPartLimit(firstPart.size))
+    } yield firstPart ++ secondPart
   }
 }

@@ -390,6 +390,22 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         resultMap("1").get("prayCount") shouldEqual None
         resultMap("2").get("prayCount") shouldEqual Some(BSONInteger(3))
       }
+      "#findByGroupIds" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        val prayer3 = CreatePrayerData("user_2", "message3", Seq("group_2", "group_3"))
+        prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
+        prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
+        prayerDao.createPrayer(prayer3).unsafeRunSync() shouldEqual "3"
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("3").unsafeRunSync()
+        prayerDao.findByGroupIds(Seq("group_1")).unsafeRunSync().map(_.id) shouldEqual Seq("1")
+        prayerDao.findByGroupIds(Seq("group_2")).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3", "2")
+        prayerDao.findByGroupIds(Seq("group_1", "group_3")).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+        prayerDao.findByGroupIds(Seq("group_2"), Some(1)).unsafeRunSync().map(_.id) shouldEqual Seq("1")
+        prayerDao.findByGroupIds(Seq("group_2"), Some(2)).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+      }
     }
 
     "NotificationDao" when {
