@@ -27,7 +27,7 @@ class PrayerDaoImpl(
   }
 
   override def findByGroup(groupId: String): IO[Seq[GroupPrayerListData]] = {
-    MongoQueryHelper.list[GroupPrayerListData](groupIdsContains(groupId), prayerListDataReaderProjector)
+    MongoQueryHelper.list[GroupPrayerListData](groupIdsContains(groupId), groupPrayerListDataProjector)
   }
 
   override def incrementPrayCount(prayerId: String): IO[Unit] = {
@@ -35,18 +35,18 @@ class PrayerDaoImpl(
     MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter)
   }
 
-  override def findByGroupIds(groupIds: Seq[String], limit: Option[Int]): IO[Seq[GroupPrayerListData]] = {
+  override def findByGroupIds(groupIds: Seq[String], limit: Option[Int]): IO[Seq[PrayerListData]] = {
     val selector      = document("groupIds"  -> document("$in" -> groupIds))
     val prayIsNull    = document("prayCount" -> BSONNull)
     val prayIsNotNull = document("prayCount" -> document("$ne" -> BSONNull))
     val byPrayCount   = document("prayCount" -> 1)
 
-    def firstPartQuery: IO[Seq[GroupPrayerListData]] =
+    def firstPartQuery: IO[Seq[PrayerListData]] =
       MongoQueryHelper
-        .list[GroupPrayerListData](selector ++ prayIsNull, prayerListDataReaderProjector, limit = limit)
-    def secondPartQuery(limit: Option[Int]): IO[Seq[GroupPrayerListData]] = {
+        .list[PrayerListData](selector ++ prayIsNull, prayerListDataProjector, limit = limit)
+    def secondPartQuery(limit: Option[Int]): IO[Seq[PrayerListData]] = {
       MongoQueryHelper
-        .list[GroupPrayerListData](selector ++ prayIsNotNull, prayerListDataReaderProjector, Some(byPrayCount), limit)
+        .list[PrayerListData](selector ++ prayIsNotNull, prayerListDataProjector, Some(byPrayCount), limit)
     }
     def secondPartLimit(firstPartCount: Int): Option[Int] = limit.map {
       case oLimit if oLimit > firstPartCount => oLimit - firstPartCount
@@ -56,6 +56,13 @@ class PrayerDaoImpl(
     for {
       firstPart  <- firstPartQuery
       secondPart <- secondPartQuery(secondPartLimit(firstPart.size))
-    } yield firstPart ++ secondPart
+    } yield {
+      val prayers = firstPart ++ secondPart
+      val prayersWithFilteredGroups = prayers.map { prayer =>
+        val searchedGroups = prayer.groupIds.filter(groupIds.contains)
+        prayer.copy(groupIds = searchedGroups)
+      }
+      prayersWithFilteredGroups
+    }
   }
 }

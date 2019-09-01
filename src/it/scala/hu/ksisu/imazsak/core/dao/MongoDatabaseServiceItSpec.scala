@@ -405,6 +405,13 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         prayerDao.findByGroupIds(Seq("group_1", "group_3")).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
         prayerDao.findByGroupIds(Seq("group_2"), Some(1)).unsafeRunSync().map(_.id) shouldEqual Seq("1")
         prayerDao.findByGroupIds(Seq("group_2"), Some(2)).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+        // filter out non requested groups
+        prayerDao.findByGroupIds(Seq("group_2", "group_3")).unsafeRunSync().map(_.groupIds) shouldEqual Seq(
+          Seq("group_2"),
+          Seq("group_2", "group_3"),
+          Seq("group_2")
+        )
+
       }
     }
 
