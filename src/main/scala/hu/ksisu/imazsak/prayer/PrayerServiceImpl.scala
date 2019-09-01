@@ -4,7 +4,7 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, Response}
 import hu.ksisu.imazsak.group.GroupDao
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData, PrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData}
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
@@ -46,9 +46,8 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
       _      <- checkGroups(groupIds)
       result <- EitherT.right(prayerDao.findByGroupIds(groupIds, Some(10)))
     } yield {
-      result.collect {
-        case PrayerListData(id, userId, groupId :: _, message) =>
-          Next10PrayerListData(id, userId, groupId, message)
+      result.flatMap { x =>
+        x.groupIds.headOption.map(groupId => Next10PrayerListData(x.id, x.userId, groupId, x.message))
       }
     }
   }
