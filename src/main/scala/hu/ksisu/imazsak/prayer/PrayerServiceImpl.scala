@@ -21,13 +21,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
   }
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
-    EitherT
-      .right(prayerDao.findPrayerByUser(ctx.userId))
-      .map(_.map { prayer =>
-        {
-          prayer.copy(prayCount = prayer.prayCount.orElse(Some(0)))
-        }
-      })
+    EitherT.right(prayerDao.findPrayerByUser(ctx.userId))
   }
 
   override def listGroupPrayers(
