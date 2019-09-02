@@ -17,7 +17,7 @@ trait PrayerDao[F[_]] {
   def findPrayerByUser(userId: String): F[Seq[MyPrayerListData]]
   def findByGroup(groupId: String): F[Seq[GroupPrayerListData]]
   def incrementPrayCount(prayerId: String): F[Unit]
-  def findByGroupIds(groupIds: Seq[String], limit: Option[Int] = None): F[Seq[PrayerListData]]
+  def findNextsByGroups(groupIds: Seq[String], exludedUserId: String, limit: Option[Int] = None): F[Seq[PrayerListData]]
 }
 
 object PrayerDao {

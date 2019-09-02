@@ -408,13 +408,17 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         prayerDao.incrementPrayCount("2").unsafeRunSync()
         prayerDao.incrementPrayCount("2").unsafeRunSync()
         prayerDao.incrementPrayCount("3").unsafeRunSync()
-        prayerDao.findByGroupIds(Seq("group_1")).unsafeRunSync().map(_.id) shouldEqual Seq("1")
-        prayerDao.findByGroupIds(Seq("group_2")).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3", "2")
-        prayerDao.findByGroupIds(Seq("group_1", "group_3")).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
-        prayerDao.findByGroupIds(Seq("group_2"), Some(1)).unsafeRunSync().map(_.id) shouldEqual Seq("1")
-        prayerDao.findByGroupIds(Seq("group_2"), Some(2)).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+        prayerDao.findNextsByGroups(Seq("group_1"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1")
+        prayerDao.findNextsByGroups(Seq("group_2"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1", "3", "2")
+        prayerDao.findNextsByGroups(Seq("group_1", "group_3"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+        prayerDao.findNextsByGroups(Seq("group_2"), "", Some(1)).unsafeRunSync().map(_.id) shouldEqual Seq("1")
+        prayerDao.findNextsByGroups(Seq("group_2"), "", Some(2)).unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")
+        // exclude user
+        prayerDao.findNextsByGroups(Seq("group_2"), "user_1").unsafeRunSync().map(_.id) shouldEqual Seq("3")
+        prayerDao.findNextsByGroups(Seq("group_2"), "user_2").unsafeRunSync().map(_.id) shouldEqual Seq("1", "2")
+
         // filter out non requested groups
-        prayerDao.findByGroupIds(Seq("group_2", "group_3")).unsafeRunSync().map(_.groupIds) shouldEqual Seq(
+        prayerDao.findNextsByGroups(Seq("group_2", "group_3"), "").unsafeRunSync().map(_.groupIds) shouldEqual Seq(
           Seq("group_2"),
           Seq("group_2", "group_3"),
           Seq("group_2")

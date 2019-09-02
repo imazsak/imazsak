@@ -35,8 +35,12 @@ class PrayerDaoImpl(
     MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter)
   }
 
-  override def findByGroupIds(groupIds: Seq[String], limit: Option[Int]): IO[Seq[PrayerListData]] = {
-    val selector      = document("groupIds"  -> document("$in" -> groupIds))
+  override def findNextsByGroups(
+      groupIds: Seq[String],
+      excludedUserId: String,
+      limit: Option[Int]
+  ): IO[Seq[PrayerListData]] = {
+    val selector      = document("groupIds"  -> document("$in" -> groupIds), "userId" -> document("$ne" -> excludedUserId))
     val prayIsNull    = document("prayCount" -> BSONNull)
     val prayIsNotNull = document("prayCount" -> document("$ne" -> BSONNull))
     val byPrayCount   = document("prayCount" -> 1)

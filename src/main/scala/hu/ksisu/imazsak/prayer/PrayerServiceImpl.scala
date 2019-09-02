@@ -44,7 +44,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
   override def next10(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Seq[Next10PrayerListData]] = {
     for {
       _      <- checkGroups(groupIds)
-      result <- EitherT.right(prayerDao.findByGroupIds(groupIds, Some(10)))
+      result <- EitherT.right(prayerDao.findNextsByGroups(groupIds, ctx.userId, Some(10)))
     } yield {
       result.flatMap { x =>
         x.groupIds.headOption.map(groupId => Next10PrayerListData(x.id, x.userId, groupId, x.message))
