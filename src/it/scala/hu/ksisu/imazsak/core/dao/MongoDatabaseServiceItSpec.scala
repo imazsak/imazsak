@@ -334,16 +334,18 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
         prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
         prayerDao.createPrayer(prayer3).unsafeRunSync() shouldEqual "3"
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("2").unsafeRunSync()
 
         val result1 = prayerDao.findPrayerByUser("user_1").unsafeRunSync()
         result1 shouldEqual Seq(
-          MyPrayerListData("1", "message1", Seq("group_1", "group_2")),
-          MyPrayerListData("2", "message2", Seq("group_2"))
+          MyPrayerListData("1", "message1", Seq("group_1", "group_2"), None),
+          MyPrayerListData("2", "message2", Seq("group_2"), Some(2))
         )
 
         val result2 = prayerDao.findPrayerByUser("user_2").unsafeRunSync()
         result2 shouldEqual Seq(
-          MyPrayerListData("3", "message3", Seq("group_2", "group_3"))
+          MyPrayerListData("3", "message3", Seq("group_2", "group_3"), None)
         )
       }
       "#findByGroup" in {

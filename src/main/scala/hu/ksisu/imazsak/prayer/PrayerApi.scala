@@ -57,7 +57,7 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
 
 object PrayerApi {
   implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest]   = jsonFormat2(CreatePrayerRequest)
-  implicit val minePrayerListDataFormat: RootJsonFormat[MyPrayerListData]       = jsonFormat3(MyPrayerListData)
+  implicit val minePrayerListDataFormat: RootJsonFormat[MyPrayerListData]       = jsonFormat4(MyPrayerListData)
   implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData]   = jsonFormat3(GroupPrayerListData)
   implicit val next10PrayerListDataFormat: RootJsonFormat[Next10PrayerListData] = jsonFormat4(Next10PrayerListData)
 }
