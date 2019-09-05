@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.prayer
 
 import cats.MonadError
 import cats.data.EitherT
-import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, Response}
+import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, NotFoundError, Response}
 import hu.ksisu.imazsak.group.GroupDao
 import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData}
@@ -52,6 +52,13 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     }
   }
 
+  override def close(data: PrayerService.PrayerCloseRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
+    for {
+      _ <- checkPrayerBelongsToCurrentUser(data.id)
+      _ <- EitherT.right(prayerDao.delete(data.id))
+    } yield ()
+  }
+
   private def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
       _      <- EitherT.cond(groupIds.nonEmpty, (), noGroupError)
@@ -59,6 +66,14 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
       illegalGroups = groupIds.toSet -- groups.map(_.id).toSet
       _ <- EitherT.cond(illegalGroups.isEmpty, (), illegalGroupError(illegalGroups))
     } yield ()
+  }
+
+  private def checkPrayerBelongsToCurrentUser(prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
+    prayerDao
+      .findById(prayerId)
+      .toRight(notFound(prayerId))
+      .ensure(notTheCurrentUsersPrayer(prayerId))(_.userId == ctx.userId)
+      .map(_ => ())
   }
 
   private def checkMessage(message: String): Response[F, Unit] = {
@@ -79,5 +94,13 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
 
   private def illegalAccessToPrayer(groupId: String, prayerId: String): AppError = {
     AccessDeniedError(s"Prayer $prayerId not in the group: $groupId")
+  }
+
+  private def notFound(prayerId: String): AppError = {
+    NotFoundError(s"Prayer ${prayerId}not found")
+  }
+
+  private def notTheCurrentUsersPrayer(prayerId: String)(implicit ctx: UserLogContext): AppError = {
+    AccessDeniedError(s"Prayer $prayerId not belongs to user ${ctx.userId}")
   }
 }

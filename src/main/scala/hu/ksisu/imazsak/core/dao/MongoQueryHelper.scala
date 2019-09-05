@@ -114,14 +114,30 @@ object MongoQueryHelper {
     } yield ()
   }
 
+  def deleteOne(selector: BSONDocument)(
+      implicit collectionF: IO[BSONCollection],
+      ec: ExecutionContext,
+      cs: ContextShift[IO]
+  ): IO[Int] = {
+    deleteMultipleWithLimit(selector, Some(1))
+  }
+
   def deleteMultiple(selector: BSONDocument)(
+      implicit collectionF: IO[BSONCollection],
+      ec: ExecutionContext,
+      cs: ContextShift[IO]
+  ): IO[Int] = {
+    deleteMultipleWithLimit(selector, None)
+  }
+
+  private def deleteMultipleWithLimit(selector: BSONDocument, limit: Option[Int])(
       implicit collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Int] = {
     for {
       collection <- collectionF
-      result     <- IO.fromFuture(IO(collection.delete.one(selector, limit = None)))
+      result     <- IO.fromFuture(IO(collection.delete.one(selector, limit = limit)))
     } yield result.n
   }
 }

@@ -1,5 +1,6 @@
 package hu.ksisu.imazsak.prayer
 
+import cats.data.OptionT
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
@@ -68,5 +69,13 @@ class PrayerDaoImpl(
       }
       prayersWithFilteredGroups
     }
+  }
+
+  override def findById(prayerId: String): OptionT[IO, GroupPrayerListData] = {
+    MongoQueryHelper.findOne[GroupPrayerListData](byId(prayerId), groupPrayerListDataProjector)
+  }
+
+  override def delete(prayerId: String): IO[Unit] = {
+    MongoQueryHelper.deleteOne(byId(prayerId)).map(_ => ())
   }
 }

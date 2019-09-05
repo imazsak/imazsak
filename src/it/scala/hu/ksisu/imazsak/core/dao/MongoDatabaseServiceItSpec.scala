@@ -425,6 +425,30 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         )
 
       }
+      "#findById" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
+        prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
+
+        val result1 = prayerDao.findById("1").value.unsafeRunSync()
+        result1 shouldEqual Some(
+          GroupPrayerListData("1", "user_1", "message1")
+        )
+        val result2 = prayerDao.findById("2").value.unsafeRunSync()
+        result2 shouldEqual Some(
+          GroupPrayerListData("2", "user_1", "message2")
+        )
+        val result3 = prayerDao.findById("3").value.unsafeRunSync()
+        result3 shouldEqual None
+      }
+      "#delete" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
+        prayerDao.delete("1").unsafeRunSync()
+        val result = prayerDao.findById("1").value.unsafeRunSync()
+        result shouldEqual None
+      }
     }
 
     "NotificationDao" when {

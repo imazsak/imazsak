@@ -9,7 +9,7 @@ import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
 import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData}
-import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData, PrayerCloseRequest}
 import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
@@ -50,6 +50,14 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
             service.next10(data.ids).toComplete
           }
         }
+      } ~ post {
+        path("prayers" / "close") {
+          entity(as[PrayerCloseRequest]) { data =>
+            userAuthAndTrace("Prayer_close") { implicit ctx =>
+              service.close(data).toComplete
+            }
+          }
+        }
       }
     }
   }
@@ -60,4 +68,5 @@ object PrayerApi {
   implicit val minePrayerListDataFormat: RootJsonFormat[MyPrayerListData]       = jsonFormat5(MyPrayerListData)
   implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData]   = jsonFormat3(GroupPrayerListData)
   implicit val next10PrayerListDataFormat: RootJsonFormat[Next10PrayerListData] = jsonFormat4(Next10PrayerListData)
+  implicit val prayerCloseRequestFormat: RootJsonFormat[PrayerCloseRequest]     = jsonFormat2(PrayerCloseRequest)
 }

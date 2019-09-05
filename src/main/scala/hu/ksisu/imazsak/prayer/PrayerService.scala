@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.prayer
 
 import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData}
-import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData, PrayerCloseRequest}
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 trait PrayerService[F[_]] {
@@ -11,9 +11,11 @@ trait PrayerService[F[_]] {
   def listGroupPrayers(groupId: String)(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]]
   def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit]
   def next10(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Seq[Next10PrayerListData]]
+  def close(data: PrayerCloseRequest)(implicit ctx: UserLogContext): Response[F, Unit]
 }
 
 object PrayerService {
   case class CreatePrayerRequest(message: String, groupIds: Seq[String])
   case class Next10PrayerListData(id: String, userId: String, groupId: String, message: String)
+  case class PrayerCloseRequest(id: String, message: Option[String])
 }

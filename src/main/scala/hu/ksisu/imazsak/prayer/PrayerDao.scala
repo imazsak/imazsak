@@ -1,23 +1,21 @@
 package hu.ksisu.imazsak.prayer
 
+import cats.data.OptionT
 import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData, PrayerListData}
-import reactivemongo.bson.{
-  BSONArray,
-  BSONDocument,
-  BSONDocumentReader,
-  BSONDocumentWriter,
-  BSONObjectID,
-  BSONString,
-  Macros,
-  document
-}
+import reactivemongo.bson._
 
 trait PrayerDao[F[_]] {
   def createPrayer(data: CreatePrayerData): F[String]
   def findPrayerByUser(userId: String): F[Seq[MyPrayerListData]]
   def findByGroup(groupId: String): F[Seq[GroupPrayerListData]]
   def incrementPrayCount(prayerId: String): F[Unit]
-  def findNextsByGroups(groupIds: Seq[String], exludedUserId: String, limit: Option[Int] = None): F[Seq[PrayerListData]]
+  def findNextsByGroups(
+      groupIds: Seq[String],
+      excludedUserId: String,
+      limit: Option[Int] = None
+  ): F[Seq[PrayerListData]]
+  def findById(prayerId: String): OptionT[F, GroupPrayerListData]
+  def delete(prayerId: String): F[Unit]
 }
 
 object PrayerDao {
