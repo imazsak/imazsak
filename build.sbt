@@ -37,10 +37,10 @@ lazy val core = (project in file("."))
       val akkaHttpV = "10.1.9"
       val akkaV     = "2.5.25"
       val alpakkaV  = "1.1.1"
-      val jwtV      = "3.1.0"
+      val jwtV      = "4.0.0"
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.0.0-RC1",
-        "org.typelevel"        %% "cats-effect"              % "2.0.0-RC1",
+        "org.typelevel"        %% "cats-core"                % "2.0.0-RC2",
+        "org.typelevel"        %% "cats-effect"              % "2.0.0-RC2",
         "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-testkit"        % akkaHttpV % "it,test",
@@ -59,13 +59,13 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.18.4",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.18.5",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % alpakkaV,
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % alpakkaV,
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.62",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.5.14" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.5.15" % "it,test"
       )
     }
   )
