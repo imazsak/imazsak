@@ -39,7 +39,7 @@ lazy val core = (project in file("."))
       val alpakkaV  = "1.1.1"
       val jwtV      = "4.0.0"
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.0.0-RC2",
+        "org.typelevel"        %% "cats-core"                % "2.0.0-RC3",
         "org.typelevel"        %% "cats-effect"              % "2.0.0-RC2",
         "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
         "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
@@ -49,7 +49,7 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-slf4j"               % akkaV,
         "com.typesafe.akka"    %% "akka-testkit"             % akkaV % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder"  % "6.1",
+        "net.logstash.logback" % "logstash-logback-encoder"  % "6.2",
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.28",
         "com.pauldijou"        %% "jwt-core"                 % jwtV,
         "com.pauldijou"        %% "jwt-spray-json"           % jwtV,
