@@ -14,6 +14,8 @@ import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, No
 import hu.ksisu.imazsak.notification.NotificationDaoImpl
 import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
+import hu.ksisu.imazsak.token.TokenDao.TokenData
+import hu.ksisu.imazsak.token.TokenDaoImpl
 import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
 import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
@@ -39,12 +41,14 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
   private val prayerDao             = new PrayerDaoImpl()
   private val notificationDao       = new NotificationDaoImpl()
   private val feedbackDao           = new FeedbackDaoImpl()
+  private val tokenDao              = new TokenDaoImpl()
 
   private val userCollection          = mongoService.getCollection("users").unsafeRunSync()
   private val groupCollection         = mongoService.getCollection("groups").unsafeRunSync()
   private val prayerCollection        = mongoService.getCollection("prayers").unsafeRunSync()
   private val notificationsCollection = mongoService.getCollection("notifications").unsafeRunSync()
   private val feedbackCollection      = mongoService.getCollection("feedback").unsafeRunSync()
+  private val tokenCollection         = mongoService.getCollection("tokens").unsafeRunSync()
 
   override def beforeEach(): Unit = {
     idGenerator.reset()
@@ -60,6 +64,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
       _ <- prayerCollection.delete.one(BSONDocument())
       _ <- notificationsCollection.delete.one(BSONDocument())
       _ <- feedbackCollection.delete.one(BSONDocument())
+      _ <- tokenCollection.delete.one(BSONDocument())
     } yield ())
   }
 
@@ -555,6 +560,53 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         resultMap("2").get("userId") shouldEqual Some(BSONString("user_2"))
         resultMap("2").get("message") shouldEqual Some(BSONString("message2"))
         resultMap("2").get("createdAt") shouldEqual Some(BSONLong(2))
+      }
+    }
+    "TokenDao" when {
+      "#create and #findByTypeAndToken" in {
+        val data1 = TokenData("type1", "token1", Some("data1"), Some(1111), false)
+        val data2 = TokenData("type2", "token2", None, None, true)
+        val data3 = TokenData("type1", "token2", Some("data3"), None, true)
+
+        tokenDao.create(data1).unsafeRunSync()
+        tokenDao.create(data2).unsafeRunSync()
+        tokenDao.create(data3).unsafeRunSync()
+
+        tokenDao.findByTypeAndToken("type1", "token1").value.unsafeRunSync() shouldEqual Some(data1)
+        tokenDao.findByTypeAndToken("type2", "token2").value.unsafeRunSync() shouldEqual Some(data2)
+        tokenDao.findByTypeAndToken("type1", "token2").value.unsafeRunSync() shouldEqual Some(data3)
+        tokenDao.findByTypeAndToken("type2", "token1").value.unsafeRunSync() shouldEqual None
+      }
+      "#deleteByTypeAndToken" in {
+        val data1 = TokenData("type1", "token1", Some("data1"), Some(1111), false)
+
+        tokenDao.create(data1).unsafeRunSync()
+
+        tokenDao.findByTypeAndToken("type1", "token1").value.unsafeRunSync() shouldEqual Some(data1)
+        tokenDao.deleteByTypeAndToken("type1", "token1").unsafeRunSync()
+        tokenDao.findByTypeAndToken("type1", "token1").value.unsafeRunSync() shouldEqual None
+      }
+      "#deleteByExpiredAt" in {
+        val data1 = TokenData("type1", "token1", Some("data1"), Some(1111), false)
+        val data2 = TokenData("type2", "token2", None, None, true)
+        val data3 = TokenData("type1", "token2", Some("data3"), Some(2222), true)
+
+        tokenDao.create(data1).unsafeRunSync()
+        tokenDao.create(data2).unsafeRunSync()
+        tokenDao.create(data3).unsafeRunSync()
+
+        tokenDao.deleteByExpiredAt(0).unsafeRunSync() shouldEqual 0
+        tokenDao.deleteByExpiredAt(1500).unsafeRunSync() shouldEqual 1
+
+        tokenDao.findByTypeAndToken("type1", "token1").value.unsafeRunSync() shouldEqual None
+        tokenDao.findByTypeAndToken("type2", "token2").value.unsafeRunSync() shouldEqual Some(data2)
+        tokenDao.findByTypeAndToken("type1", "token2").value.unsafeRunSync() shouldEqual Some(data3)
+
+        tokenDao.deleteByExpiredAt(3000).unsafeRunSync() shouldEqual 1
+        tokenDao.deleteByExpiredAt(3000).unsafeRunSync() shouldEqual 0
+
+        tokenDao.findByTypeAndToken("type2", "token2").value.unsafeRunSync() shouldEqual Some(data2)
+        tokenDao.findByTypeAndToken("type1", "token2").value.unsafeRunSync() shouldEqual None
       }
     }
   }

@@ -20,3 +20,6 @@ db.notifications.createIndex({"userId": 1});
 
 db.createCollection("feedback");
 db.notifications.createIndex({"id": 1}, {"unique": true});
+
+db.createCollection("tokens");
+db.users.createIndex({"tokenType": 1, "token": 1}, {"unique": true});
