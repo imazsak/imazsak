@@ -14,6 +14,7 @@ import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService,
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.notification._
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
+import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
@@ -43,6 +44,8 @@ trait Services[F[_]] {
   implicit val notificationDao: NotificationDao[F]
   implicit val notificationService: NotificationService[F]
   implicit val userService: UserService[F]
+  implicit val tokenDao: TokenDao[F]
+  implicit val tokenService: TokenService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -56,6 +59,7 @@ trait Services[F[_]] {
       _ <- initialize(databaseService, "database")
       _ <- initialize(fileStoreService, "filestore")
       _ <- initialize(amqpService, "ampq")
+      _ <- initialize(tokenService, "token")
     } yield ()
   }
 }
@@ -92,4 +96,6 @@ class RealServices(
   implicit lazy val notificationDao: NotificationDao[IO]         = new NotificationDaoImpl()
   implicit lazy val notificationService: NotificationService[IO] = new NotificationServiceImpl[IO]()
   implicit lazy val userService: UserService[IO]                 = new UserServiceImpl[IO]()
+  implicit lazy val tokenDao: TokenDao[IO]                       = new TokenDaoImpl()
+  implicit lazy val tokenService: TokenService[IO]               = new TokenServiceImpl[IO]()
 }

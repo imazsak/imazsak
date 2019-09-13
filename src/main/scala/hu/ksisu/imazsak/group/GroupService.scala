@@ -6,4 +6,6 @@ import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 trait GroupService[F[_]] {
   def listGroups()(implicit ctx: UserLogContext): Response[F, Seq[GroupListData]]
+  def createJoinToken(groupId: String)(implicit ctx: UserLogContext): Response[F, String]
+  def joinToGroup(groupId: String, token: String)(implicit ctx: UserLogContext): Response[F, Unit]
 }
