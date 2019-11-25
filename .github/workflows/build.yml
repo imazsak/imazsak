@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE_INTERACTIVE_NO_CLI: 1
+      COMPOSE_PROJECT_NAME: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Compile
+        run: docker-compose build
+      - name: Compose up
+        run: docker-compose up -d
+      - name: Test
+        run: docker-compose exec -T imazsak sbt clean compile test it:test
+      - name: Build and push to AWS ECR
+        uses: kciter/aws-ecr-action@v1
+        with:
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          repo:  ${{ secrets.REPO }}
+          region: 'eu-central-1'
+          tags: ${{ github.sha }}
+          dockerfile: 'Dockerfile-build'
+          extra_build_args: COMPOSE_PROJECT_NAME=${{ github.sha }}
