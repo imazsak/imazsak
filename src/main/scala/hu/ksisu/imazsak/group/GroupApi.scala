@@ -32,11 +32,11 @@ class GroupApi(implicit service: GroupService[IO], val jwtService: JwtService[IO
           }
         }
       } ~
-      path("groups" / Segment / "join") { groupId =>
+      path("groups" / "join") {
         post {
           entity(as[Token]) { data =>
             userAuthAndTrace("Group_JoinWithToken") { implicit ctx =>
-              service.joinToGroup(groupId, data.token).toComplete
+              service.joinToGroup(data.token).toComplete
             }
           }
         }

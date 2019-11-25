@@ -25,12 +25,12 @@ class GroupServiceImpl[F[_]: Monad](implicit val groupDao: GroupDao[F], tokenSer
     } yield token
   }
 
-  override def joinToGroup(groupId: String, token: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
+  override def joinToGroup(token: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
-      _      <- EitherT.right(groupDao.isMember(groupId, ctx.userId)).ensure(alreadyMember(groupId))(!_)
       tokenO <- tokenService.validateAndGetTokenData[GroupTokenData](tokenType, token)
-      _      <- EitherT.fromOption(tokenO, invalidToken).ensure(invalidToken)(_.groupId == groupId)
-      _      <- EitherT.right(groupDao.addMemberToGroup(groupId, GroupMember(ctx.userId)))
+      data   <- EitherT.fromOption(tokenO, invalidToken)
+      _      <- EitherT.right(groupDao.isMember(data.groupId, ctx.userId)).ensure(alreadyMember(data.groupId))(!_)
+      _      <- EitherT.right(groupDao.addMemberToGroup(data.groupId, GroupMember(ctx.userId)))
     } yield ()
   }
 
