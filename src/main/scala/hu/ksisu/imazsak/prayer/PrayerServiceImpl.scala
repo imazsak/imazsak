@@ -37,7 +37,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     for {
       prayers <- listGroupPrayers(groupId)
       _       <- EitherT.cond(prayers.exists(_.id == prayerId), (), illegalAccessToPrayer(groupId, prayerId))
-      _       <- EitherT.right(prayerDao.incrementPrayCount(prayerId))
+      _       <- EitherT.right(prayerDao.incrementPrayCount(ctx.userId, prayerId))
     } yield ()
   }
 

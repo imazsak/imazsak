@@ -339,8 +339,8 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
         prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
         prayerDao.createPrayer(prayer3).unsafeRunSync() shouldEqual "3"
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount("userid", "2").unsafeRunSync()
+        prayerDao.incrementPrayCount("userid", "2").unsafeRunSync()
 
         val result1 = prayerDao.findPrayerByUser("user_1").unsafeRunSync()
         result1.map(_.copy(createdAt = 0)) shouldEqual Seq(
@@ -385,13 +385,15 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         )
       }
       "#incrementPrayCount" in {
-        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
-        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        val prayUser1 = "PU1"
+        val prayUser2 = "PU2"
+        val prayer1   = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2   = CreatePrayerData("user_1", "message2", Seq("group_2"))
         prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
         prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
+        prayerDao.incrementPrayCount(prayUser1, "2").unsafeRunSync()
+        prayerDao.incrementPrayCount(prayUser1, "2").unsafeRunSync()
+        prayerDao.incrementPrayCount(prayUser2, "2").unsafeRunSync()
         val result = await(
           prayerCollection
             .find(BSONDocument(), None)
@@ -401,7 +403,9 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
 
         val resultMap = result.map(doc => doc.getId -> doc).toMap
         resultMap("1").get("prayCount") shouldEqual None
+        resultMap("1").get("prayUsers") shouldEqual None
         resultMap("2").get("prayCount") shouldEqual Some(BSONInteger(3))
+        resultMap("2").get("prayUsers") shouldEqual Some(BSONArray(BSONString(prayUser1), BSONString(prayUser2)))
       }
       "#findByGroupIds" in {
         val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
@@ -410,9 +414,9 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
         prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
         prayerDao.createPrayer(prayer3).unsafeRunSync() shouldEqual "3"
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
-        prayerDao.incrementPrayCount("2").unsafeRunSync()
-        prayerDao.incrementPrayCount("3").unsafeRunSync()
+        prayerDao.incrementPrayCount("userid", "2").unsafeRunSync()
+        prayerDao.incrementPrayCount("userid", "2").unsafeRunSync()
+        prayerDao.incrementPrayCount("userid", "3").unsafeRunSync()
         prayerDao.findNextsByGroups(Seq("group_1"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1")
         prayerDao.findNextsByGroups(Seq("group_2"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1", "3", "2")
         prayerDao.findNextsByGroups(Seq("group_1", "group_3"), "").unsafeRunSync().map(_.id) shouldEqual Seq("1", "3")

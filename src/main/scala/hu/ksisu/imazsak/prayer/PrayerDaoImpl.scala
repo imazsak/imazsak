@@ -31,9 +31,10 @@ class PrayerDaoImpl(
     MongoQueryHelper.list[GroupPrayerListData](groupIdsContains(groupId), groupPrayerListDataProjector)
   }
 
-  override def incrementPrayCount(prayerId: String): IO[Unit] = {
-    val incrementPrayCounter = document("$inc" -> document("prayCount" -> 1))
-    MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter)
+  override def incrementPrayCount(userId: String, prayerId: String): IO[Unit] = {
+    val incrementPrayCounter = document("$inc"      -> document("prayCount" -> 1))
+    val addUserToPrayUsers   = document("$addToSet" -> document("prayUsers" -> userId))
+    MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter ++ addUserToPrayUsers)
   }
 
   override def findNextsByGroups(
