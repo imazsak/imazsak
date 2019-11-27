@@ -4,12 +4,25 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, NotFoundError, Response}
 import hu.ksisu.imazsak.group.GroupDao
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
+import hu.ksisu.imazsak.notification.NotificationService
+import hu.ksisu.imazsak.notification.NotificationService.{CreateNotificationMetaData, CreateNotificationRequest}
+import hu.ksisu.imazsak.prayer.PrayerDao.{
+  CreatePrayerData,
+  GroupPrayerListData,
+  MyPrayerListData,
+  PrayerWithPrayUserData
+}
 import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData}
+import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
-class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: PrayerDao[F], groupDao: GroupDao[F])
-    extends PrayerService[F] {
+class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
+    implicit prayerDao: PrayerDao[F],
+    groupDao: GroupDao[F],
+    userDao: UserDao[F],
+    notificationService: NotificationService[F]
+) extends PrayerService[F] {
+  import cats.syntax.functor._
 
   override def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
@@ -54,8 +67,9 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
 
   override def close(data: PrayerService.PrayerCloseRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
-      _ <- checkPrayerBelongsToCurrentUser(data.id)
-      _ <- EitherT.right(prayerDao.delete(data.id))
+      prayerData <- loadPrayerAndCheckPrayerBelongsToCurrentUser(data.id)
+      _          <- sendFeedbackToUsers(prayerData, data.message.getOrElse(""))
+      _          <- EitherT.right(prayerDao.delete(data.id))
     } yield ()
   }
 
@@ -68,12 +82,49 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit prayerDao: P
     } yield ()
   }
 
-  private def checkPrayerBelongsToCurrentUser(prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
+  private def sendFeedbackToUsers(prayerData: PrayerWithPrayUserData, feedback: String)(
+      implicit ctx: UserLogContext
+  ): Response[F, Unit] = {
+    if (feedback.trim.isEmpty) {
+      EitherT.rightT({})
+    } else {
+      generatePrayerCloseFeedbackNotificationMessage(prayerData, feedback).flatMap { msg =>
+        import cats.instances.list._
+        import cats.syntax.traverse._
+        type Tmp[T] = Response[F, T]
+
+        prayerData.prayUsers
+          .map(
+            userId => CreateNotificationRequest(userId, msg, CreateNotificationMetaData(Some("PRAYER_CLOSE_FEEDBACK")))
+          )
+          .toList
+          .traverse[Tmp, Unit](notification => notificationService.createNotification(notification))
+          .map(_ => {})
+      }
+    }
+  }
+
+  private def generatePrayerCloseFeedbackNotificationMessage(prayerData: PrayerWithPrayUserData, feedback: String)(
+      implicit ctx: UserLogContext
+  ): Response[F, String] = {
+    EitherT.right(
+      userDao
+        .findUserData(ctx.userId)
+        .subflatMap(_.name)
+        .getOrElse("")
+        .map { userName =>
+          s"$userName: $feedback\n\n(${prayerData.message})"
+        }
+    )
+  }
+
+  private def loadPrayerAndCheckPrayerBelongsToCurrentUser(
+      prayerId: String
+  )(implicit ctx: UserLogContext): Response[F, PrayerWithPrayUserData] = {
     prayerDao
-      .findById(prayerId)
+      .findWithPrayUserListById(prayerId)
       .toRight(notFound(prayerId))
       .ensure(notTheCurrentUsersPrayer(prayerId))(_.userId == ctx.userId)
-      .map(_ => ())
   }
 
   private def checkMessage(message: String): Response[F, Unit] = {
