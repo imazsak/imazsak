@@ -26,7 +26,7 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getAuthHookConfig: AuthHookConfig
 }
 
-class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig[F] {
+class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig[F] {
   import cats.syntax.applicative._
   private lazy val conf: Config = ConfigFactory.load
 

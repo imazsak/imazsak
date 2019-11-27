@@ -2,7 +2,14 @@ package hu.ksisu.imazsak.group
 
 import cats.data.OptionT
 import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, GroupListData, GroupMember}
-import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONDocumentReader, BSONDocumentWriter, Macros, document}
+import reactivemongo.api.bson.{
+  BSONDocument,
+  BSONDocumentHandler,
+  BSONDocumentReader,
+  BSONDocumentWriter,
+  Macros,
+  document
+}
 
 trait GroupDao[F[_]] {
   def findGroupsByUser(userId: String): F[Seq[GroupListData]]

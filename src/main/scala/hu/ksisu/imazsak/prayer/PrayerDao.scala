@@ -8,7 +8,9 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
   PrayerListData,
   PrayerWithPrayUserData
 }
-import reactivemongo.bson._
+import reactivemongo.api.bson._
+
+import scala.util.Success
 
 trait PrayerDao[F[_]] {
   def createPrayer(data: CreatePrayerData): F[String]
@@ -38,22 +40,22 @@ object PrayerDao {
   implicit val prayerWithPrayUserDataReader: BSONDocumentReader[PrayerWithPrayUserData] =
     Macros.reader[PrayerWithPrayUserData]
 
-  implicit val myPrayerListDataReader: BSONDocumentReader[MyPrayerListData] = (bson: BSONDocument) => {
-    val opt: Option[MyPrayerListData] = for {
-      id            <- bson.getAs[String]("id")
-      message       <- bson.getAs[String]("message")
-      groupIdsArray <- bson.getAs[BSONArray]("groupIds")
-      prayCount     <- bson.getAs[Int]("prayCount").orElse(Some(0))
-      objectId      <- bson.getAs[BSONObjectID]("_id")
-    } yield {
-      val createdAtMillis = objectId.time
-      val groupIds = groupIdsArray.values.collect {
-        case BSONString(groupId) => groupId
+  implicit val myPrayerListDataReader: BSONDocumentReader[MyPrayerListData] =
+    BSONDocumentReader.from((bson: BSONDocument) => {
+      for {
+        id            <- bson.getAsTry[String]("id")
+        message       <- bson.getAsTry[String]("message")
+        groupIdsArray <- bson.getAsTry[BSONArray]("groupIds")
+        prayCount     <- bson.getAsTry[Int]("prayCount").orElse(Success(0))
+        objectId      <- bson.getAsTry[BSONObjectID]("_id")
+      } yield {
+        val createdAtMillis = objectId.time
+        val groupIds = groupIdsArray.values.collect {
+          case BSONString(groupId) => groupId
+        }
+        MyPrayerListData(id, message, groupIds, prayCount, createdAtMillis)
       }
-      MyPrayerListData(id, message, groupIds, prayCount, createdAtMillis)
-    }
-    opt.get
-  }
+    })
 
   val myPrayerListDataProjector: Option[BSONDocument] = Option(
     document("id" -> 1, "groupIds" -> 1, "message" -> 1, "prayCount" -> 1, "_id" -> 1)

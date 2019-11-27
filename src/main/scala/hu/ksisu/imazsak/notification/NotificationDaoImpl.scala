@@ -5,8 +5,8 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.notification.NotificationDao._
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSON, document}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSON, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -32,7 +32,7 @@ class NotificationDaoImpl(
   }
 
   override def updateMeta(id: String, meta: NotificationMeta): IO[Unit] = {
-    val modifier = document("$set" -> document("meta" -> BSON.writeDocument(meta)))
+    val modifier = document("$set" -> document("meta" -> BSON.writeDocument(meta).getOrElse(document())))
     MongoQueryHelper.updateOne(byId(id), modifier)
   }
 

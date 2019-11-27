@@ -8,7 +8,7 @@ import hu.ksisu.imazsak.feedback.FeedbackService.CreateFeedbackRequest
 import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
-class FeedbackServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class FeedbackServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit feedbackDao: FeedbackDao[F],
     date: DateTimeUtil
 ) extends FeedbackService[F] {

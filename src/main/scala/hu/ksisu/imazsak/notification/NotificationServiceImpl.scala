@@ -9,7 +9,7 @@ import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import spray.json.JsonWriter
 
-class NotificationServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit notificationDao: NotificationDao[F],
     date: DateTimeUtil
 ) extends NotificationService[F] {

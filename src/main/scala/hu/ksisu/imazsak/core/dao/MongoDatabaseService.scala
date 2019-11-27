@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.core.dao
 
 import hu.ksisu.imazsak.Initable
-import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.bson.collection.BSONCollection
 
 trait MongoDatabaseService[F[_]] extends Initable[F] {
   def checkStatus(): F[Boolean]

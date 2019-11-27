@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:11.0.3_1.2.8_2.13.0 as builder
+FROM hseeberger/scala-sbt:8u222_1.3.4_2.13.1 as builder
 WORKDIR /app
 COPY build.sbt /app/build.sbt
 COPY project /app/project
@@ -8,10 +8,10 @@ RUN sbt stage && \
     chmod -R u=rX,g=rX /app/target/universal/stage && \
     chmod u+x,g+x /app/target/universal/stage/bin/imazsak
 
-
-FROM openjdk:11
+FROM openjdk:8-alpine
 USER root
-RUN useradd --system --create-home --uid 1001 --gid 0 imazsak
+RUN apk add --no-cache bash && \
+    adduser -S -u 1001 imazsak
 USER 1001
 EXPOSE 9000
 ENTRYPOINT ["/app/bin/imazsak"]

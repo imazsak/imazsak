@@ -1,5 +1,5 @@
 package hu.ksisu.imazsak.core.dao
-import reactivemongo.bson.{BSONDocument, document}
+import reactivemongo.api.bson.{BSONDocument, document}
 
 object MongoSelectors {
   val all: BSONDocument                                  = document()

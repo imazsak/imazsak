@@ -20,7 +20,7 @@ import hu.ksisu.imazsak.prayer.PrayerService.{
 import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
 
-class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
+class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
     groupDao: GroupDao[F],
     userDao: UserDao[F],

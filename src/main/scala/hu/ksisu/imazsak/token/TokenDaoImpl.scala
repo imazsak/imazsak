@@ -4,8 +4,8 @@ import cats.data.OptionT
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.token.TokenDao.TokenData
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONDocument, document}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 

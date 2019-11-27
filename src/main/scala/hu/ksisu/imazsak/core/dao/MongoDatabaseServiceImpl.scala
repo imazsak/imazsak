@@ -4,7 +4,7 @@ import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
-import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
 
 import scala.concurrent.{ExecutionContext, Future}

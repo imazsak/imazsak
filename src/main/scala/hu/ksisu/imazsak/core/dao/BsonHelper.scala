@@ -1,18 +1,18 @@
 package hu.ksisu.imazsak.core.dao
 
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.bson.{BSON, BSONDocument, BSONString, BSONWriter}
+import reactivemongo.api.bson.{BSON, BSONDocument, BSONDocumentWriter, BSONString, document}
 
 object BsonHelper {
 
   implicit class ModelWrapper[T](model: T) {
 
-    def toBsonWithNewId[B <: BSONDocument](
-        implicit writer: BSONWriter[T, B],
+    def toBsonWithNewId(
+        implicit writer: BSONDocumentWriter[T],
         idGenerator: IdGenerator
     ): BSONDocument = {
       val id = idGenerator.generate()
-      BSON.write(model) ++ BSONDocument("id" -> BSONString(id))
+      BSON.writeDocument(model).getOrElse(document()) ++ BSONDocument("id" -> BSONString(id))
     }
   }
 

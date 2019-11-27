@@ -6,8 +6,8 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.prayer.PrayerDao._
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONNull, document}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSONDocument, BSONNull, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -79,8 +79,9 @@ class PrayerDaoImpl(
   override def findWithPrayUserListById(prayerId: String): OptionT[IO, PrayerWithPrayUserData] = {
     MongoQueryHelper
       .findOne[BSONDocument](byId(prayerId), prayerWithPrayUserDataProjector)
-      .map { doc =>
-        (doc ++ document("prayUsers" -> Seq())).as[PrayerWithPrayUserData]
+      .subflatMap { doc =>
+        println(doc.toMap)
+        (document("prayUsers" -> Seq()) ++ doc).asOpt[PrayerWithPrayUserData]
       }
   }
 

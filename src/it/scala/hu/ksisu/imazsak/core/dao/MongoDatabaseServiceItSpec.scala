@@ -26,11 +26,11 @@ import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.{Cursor, MongoDriver}
-import reactivemongo.bson.{BSON, BSONArray, BSONBoolean, BSONDocument, BSONInteger, BSONLong, BSONString}
+import reactivemongo.api.bson._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Success, Try}
+import scala.util.Try
 
 class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterEach {
   import cats.instances.try_._
@@ -88,7 +88,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
       }
       "#updateUserData" in {
         val userData = UserData("secret_id", Some("nickname"))
-        val data     = BSON.write(userData) ++ BSONDocument("extra_data" -> BSONBoolean(true))
+        val data     = BSON.writeDocument(userData).getOrElse(document()) ++ BSONDocument("extra_data" -> BSONBoolean(true))
         await(userCollection.insert.one(data))
         userDao.updateUserData(userData.copy(name = Some("new_name"))).unsafeRunSync()
         val result2 = await(userCollection.find(byId(userData.id), None).one[BSONDocument])
@@ -291,9 +291,9 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         result.get.get("members") shouldBe a[Some[_]]
         val members = result.get
           .get("members")
-          .collect { case x: BSONArray => x.stream.toList }
+          .collect { case x: BSONArray => x.values.toList }
           .get
-          .collect { case Success(value: BSONDocument) => value.get("id") }
+          .collect { case value: BSONDocument => value.get("id") }
           .collect { case Some(x: BSONString) => x.value }
         members shouldEqual Seq("user 1", "user 2")
       }
@@ -354,7 +354,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         resultMap("3").get("message") shouldEqual Some(BSONString("message3"))
         resultMap("3").get("groupIds") shouldEqual Some(BSONArray(BSONString("group_2"), BSONString("group_3")))
       }
-      "#listMinePrayers" in {
+      "#findPrayerByUser" in {
         val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
         val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
         val prayer3 = CreatePrayerData("user_2", "message3", Seq("group_2", "group_3"))
@@ -373,6 +373,8 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         val d           = 1000L
         val startTime   = currentTime - d
         val endTime     = currentTime + d
+        println(result1.map(_.createdAt))
+        println(currentTime)
         result1.map(_.createdAt).forall(time => startTime <= time && time <= endTime) shouldBe true
 
         val result2 = prayerDao.findPrayerByUser("user_2").unsafeRunSync()

@@ -1,16 +1,12 @@
 ARG COMPOSE_PROJECT_NAME
 FROM imazsak-build:${COMPOSE_PROJECT_NAME} as builder
 
-FROM openjdk:11
-WORKDIR /app
-COPY --from=builder /app/target/universal/stage /app
+FROM openjdk:8-alpine
 USER root
-RUN useradd --system --create-home --uid 1001 --gid 0 imazsak && \
-    chmod -R u=rX,g=rX /app && \
-    chmod u+x,g+x /app/bin/imazsak && \
-    chown -R 1001:root /app
+RUN apk add --no-cache bash && \
+    adduser -S -u 1001 imazsak
 USER 1001
-
 EXPOSE 9000
 ENTRYPOINT ["/app/bin/imazsak"]
 CMD []
+COPY --from=builder --chown=1001:root /app/target/universal/stage /app

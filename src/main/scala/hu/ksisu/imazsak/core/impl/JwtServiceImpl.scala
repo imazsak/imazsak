@@ -12,7 +12,7 @@ import pdi.jwt.algorithms.{JwtAsymmetricAlgorithm, JwtHmacAlgorithm}
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
 import spray.json._
 
-class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConfig) extends JwtService[F] {
+class JwtServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit config: JwtConfig) extends JwtService[F] {
 
   import cats.syntax.flatMap._
   import cats.syntax.functor._
@@ -35,6 +35,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
     algo.map {
       case a: JwtHmacAlgorithm       => JwtSprayJson.decodeJson(token, config.secret, Seq(a)).toOption
       case a: JwtAsymmetricAlgorithm => JwtSprayJson.decodeJson(token, config.secret, Seq(a)).toOption
+      case _                         => None
     }
   }
 
@@ -49,6 +50,7 @@ class JwtServiceImpl[F[_]: MonadError[?[_], Throwable]](implicit config: JwtConf
     algo.map {
       case a: JwtHmacAlgorithm       => JwtSprayJson.isValid(token, config.secret, Seq(a))
       case a: JwtAsymmetricAlgorithm => JwtSprayJson.isValid(token, config.secret, Seq(a))
+      case _                         => false
     }
   }
 }

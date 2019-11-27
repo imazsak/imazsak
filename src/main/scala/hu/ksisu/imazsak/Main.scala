@@ -3,7 +3,6 @@ package hu.ksisu.imazsak
 import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.util.LoggerUtil
 import org.slf4j.{Logger, LoggerFactory}
@@ -17,7 +16,6 @@ object Main extends App {
   private implicit lazy val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
 
   private implicit lazy val system               = ActorSystem("imazsak-system")
-  private implicit lazy val materializer         = ActorMaterializer()
   private implicit lazy val executionContext     = system.dispatcher
   private implicit lazy val cs: ContextShift[IO] = IO.contextShift(executionContext)
 

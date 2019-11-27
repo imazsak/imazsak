@@ -1,7 +1,6 @@
 package hu.ksisu.imazsak.util
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
-import akka.stream.ActorMaterializer
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.TestBase
 
@@ -18,7 +17,6 @@ class AkkaHttpWrapperSpec extends TestBase {
       val test = TestClass("asd", 5, false)
 
       withActorSystem { implicit as =>
-        implicit val materializer         = ActorMaterializer()
         implicit val cs: ContextShift[IO] = IO.contextShift(as.dispatcher)
 
         val http = new AkkaHttpWrapper()

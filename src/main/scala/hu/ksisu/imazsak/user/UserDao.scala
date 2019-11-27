@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.user
 
 import cats.data.OptionT
 import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
-import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, BSONDocumentReader, Macros, document}
+import reactivemongo.api.bson.{BSONDocument, BSONDocumentHandler, BSONDocumentReader, Macros, document}
 
 trait UserDao[F[_]] {
   def findUserData(id: String): OptionT[F, UserData]

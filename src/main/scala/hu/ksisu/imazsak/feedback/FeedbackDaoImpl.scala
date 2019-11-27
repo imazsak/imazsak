@@ -4,7 +4,7 @@ import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.bson.collection.BSONCollection
 
 import scala.concurrent.ExecutionContext
 

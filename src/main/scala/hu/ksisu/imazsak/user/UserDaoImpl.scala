@@ -5,8 +5,8 @@ import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.user.UserDao._
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSON, BSONDocument, document}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSONDocument, BSON, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -19,7 +19,7 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
   }
 
   override def updateUserData(userData: UserData): IO[Unit] = {
-    val modifier = document("$set" -> BSON.writeDocument(userData).remove("id"))
+    val modifier = document("$set" -> (BSON.writeDocument(userData).getOrElse(document()) -- "id"))
     MongoQueryHelper.updateOne(byId(userData.id), modifier)
   }
 
@@ -34,7 +34,7 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
   override def isAdmin(id: String): IO[Boolean] = {
     MongoQueryHelper
       .findOne[BSONDocument](byId(id), isAdminProjector)
-      .subflatMap(_.getAs[Boolean]("isAdmin"))
+      .subflatMap(_.getAsOpt[Boolean]("isAdmin"))
       .getOrElse(false)
   }
 }

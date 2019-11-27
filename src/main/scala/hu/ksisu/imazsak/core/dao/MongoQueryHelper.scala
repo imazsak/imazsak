@@ -5,15 +5,15 @@ import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.dao.BsonHelper._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.Cursor
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONWriter}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter}
 
 import scala.concurrent.ExecutionContext
 
 object MongoQueryHelper {
-  def insert[T, B <: BSONDocument](data: T)(
+  def insert[T](data: T)(
       implicit collectionF: IO[BSONCollection],
-      writer: BSONWriter[T, B],
+      writer: BSONDocumentWriter[T],
       idGenerator: IdGenerator,
       ec: ExecutionContext,
       cs: ContextShift[IO]
@@ -36,7 +36,7 @@ object MongoQueryHelper {
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Seq[T]] = {
-    def createQuery(collection: BSONCollection) = {
+    def createQuery(collection: BSONCollection): IO[Seq[T]] = {
       val find   = collection.find(selector, projector)
       val sorted = sort.fold(find)(find.sort)
       limit match {

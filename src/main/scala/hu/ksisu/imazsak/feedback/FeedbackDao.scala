@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.feedback
 
 import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
-import reactivemongo.bson.{BSONDocumentWriter, Macros}
+import reactivemongo.api.bson.{BSONDocumentWriter, Macros}
 
 trait FeedbackDao[F[_]] {
   def create(data: CreateFeedbackData): F[String]

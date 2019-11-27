@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.token
 
 import cats.data.OptionT
 import hu.ksisu.imazsak.token.TokenDao.TokenData
-import reactivemongo.bson.{BSONDocumentHandler, Macros}
+import reactivemongo.api.bson.{BSONDocumentHandler, Macros}
 
 trait TokenDao[F[_]] {
   def create(data: TokenData): F[Unit]

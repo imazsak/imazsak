@@ -1,7 +1,7 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.0",
+  scalaVersion := "2.13.1",
   organization := "hu.ksisu",
   scalafmtOnCompile := true,
   version := "0.1.0"
@@ -34,38 +34,34 @@ lazy val core = (project in file("."))
       "-Xlint"
     ),
     libraryDependencies ++= {
-      val akkaHttpV = "10.1.9"
-      val akkaV     = "2.5.25"
-      val alpakkaV  = "1.1.1"
-      val jwtV      = "4.0.0"
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0",
         "org.typelevel"        %% "cats-effect"              % "2.0.0",
-        "com.typesafe.akka"    %% "akka-http"                % akkaHttpV,
-        "com.typesafe.akka"    %% "akka-http-spray-json"     % akkaHttpV,
-        "com.typesafe.akka"    %% "akka-http-testkit"        % akkaHttpV % "it,test",
-        "com.typesafe.akka"    %% "akka-actor"               % akkaV,
-        "com.typesafe.akka"    %% "akka-stream"              % akkaV,
-        "com.typesafe.akka"    %% "akka-slf4j"               % akkaV,
-        "com.typesafe.akka"    %% "akka-testkit"             % akkaV % "it,test",
+        "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
+        "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
+        "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
+        "com.typesafe.akka"    %% "akka-actor"               % "2.6.0",
+        "com.typesafe.akka"    %% "akka-stream"              % "2.6.0",
+        "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.0",
+        "com.typesafe.akka"    %% "akka-testkit"             % "2.6.0" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.2",
-        "org.slf4j"            % "jul-to-slf4j"              % "1.7.28",
-        "com.pauldijou"        %% "jwt-core"                 % jwtV,
-        "com.pauldijou"        %% "jwt-spray-json"           % jwtV,
+        "org.slf4j"            % "jul-to-slf4j"              % "1.7.29",
+        "com.pauldijou"        %% "jwt-core"                 % "4.2.0",
+        "com.pauldijou"        %% "jwt-spray-json"           % "4.2.0",
         "commons-codec"        % "commons-codec"             % "1.13",
-        "ch.megard"            %% "akka-http-cors"           % "0.4.1",
+        "ch.megard"            %% "akka-http-cors"           % "0.4.2",
         "io.opentracing"       % "opentracing-api"           % "0.33.0",
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.18.6",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % alpakkaV,
-        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % alpakkaV,
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.63",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.19.2",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.2",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "1.1.2",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.64",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.0.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.5.16" % "it,test"
+        "org.mockito"          % "mockito-core"              % "3.2.0" % "it,test",
+        "org.mockito"          %% "mockito-scala"            % "1.7.1" % "it,test"
       )
     }
   )
@@ -76,8 +72,8 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
-addCompilerPlugin("io.tryp"       % "splain"          % "0.4.1" cross CrossVersion.patch)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin("io.tryp"       % "splain"          % "0.5.0" cross CrossVersion.patch)
 
 cancelable in Global := true
 

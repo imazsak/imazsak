@@ -7,8 +7,8 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.group.GroupDao._
 import hu.ksisu.imazsak.util.IdGenerator
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSON, BSONDocument, document}
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.bson.{BSON, BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -45,7 +45,7 @@ class GroupDaoImpl(
   }
 
   override def addMemberToGroup(groupId: String, member: GroupMember): IO[Unit] = {
-    val modifier = document("$push" -> document("members" -> BSON.write(member)))
+    val modifier = document("$push" -> document("members" -> BSON.write(member).getOrElse(document())))
     MongoQueryHelper.updateOne(byId(groupId), modifier)
   }
 
