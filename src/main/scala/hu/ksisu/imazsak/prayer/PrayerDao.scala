@@ -1,7 +1,13 @@
 package hu.ksisu.imazsak.prayer
 
 import cats.data.OptionT
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData, PrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{
+  CreatePrayerData,
+  GroupPrayerListData,
+  MyPrayerListData,
+  PrayerListData,
+  PrayerWithPrayUserData
+}
 import reactivemongo.bson._
 
 trait PrayerDao[F[_]] {
@@ -15,6 +21,7 @@ trait PrayerDao[F[_]] {
       limit: Option[Int] = None
   ): F[Seq[PrayerListData]]
   def findById(prayerId: String): OptionT[F, GroupPrayerListData]
+  def findWithPrayUserListById(prayerId: String): OptionT[F, PrayerWithPrayUserData]
   def delete(prayerId: String): F[Unit]
 }
 
@@ -23,10 +30,13 @@ object PrayerDao {
   case class MyPrayerListData(id: String, message: String, groupIds: Seq[String], prayCount: Int, createdAt: Long)
   case class GroupPrayerListData(id: String, userId: String, message: String)
   case class PrayerListData(id: String, userId: String, groupIds: Seq[String], message: String)
+  case class PrayerWithPrayUserData(userId: String, message: String, prayUsers: Seq[String])
 
   implicit val createPrayerDataWriter: BSONDocumentWriter[CreatePrayerData]       = Macros.writer[CreatePrayerData]
   implicit val groupPrayerListDataReader: BSONDocumentReader[GroupPrayerListData] = Macros.reader[GroupPrayerListData]
   implicit val prayerListDataReader: BSONDocumentReader[PrayerListData]           = Macros.reader[PrayerListData]
+  implicit val prayerWithPrayUserDataReader: BSONDocumentReader[PrayerWithPrayUserData] =
+    Macros.reader[PrayerWithPrayUserData]
 
   implicit val myPrayerListDataReader: BSONDocumentReader[MyPrayerListData] = (bson: BSONDocument) => {
     val opt: Option[MyPrayerListData] = for {
@@ -51,5 +61,9 @@ object PrayerDao {
   val groupPrayerListDataProjector: Option[BSONDocument] = Option(document("id" -> 1, "userId" -> 1, "message" -> 1))
   val prayerListDataProjector: Option[BSONDocument] = Option(
     document("id" -> 1, "userId" -> 1, "groupIds" -> 1, "message" -> 1)
+  )
+
+  val prayerWithPrayUserDataProjector: Option[BSONDocument] = Option(
+    document("userId" -> 1, "message" -> 1, "prayUsers" -> 1)
   )
 }

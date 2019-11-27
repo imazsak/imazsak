@@ -12,7 +12,12 @@ import hu.ksisu.imazsak.group.GroupDao.{CreateGroupData, GroupAdminListData, Gro
 import hu.ksisu.imazsak.group.GroupDaoImpl
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationListData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationDaoImpl
-import hu.ksisu.imazsak.prayer.PrayerDao.{CreatePrayerData, GroupPrayerListData, MyPrayerListData}
+import hu.ksisu.imazsak.prayer.PrayerDao.{
+  CreatePrayerData,
+  GroupPrayerListData,
+  MyPrayerListData,
+  PrayerWithPrayUserData
+}
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
 import hu.ksisu.imazsak.token.TokenDao.TokenData
 import hu.ksisu.imazsak.token.TokenDaoImpl
@@ -449,6 +454,26 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           GroupPrayerListData("2", "user_1", "message2")
         )
         val result3 = prayerDao.findById("3").value.unsafeRunSync()
+        result3 shouldEqual None
+      }
+      "#findWithPrayUserListById" in {
+        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val prayer2 = CreatePrayerData("user_1", "message2", Seq("group_2"))
+        prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
+        prayerDao.createPrayer(prayer2).unsafeRunSync() shouldEqual "2"
+        prayerDao.incrementPrayCount("p_user_9", "2").unsafeRunSync()
+        prayerDao.incrementPrayCount("p_user_8", "2").unsafeRunSync()
+        prayerDao.incrementPrayCount("p_user_8", "2").unsafeRunSync()
+
+        val result1 = prayerDao.findWithPrayUserListById("1").value.unsafeRunSync()
+        result1 shouldEqual Some(
+          PrayerWithPrayUserData("user_1", "message1", Seq())
+        )
+        val result2 = prayerDao.findWithPrayUserListById("2").value.unsafeRunSync()
+        result2 shouldEqual Some(
+          PrayerWithPrayUserData("user_1", "message2", Seq("p_user_9", "p_user_8"))
+        )
+        val result3 = prayerDao.findWithPrayUserListById("3").value.unsafeRunSync()
         result3 shouldEqual None
       }
       "#delete" in {
