@@ -16,11 +16,13 @@ import hu.ksisu.imazsak.prayer.PrayerService.{
   Next10PrayerListData,
   PrayerCloseFeedbackNotificationData
 }
+import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
     groupDao: GroupDao[F],
+    userDao: UserDao[F],
     notificationService: NotificationService[F]
 ) extends PrayerService[F] {
 
@@ -92,11 +94,26 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
       import cats.syntax.traverse._
       type Tmp[T] = Response[F, T]
 
-      val msg = PrayerCloseFeedbackNotificationData(ctx.userId, prayerData.message, feedback)
-      prayerData.prayUsers.toList
-        .traverse[Tmp, Unit](userId => notificationService.createNotification("PRAYER_CLOSE_FEEDBACK", userId, msg))
-        .map(_ => {})
+      createPrayerCloseFeedbackNotificationData(prayerData, feedback).flatMap { msg =>
+        prayerData.prayUsers.toList
+          .traverse[Tmp, Unit](userId => notificationService.createNotification("PRAYER_CLOSE_FEEDBACK", userId, msg))
+          .map(_ => {})
+      }
     }
+  }
+
+  private def createPrayerCloseFeedbackNotificationData(prayerData: PrayerWithPrayUserData, feedback: String)(
+      implicit ctx: UserLogContext
+  ): Response[F, PrayerCloseFeedbackNotificationData] = {
+    import cats.syntax.functor._
+    val userNameFO = userDao
+      .findUserData(ctx.userId)
+      .map(_.name)
+      .getOrElse(None)
+    val result = userNameFO.map { userNameO =>
+      PrayerCloseFeedbackNotificationData(userNameO, prayerData.message, feedback)
+    }
+    EitherT.right(result)
   }
 
   private def loadPrayerAndCheckPrayerBelongsToCurrentUser(
