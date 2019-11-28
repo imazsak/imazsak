@@ -15,7 +15,14 @@ trait PrayerService[F[_]] {
 }
 
 object PrayerService {
+  import spray.json._
+  import DefaultJsonProtocol._
+
   case class CreatePrayerRequest(message: String, groupIds: Seq[String])
   case class Next10PrayerListData(id: String, userId: String, groupId: String, message: String)
   case class PrayerCloseRequest(id: String, message: Option[String])
+
+  case class PrayerCloseFeedbackNotificationData(userId: String, message: String, feedback: String)
+  implicit val formatPrayerCloseFeedbackNotificationMessage: RootJsonFormat[PrayerCloseFeedbackNotificationData] =
+    jsonFormat3(PrayerCloseFeedbackNotificationData)
 }

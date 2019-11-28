@@ -8,11 +8,12 @@ import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.notification.NotificationApi._
-import hu.ksisu.imazsak.notification.NotificationDao.{NotificationListData, NotificationMeta}
+import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
+import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
+import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
-import hu.ksisu.imazsak.util.ApiHelper._
 
 class NotificationApi(implicit service: NotificationService[IO], val jwtService: JwtService[IO])
     extends Api
@@ -47,6 +48,8 @@ class NotificationApi(implicit service: NotificationService[IO], val jwtService:
 }
 
 object NotificationApi {
-  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta]         = jsonFormat2(NotificationMeta)
-  implicit val notificationListDataFormat: RootJsonFormat[NotificationListData] = jsonFormat4(NotificationListData)
+  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta] = jsonFormat2(NotificationMeta)
+  implicit val notificationListDataFormat: RootJsonFormat[NotificationListResponse] = jsonFormat4(
+    NotificationListResponse
+  )
 }
