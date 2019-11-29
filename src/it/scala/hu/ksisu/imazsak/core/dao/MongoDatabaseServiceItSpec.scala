@@ -121,6 +121,23 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           UserAdminListData("secret_id3", Some("nickname3"))
         )
       }
+      "#isAdmin" in {
+        val userId = "secret_id"
+
+        userDao.isAdmin(userId).unsafeRunSync() shouldBe false
+
+        val user = UserData(userId, Some("nickname1"))
+        await(userCollection.insert.one(user))
+        userDao.isAdmin(userId).unsafeRunSync() shouldBe false
+
+        await(
+          userCollection.update.one(
+            BSONDocument("id"   -> BSONString(userId)),
+            BSONDocument("$set" -> BSONDocument("isAdmin" -> BSONBoolean(true)))
+          )
+        )
+        userDao.isAdmin(userId).unsafeRunSync() shouldBe true
+      }
     }
 
     "GroupDao" when {

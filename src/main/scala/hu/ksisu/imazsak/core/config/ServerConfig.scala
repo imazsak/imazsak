@@ -3,6 +3,7 @@ import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import hu.ksisu.imazsak.Initable
 import hu.ksisu.imazsak.core.AmqpService.AmqpConfig
+import hu.ksisu.imazsak.core.AuthHookService.AuthHookConfig
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
@@ -21,6 +22,8 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getJwtConfig: JwtConfig
 
   implicit def getAmqpConfig: AmqpConfig
+
+  implicit def getAuthHookConfig: AuthHookConfig
 }
 
 class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig[F] {
@@ -68,6 +71,13 @@ class ServerConfigImpl[F[_]: MonadError[?[_], Throwable]]() extends ServerConfig
     val config = conf.getConfig("amqp")
     AmqpConfig(
       readFromFileOrConf(config, "uri")
+    )
+  }
+
+  override implicit def getAuthHookConfig: AuthHookConfig = {
+    val config = conf.getConfig("authHook")
+    AuthHookConfig(
+      Try(readFromFileOrConf(config, "secret")).getOrElse("")
     )
   }
 

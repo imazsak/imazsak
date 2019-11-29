@@ -6,7 +6,7 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.user.UserDao._
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSON, document}
+import reactivemongo.bson.{BSON, BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -29,5 +29,12 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
 
   override def findUsersByIds(ids: Seq[String]): IO[Seq[UserAdminListData]] = {
     MongoQueryHelper.list[UserAdminListData](byIds(ids), userAdminListDataProjector)
+  }
+
+  override def isAdmin(id: String): IO[Boolean] = {
+    MongoQueryHelper
+      .findOne[BSONDocument](byId(id), isAdminProjector)
+      .subflatMap(_.getAs[Boolean]("isAdmin"))
+      .getOrElse(false)
   }
 }

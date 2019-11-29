@@ -6,7 +6,7 @@ import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
 import hu.ksisu.imazsak.core.dao._
 import hu.ksisu.imazsak.core.healthcheck.{HealthCheckService, HealthCheckServiceImpl}
-import hu.ksisu.imazsak.core.impl.JwtServiceImpl
+import hu.ksisu.imazsak.core.impl.{AuthHookServiceImpl, JwtServiceImpl}
 import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService, FeedbackServiceImpl}
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.notification._
@@ -48,4 +48,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val userService: UserService[IO]                 = new UserServiceImpl[IO]()
   implicit lazy val tokenDao: TokenDao[IO]                       = new TokenDaoImpl()
   implicit lazy val tokenService: TokenService[IO]               = new TokenServiceImpl[IO]()
+  implicit lazy val authHookService: AuthHookService[IO]         = new AuthHookServiceImpl[IO]()
 }

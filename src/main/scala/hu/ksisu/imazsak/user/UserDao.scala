@@ -9,6 +9,7 @@ trait UserDao[F[_]] {
   def updateUserData(userData: UserData): F[Unit]
   def allUser(): F[Seq[UserAdminListData]]
   def findUsersByIds(ids: Seq[String]): F[Seq[UserAdminListData]]
+  def isAdmin(id: String): F[Boolean]
 }
 
 object UserDao {
@@ -18,6 +19,7 @@ object UserDao {
   implicit val userDataHandler: BSONDocumentHandler[UserData]                 = Macros.handler[UserData]
   implicit val userAdminListDataReader: BSONDocumentReader[UserAdminListData] = Macros.reader[UserAdminListData]
 
-  val userDataProjector: Option[BSONDocument]          = Option(document("id" -> 1, "name" -> 1))
-  val userAdminListDataProjector: Option[BSONDocument] = Option(document("id" -> 1, "name" -> 1))
+  val userDataProjector: Option[BSONDocument]          = Option(document("id"      -> 1, "name" -> 1))
+  val userAdminListDataProjector: Option[BSONDocument] = Option(document("id"      -> 1, "name" -> 1))
+  val isAdminProjector: Option[BSONDocument]           = Option(document("isAdmin" -> 1))
 }
