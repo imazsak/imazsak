@@ -1,10 +1,8 @@
 package hu.ksisu.imazsak.core
 
-import akka.http.scaladsl.model.headers.HttpChallenge
-import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
+import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.{AuthenticationFailedRejection, Directive0, Directive1}
 import cats.data.OptionT
 import cats.effect.IO
 import hu.ksisu.imazsak.Api
@@ -22,7 +20,7 @@ trait AuthDirectives {
 
   type AsyncAuthenticator[T] = Credentials => Future[Option[T]]
 
-  private def validateAndGetId(token: String): Future[Option[String]] = {
+  private def validateAndGetId(token: String, admin: Boolean): Future[Option[String]] = {
     OptionT(jwtService.validateAndDecode(token))
       .subflatMap(_.fields.get("id"))
       .collect {
@@ -32,22 +30,14 @@ trait AuthDirectives {
       .unsafeToFuture()
   }
 
-  protected def userAuthenticator: AsyncAuthenticator[String] = {
-    case Credentials.Provided(token) => validateAndGetId(token)
+  protected def jwtAuthenticator(admin: Boolean): AsyncAuthenticator[String] = {
+    case Credentials.Provided(token) => validateAndGetId(token, admin)
     case _                           => Future.successful(None)
   }
 
-  def userAuth: Directive1[String] = authenticateOAuth2Async[String]("", userAuthenticator)
+  def userAuth: Directive1[String] = authenticateOAuth2Async[String]("", jwtAuthenticator(admin = false))
 
-  def adminAuth: Directive0 = {
-    headerValueByName("X-Admin-Key").flatMap { key =>
-      if (key == "adminpass") { // todo config
-        pass
-      } else {
-        reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("", "")))
-      }
-    }
-  }
+  def adminAuth: Directive1[String] = authenticateOAuth2Async[String]("", jwtAuthenticator(admin = true))
 
   protected def withUserTrace[T <: LogContext](name: String, userId: String)(
       contextFactory: (String, Tracer, Span) => T
@@ -60,7 +50,7 @@ trait AuthDirectives {
   }
 
   def adminAuthAndTrace(name: String): Directive1[AdminLogContext] = {
-    adminAuth.tflatMap(_ => userAuth.flatMap(userId => withUserTrace(name, userId)(AdminLogContext)))
+    adminAuth.flatMap(adminId => withUserTrace(name, adminId)(AdminLogContext))
   }
 
 }
