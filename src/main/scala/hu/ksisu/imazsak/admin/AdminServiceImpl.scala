@@ -44,7 +44,7 @@ class AdminServiceImpl[F[_]: Monad](implicit userDao: UserDao[F], groupDao: Grou
 
   private def validateName(name: String): Response[F, Unit] = {
     for {
-      _ <- EitherT.cond[F](name.trim.length > 5, (), nameIsTooShort(name))
+      _ <- EitherT.cond[F](name.trim.length > 2, (), nameIsTooShort(name))
       _ <- groupDao.findGroupByName(name).map(_ => nameIsUsed(name)).toLeft(())
     } yield ()
   }
