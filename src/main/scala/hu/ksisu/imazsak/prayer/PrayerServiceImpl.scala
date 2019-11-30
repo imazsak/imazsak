@@ -14,10 +14,11 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
 import hu.ksisu.imazsak.prayer.PrayerService.{
   CreatePrayerRequest,
   Next10PrayerListData,
-  PrayerCloseFeedbackNotificationData
+  PrayerCloseFeedbackNotificationData,
+  PrayerCreatedNotificationData
 }
 import hu.ksisu.imazsak.user.UserDao
-import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
+import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
 
 class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
@@ -25,14 +26,30 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
     userDao: UserDao[F],
     notificationService: NotificationService[F]
 ) extends PrayerService[F] {
+  import cats.syntax.functor._
+  import cats.syntax.traverse._
+  import cats.syntax.applicative._
+  import cats.syntax.applicativeError._
+  private type Tmp[T] = Response[F, T]
+
+  private implicit val logger = new Logger("PrayerServiceImpl")
 
   override def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
     for {
-      _ <- checkMessage(data.message)
-      _ <- checkGroups(data.groupIds)
-      _ <- EitherT.right(prayerDao.createPrayer(model))
-    } yield ()
+      _  <- checkMessage(data.message)
+      _  <- checkGroups(data.groupIds)
+      id <- EitherT.right(prayerDao.createPrayer(model))
+    } yield {
+      sendNewPrayerNotification(id, data)
+        .recover {
+          case error => logger.warn(s"sendNewPrayerNotification failed! $error")
+        }
+        .value
+        .onError {
+          case ex => logger.warn(s"sendNewPrayerNotification failed!", ex).pure[F]
+        }
+    }
   }
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
@@ -84,6 +101,45 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
     } yield ()
   }
 
+  // TODO: refactor the whole function
+  private def sendNewPrayerNotification(id: String, data: CreatePrayerRequest)(
+      implicit ctx: UserLogContext
+  ): Response[F, Unit] = {
+    import cats.instances.list._
+    val usersWithGroupIds = data.groupIds.toList
+      .flatTraverse(
+        id =>
+          groupDao
+            .findMembersByGroupId(id)
+            .map(_.map(_.id -> id).toList)
+      )
+      .map(_.groupMap(_._1)(_._2))
+      .map(_.toList)
+
+    EitherT
+      .right(usersWithGroupIds)
+      .flatMap(_.traverse[Tmp, Unit] {
+        case (userId, groupIds) =>
+          createPrayerCreatedNotificationData(userId, data.message, groupIds).flatMap { msg =>
+            notificationService.createNotification("PRAYER_CREATED", userId, msg)
+          }
+      })
+      .map(_ => {})
+  }
+
+  private def createPrayerCreatedNotificationData(id: String, message: String, groupIds: Seq[String])(
+      implicit ctx: UserLogContext
+  ): Response[F, PrayerCreatedNotificationData] = {
+    val userNameFO = userDao
+      .findUserData(ctx.userId)
+      .map(_.name)
+      .getOrElse(None)
+    val result = userNameFO.map { userNameO =>
+      PrayerCreatedNotificationData(id, userNameO, message, groupIds)
+    }
+    EitherT.right(result)
+  }
+
   private def sendFeedbackToUsers(prayerData: PrayerWithPrayUserData, feedback: String)(
       implicit ctx: UserLogContext
   ): Response[F, Unit] = {
@@ -91,9 +147,6 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
       EitherT.rightT({})
     } else {
       import cats.instances.list._
-      import cats.syntax.traverse._
-      type Tmp[T] = Response[F, T]
-
       createPrayerCloseFeedbackNotificationData(prayerData, feedback).flatMap { msg =>
         prayerData.prayUsers.toList
           .traverse[Tmp, Unit](userId => notificationService.createNotification("PRAYER_CLOSE_FEEDBACK", userId, msg))
@@ -105,7 +158,6 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
   private def createPrayerCloseFeedbackNotificationData(prayerData: PrayerWithPrayUserData, feedback: String)(
       implicit ctx: UserLogContext
   ): Response[F, PrayerCloseFeedbackNotificationData] = {
-    import cats.syntax.functor._
     val userNameFO = userDao
       .findUserData(ctx.userId)
       .map(_.name)

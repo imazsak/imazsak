@@ -22,7 +22,10 @@ object PrayerService {
   case class Next10PrayerListData(id: String, userId: String, groupId: String, message: String)
   case class PrayerCloseRequest(id: String, message: Option[String])
 
+  case class PrayerCreatedNotificationData(id: String, userName: Option[String], message: String, groupIds: Seq[String])
   case class PrayerCloseFeedbackNotificationData(userName: Option[String], message: String, feedback: String)
   implicit val formatPrayerCloseFeedbackNotificationMessage: RootJsonFormat[PrayerCloseFeedbackNotificationData] =
     jsonFormat3(PrayerCloseFeedbackNotificationData)
+  implicit val formatPrayerCreatedNotificationData: RootJsonFormat[PrayerCreatedNotificationData] =
+    jsonFormat4(PrayerCreatedNotificationData)
 }
