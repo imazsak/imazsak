@@ -109,7 +109,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
   }
 
   // TODO: refactor the whole function
-  private def sendNewPrayerNotification(id: String, data: CreatePrayerRequest)(
+  private def sendNewPrayerNotification(prayerId: String, data: CreatePrayerRequest)(
       implicit ctx: UserLogContext
   ): Response[F, Unit] = {
     import cats.instances.list._
@@ -127,14 +127,14 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
       .right(usersWithGroupIds)
       .flatMap(_.traverse[Tmp, Unit] {
         case (userId, groupIds) =>
-          createPrayerCreatedNotificationData(userId, data.message, groupIds).flatMap { msg =>
+          createPrayerCreatedNotificationData(prayerId, data.message, groupIds).flatMap { msg =>
             notificationService.createNotification("PRAYER_CREATED", userId, msg)
           }
       })
       .map(_ => {})
   }
 
-  private def createPrayerCreatedNotificationData(id: String, message: String, groupIds: Seq[String])(
+  private def createPrayerCreatedNotificationData(prayerId: String, message: String, groupIds: Seq[String])(
       implicit ctx: UserLogContext
   ): Response[F, PrayerCreatedNotificationData] = {
     val userNameFO = userDao
@@ -142,7 +142,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
       .map(_.name)
       .getOrElse(None)
     val result = userNameFO.map { userNameO =>
-      PrayerCreatedNotificationData(id, userNameO, message, groupIds)
+      PrayerCreatedNotificationData(prayerId, userNameO, message, groupIds)
     }
     EitherT.right(result)
   }
