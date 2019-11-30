@@ -121,7 +121,7 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
             .map(_.map(_.id -> id).toList)
       )
       .map(_.groupMap(_._1)(_._2))
-      .map(_.toList)
+      .map(_.filter(_._1 != ctx.userId).toList)
 
     EitherT
       .right(usersWithGroupIds)
