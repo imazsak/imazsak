@@ -26,10 +26,9 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
     userDao: UserDao[F],
     notificationService: NotificationService[F]
 ) extends PrayerService[F] {
+  import cats.syntax.applicativeError._
   import cats.syntax.functor._
   import cats.syntax.traverse._
-  import cats.syntax.applicative._
-  import cats.syntax.applicativeError._
   private type Tmp[T] = Response[F, T]
 
   private implicit val logger = new Logger("PrayerServiceImpl")
@@ -40,16 +39,24 @@ class PrayerServiceImpl[F[_]: MonadError[?[_], Throwable]](
       _  <- checkMessage(data.message)
       _  <- checkGroups(data.groupIds)
       id <- EitherT.right(prayerDao.createPrayer(model))
-    } yield {
-      sendNewPrayerNotification(id, data)
-        .recover {
-          case error => logger.warn(s"sendNewPrayerNotification failed! $error")
-        }
-        .value
-        .onError {
-          case ex => logger.warn(s"sendNewPrayerNotification failed!", ex).pure[F]
-        }
-    }
+      _  <- sendNewPrayerNotificationWithoutError(id, data)
+    } yield {}
+  }
+
+  private def sendNewPrayerNotificationWithoutError(id: String, data: CreatePrayerRequest)(
+      implicit ctx: UserLogContext
+  ): Response[F, Unit] = {
+    val result = sendNewPrayerNotification(id, data)
+      .recover {
+        case error => logger.warn(s"sendNewPrayerNotification failed! $error")
+      }
+      .value
+      .recover {
+        case ex =>
+          logger.warn(s"sendNewPrayerNotification failed!", ex)
+          Right({})
+      }
+    EitherT(result)
   }
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
