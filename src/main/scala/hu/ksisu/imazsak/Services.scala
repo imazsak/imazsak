@@ -47,6 +47,7 @@ trait Services[F[_]] {
   implicit val tokenDao: TokenDao[F]
   implicit val tokenService: TokenService[F]
   implicit val authHookService: AuthHookService[F]
+  implicit val pushNotificationService: PushNotificationService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -61,6 +62,7 @@ trait Services[F[_]] {
       _ <- initialize(fileStoreService, "filestore")
       _ <- initialize(amqpService, "ampq")
       _ <- initialize(tokenService, "token")
+      _ <- initialize(pushNotificationService, "push")
     } yield ()
   }
 }
@@ -75,29 +77,30 @@ class RealServices(
   implicit lazy val configService: ServerConfig[IO] = new ServerConfigImpl[IO]
   import configService._
 
-  implicit lazy val healthCheckService: HealthCheckService[IO]   = new HealthCheckServiceImpl[IO]
-  implicit lazy val mongoDriver: MongoDriver                     = new MongoDriver()
-  implicit lazy val databaseService: MongoDatabaseService[IO]    = new MongoDatabaseServiceImpl()
-  implicit lazy val httpWrapper: HttpWrapper[IO]                 = new AkkaHttpWrapper()
-  implicit lazy val idGenerator: IdGenerator                     = new IdGeneratorImpl
-  implicit lazy val dateTimeService: DateTimeUtil                = new DateTimeUtilImpl
-  implicit lazy val tracerService: TracerService[IO]             = new TracerService[IO]()
-  implicit lazy val amqpService: AmqpService[IO]                 = new AmqpServiceImpl[IO]()
-  implicit lazy val jwtService: JwtServiceImpl[IO]               = new JwtServiceImpl[IO]()
-  implicit lazy val userDao: UserDao[IO]                         = new UserDaoImpl()
-  implicit lazy val meService: MeService[IO]                     = new MeServiceImpl[IO]()
-  implicit lazy val groupDao: GroupDao[IO]                       = new GroupDaoImpl()
-  implicit lazy val groupService: GroupService[IO]               = new GroupServiceImpl()
-  implicit lazy val prayerDao: PrayerDao[IO]                     = new PrayerDaoImpl()
-  implicit lazy val prayerService: PrayerService[IO]             = new PrayerServiceImpl[IO]()
-  implicit lazy val adminService: AdminService[IO]               = new AdminServiceImpl[IO]()
-  implicit lazy val fileStoreService: FileStoreService[IO]       = new S3FileStoreService()
-  implicit lazy val feedbackDao: FeedbackDao[IO]                 = new FeedbackDaoImpl()
-  implicit lazy val feedbackService: FeedbackService[IO]         = new FeedbackServiceImpl[IO]()
-  implicit lazy val notificationDao: NotificationDao[IO]         = new NotificationDaoImpl()
-  implicit lazy val notificationService: NotificationService[IO] = new NotificationServiceImpl[IO]()
-  implicit lazy val userService: UserService[IO]                 = new UserServiceImpl[IO]()
-  implicit lazy val tokenDao: TokenDao[IO]                       = new TokenDaoImpl()
-  implicit lazy val tokenService: TokenService[IO]               = new TokenServiceImpl[IO]()
-  implicit lazy val authHookService: AuthHookService[IO]         = new AuthHookServiceImpl[IO]()
+  implicit lazy val healthCheckService: HealthCheckService[IO]           = new HealthCheckServiceImpl[IO]
+  implicit lazy val mongoDriver: MongoDriver                             = new MongoDriver()
+  implicit lazy val databaseService: MongoDatabaseService[IO]            = new MongoDatabaseServiceImpl()
+  implicit lazy val httpWrapper: HttpWrapper[IO]                         = new AkkaHttpWrapper()
+  implicit lazy val idGenerator: IdGenerator                             = new IdGeneratorImpl
+  implicit lazy val dateTimeService: DateTimeUtil                        = new DateTimeUtilImpl
+  implicit lazy val tracerService: TracerService[IO]                     = new TracerService[IO]()
+  implicit lazy val amqpService: AmqpService[IO]                         = new AmqpServiceImpl[IO]()
+  implicit lazy val jwtService: JwtServiceImpl[IO]                       = new JwtServiceImpl[IO]()
+  implicit lazy val userDao: UserDao[IO]                                 = new UserDaoImpl()
+  implicit lazy val meService: MeService[IO]                             = new MeServiceImpl[IO]()
+  implicit lazy val groupDao: GroupDao[IO]                               = new GroupDaoImpl()
+  implicit lazy val groupService: GroupService[IO]                       = new GroupServiceImpl()
+  implicit lazy val prayerDao: PrayerDao[IO]                             = new PrayerDaoImpl()
+  implicit lazy val prayerService: PrayerService[IO]                     = new PrayerServiceImpl[IO]()
+  implicit lazy val adminService: AdminService[IO]                       = new AdminServiceImpl[IO]()
+  implicit lazy val fileStoreService: FileStoreService[IO]               = new S3FileStoreService()
+  implicit lazy val feedbackDao: FeedbackDao[IO]                         = new FeedbackDaoImpl()
+  implicit lazy val feedbackService: FeedbackService[IO]                 = new FeedbackServiceImpl[IO]()
+  implicit lazy val notificationDao: NotificationDao[IO]                 = new NotificationDaoImpl()
+  implicit lazy val notificationService: NotificationService[IO]         = new NotificationServiceImpl[IO]()
+  implicit lazy val userService: UserService[IO]                         = new UserServiceImpl[IO]()
+  implicit lazy val tokenDao: TokenDao[IO]                               = new TokenDaoImpl()
+  implicit lazy val tokenService: TokenService[IO]                       = new TokenServiceImpl[IO]()
+  implicit lazy val authHookService: AuthHookService[IO]                 = new AuthHookServiceImpl[IO]()
+  implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
 }

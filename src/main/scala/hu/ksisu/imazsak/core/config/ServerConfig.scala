@@ -8,6 +8,7 @@ import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl.JwtConfig
+import hu.ksisu.imazsak.notification.PushNotificationService.PushNotificationConfig
 
 import scala.io.Source
 import scala.util.Try
@@ -24,6 +25,8 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getAmqpConfig: AmqpConfig
 
   implicit def getAuthHookConfig: AuthHookConfig
+
+  implicit def getPushNotificationConfig: PushNotificationConfig
 }
 
 class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig[F] {
@@ -83,5 +86,13 @@ class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig
 
   private def readFromFileOrConf(config: Config, key: String): String = {
     Try(Source.fromFile(config.getString(s"${key}File")).mkString).getOrElse(config.getString(key))
+  }
+
+  override implicit def getPushNotificationConfig: PushNotificationConfig = {
+    val config = conf.getConfig("pushNotification")
+    PushNotificationConfig(
+      config.getString("publicKey"),
+      readFromFileOrConf(config, "privateKey")
+    )
   }
 }

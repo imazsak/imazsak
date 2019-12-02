@@ -15,8 +15,11 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
-class NotificationApi(implicit service: NotificationService[IO], val jwtService: JwtService[IO])
-    extends Api
+class NotificationApi(
+    implicit service: NotificationService[IO],
+    push: PushNotificationService[IO],
+    val jwtService: JwtService[IO]
+) extends Api
     with AuthDirectives {
   implicit val logger = new Logger("NotificationApi")
 
@@ -52,6 +55,12 @@ class NotificationApi(implicit service: NotificationService[IO], val jwtService:
           path("push" / "unsubscribe") {
             userAuthAndTrace("Notifications_PushUnsubscribe") { implicit ctx =>
               service.pushUnsubscribe().toComplete
+            }
+          }
+        } ~ {
+          path("push" / "test") {
+            userAuthAndTrace("Notifications_PushTest") { implicit ctx =>
+              push.sendPushNotification(ctx.userId, "Hello! :)").toComplete
             }
           }
         }
