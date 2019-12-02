@@ -4,13 +4,16 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AppError, Response}
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
-import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
+import hu.ksisu.imazsak.notification.NotificationService.{NotificationListResponse, PushSubscribeRequest}
+import hu.ksisu.imazsak.user.UserDao
+import hu.ksisu.imazsak.user.UserDao.UserPushSubscribeData
 import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import spray.json.JsonWriter
 
 class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit notificationDao: NotificationDao[F],
+    userDao: UserDao[F],
     date: DateTimeUtil
 ) extends NotificationService[F] {
 
@@ -51,4 +54,16 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     EitherT.right(notificationDao.setRead(ids, ctx.userId))
   }
 
+  override def pushSubscribe(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
+    val daoData = UserPushSubscribeData(
+      data.endpoint,
+      data.expirationTime,
+      data.keys
+    )
+    EitherT.right(userDao.savePushSubscribe(ctx.userId, daoData))
+  }
+
+  override def pushUnsubscribe()(implicit ctx: UserLogContext): Response[F, Unit] = {
+    EitherT.right(userDao.removePushSubscribe(ctx.userId))
+  }
 }

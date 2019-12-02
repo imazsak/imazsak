@@ -9,7 +9,7 @@ import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.notification.NotificationApi._
 import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
-import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
+import hu.ksisu.imazsak.notification.NotificationService.{NotificationListResponse, PushSubscribeRequest}
 import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
@@ -40,7 +40,21 @@ class NotificationApi(implicit service: NotificationService[IO], val jwtService:
                 service.deleteUserNotifications(data.ids).toComplete
               }
             }
+          } ~ {
+          path("push" / "subscribe") {
+            userAuthAndTrace("Notifications_PushSubscribe") { implicit ctx =>
+              entity(as[PushSubscribeRequest]) { data =>
+                service.pushSubscribe(data).toComplete
+              }
+            }
           }
+        } ~ {
+          path("push" / "unsubscribe") {
+            userAuthAndTrace("Notifications_PushUnsubscribe") { implicit ctx =>
+              service.pushUnsubscribe().toComplete
+            }
+          }
+        }
       }
     }
   }
@@ -48,7 +62,8 @@ class NotificationApi(implicit service: NotificationService[IO], val jwtService:
 }
 
 object NotificationApi {
-  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta] = jsonFormat2(NotificationMeta)
+  implicit val pushSubscribeRequestFormat: RootJsonFormat[PushSubscribeRequest] = jsonFormat3(PushSubscribeRequest)
+  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta]         = jsonFormat2(NotificationMeta)
   implicit val notificationListDataFormat: RootJsonFormat[NotificationListResponse] = jsonFormat4(
     NotificationListResponse
   )

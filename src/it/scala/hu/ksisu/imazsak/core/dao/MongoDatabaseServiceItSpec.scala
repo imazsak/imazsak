@@ -21,7 +21,7 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
 import hu.ksisu.imazsak.token.TokenDao.TokenData
 import hu.ksisu.imazsak.token.TokenDaoImpl
-import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData}
+import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData, UserPushSubscribeData}
 import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
@@ -137,6 +137,26 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           )
         )
         userDao.isAdmin(userId).unsafeRunSync() shouldBe true
+      }
+      "#savePushSubscribe, #findPushSubscribe, #removePushSubscribe" in {
+        val userId = "secret_id"
+        val user   = UserData(userId, Some("nickname1"))
+        await(userCollection.insert.one(user))
+
+        val data = UserPushSubscribeData(
+          "end+point",
+          Some(1111L),
+          Map(
+            "a" -> "b",
+            "c" -> "d"
+          )
+        )
+
+        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual None
+        userDao.savePushSubscribe(userId, data).unsafeRunSync()
+        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual Some(data)
+        userDao.removePushSubscribe(userId).unsafeRunSync()
+        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual None
       }
     }
 
@@ -373,8 +393,6 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         val d           = 1000L
         val startTime   = currentTime - d
         val endTime     = currentTime + d
-        println(result1.map(_.createdAt))
-        println(currentTime)
         result1.map(_.createdAt).forall(time => startTime <= time && time <= endTime) shouldBe true
 
         val result2 = prayerDao.findPrayerByUser("user_2").unsafeRunSync()

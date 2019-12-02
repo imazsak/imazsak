@@ -80,7 +80,6 @@ class PrayerDaoImpl(
     MongoQueryHelper
       .findOne[BSONDocument](byId(prayerId), prayerWithPrayUserDataProjector)
       .subflatMap { doc =>
-        println(doc.toMap)
         (document("prayUsers" -> Seq()) ++ doc).asOpt[PrayerWithPrayUserData]
       }
   }

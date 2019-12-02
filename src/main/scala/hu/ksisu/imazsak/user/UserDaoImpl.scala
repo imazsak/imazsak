@@ -6,7 +6,7 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.user.UserDao._
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.bson.{BSONDocument, BSON, document}
+import reactivemongo.api.bson.{BSON, BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 
@@ -36,5 +36,20 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
       .findOne[BSONDocument](byId(id), isAdminProjector)
       .subflatMap(_.getAsOpt[Boolean]("isAdmin"))
       .getOrElse(false)
+  }
+
+  override def savePushSubscribe(id: String, data: UserPushSubscribeData): IO[Unit] = {
+    val doc = document("push" -> (BSON.writeDocument(data).getOrElse(document())))
+    MongoQueryHelper.updateOne(byId(id), document("$set" -> doc))
+  }
+
+  override def findPushSubscribe(id: String): OptionT[IO, UserPushSubscribeData] = {
+    MongoQueryHelper.findOne[BSONDocument](byId(id), findPushSubscribeProjector).subflatMap { doc =>
+      doc.getAsOpt[UserPushSubscribeData]("push")
+    }
+  }
+
+  override def removePushSubscribe(id: String): IO[Unit] = {
+    MongoQueryHelper.updateOne(byId(id), document("$unset" -> document("push" -> "")))
   }
 }
