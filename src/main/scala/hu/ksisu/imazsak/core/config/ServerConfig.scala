@@ -91,7 +91,7 @@ class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig
   override implicit def getPushNotificationConfig: PushNotificationConfig = {
     val config = conf.getConfig("pushNotification")
     PushNotificationConfig(
-      config.getString("publicKey"),
+      readFromFileOrConf(config, "publicKey"),
       readFromFileOrConf(config, "privateKey")
     )
   }
