@@ -62,6 +62,7 @@ trait Services[F[_]] {
       _ <- initialize(fileStoreService, "filestore")
       _ <- initialize(amqpService, "ampq")
       _ <- initialize(tokenService, "token")
+      _ <- initialize(notificationService, "notification")
       _ <- initialize(pushNotificationService, "push")
     } yield ()
   }

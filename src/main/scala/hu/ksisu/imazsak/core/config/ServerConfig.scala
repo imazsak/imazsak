@@ -2,7 +2,7 @@ package hu.ksisu.imazsak.core.config
 import cats.MonadError
 import com.typesafe.config.{Config, ConfigFactory}
 import hu.ksisu.imazsak.Initable
-import hu.ksisu.imazsak.core.AmqpService.AmqpConfig
+import hu.ksisu.imazsak.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import hu.ksisu.imazsak.core.AuthHookService.AuthHookConfig
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
@@ -27,6 +27,8 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getAuthHookConfig: AuthHookConfig
 
   implicit def getPushNotificationConfig: PushNotificationConfig
+
+  implicit def getAmqpQueueConfig(name: String): AmqpQueueConfig
 }
 
 class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig[F] {
@@ -75,6 +77,14 @@ class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig
     AmqpConfig(
       readFromFileOrConf(config, "uri")
     )
+  }
+
+  override implicit def getAmqpQueueConfig(name: String): AmqpQueueConfig = {
+    val path: String = name match {
+      case "notification_service" => "pushNotification.amqp"
+      case _                      => throw new IllegalArgumentException(s"$name unknown AMQP type.")
+    }
+    AmqpQueueConfig(conf.getConfig(path))
   }
 
   override implicit def getAuthHookConfig: AuthHookConfig = {

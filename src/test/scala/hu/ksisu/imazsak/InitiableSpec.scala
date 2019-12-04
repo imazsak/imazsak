@@ -32,6 +32,7 @@ class InitiableSpec extends TestBase {
       override def getJwtConfig: JwtServiceImpl.JwtConfig                                    = ???
       override def getAuthHookConfig: AuthHookService.AuthHookConfig                         = ???
       override def getPushNotificationConfig: PushNotificationService.PushNotificationConfig = ???
+      override def getAmqpQueueConfig(name: String): AmqpService.AmqpQueueConfig             = ???
     }
   }
   import cats.instances.try_._
