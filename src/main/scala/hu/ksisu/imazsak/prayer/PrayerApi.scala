@@ -13,7 +13,7 @@ import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerL
 import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
-import spray.json.RootJsonFormat
+import spray.json.{JsObject, RootJsonFormat}
 
 class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[IO]) extends Api with AuthDirectives {
   implicit val logger = new Logger("PrayerApi")
@@ -39,8 +39,10 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
       }
     } ~ post {
       path("groups" / Segment / "prayers" / Segment / "pray") { (groupId, prayerId) =>
-        userAuthAndTrace("Prayer_Pray") { implicit ctx =>
-          service.pray(groupId, prayerId).toComplete
+        entity(as[JsObject]) { _ =>
+          userAuthAndTrace("Prayer_Pray") { implicit ctx =>
+            service.pray(groupId, prayerId).toComplete
+          }
         }
       }
     } ~ post {
