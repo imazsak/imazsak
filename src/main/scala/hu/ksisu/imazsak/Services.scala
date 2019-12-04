@@ -1,7 +1,6 @@
 package hu.ksisu.imazsak
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import cats.MonadError
 import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.admin.{AdminService, AdminServiceImpl}
@@ -71,7 +70,6 @@ trait Services[F[_]] {
 class RealServices(
     implicit ec: ExecutionContext,
     actorSystem: ActorSystem,
-    materializer: Materializer,
     cs: ContextShift[IO]
 ) extends Services[IO] {
 

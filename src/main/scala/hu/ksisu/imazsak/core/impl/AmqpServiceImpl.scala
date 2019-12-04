@@ -1,14 +1,14 @@
 package hu.ksisu.imazsak.core.impl
 
-import akka.Done
-import akka.stream.alpakka.amqp.scaladsl.AmqpSink
 import akka.stream.alpakka.amqp._
+import akka.stream.alpakka.amqp.scaladsl.{AmqpSink, AmqpSource}
 import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.util.ByteString
+import akka.{Done, NotUsed}
 import cats.Applicative
 import hu.ksisu.imazsak.core.AmqpService
-import hu.ksisu.imazsak.core.AmqpService.{AmqpConfig, AmqpQueue, AmqpQueueConfig}
+import hu.ksisu.imazsak.core.AmqpService.{AmqpConfig, AmqpQueueConfig, AmqpSenderWrapper}
 
 import scala.concurrent.Future
 
@@ -26,7 +26,7 @@ class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, mat: Mater
     ().pure[F]
   }
 
-  override def createQueue(queueConfig: AmqpQueueConfig): AmqpQueue = {
+  override def createSenderWrapper(queueConfig: AmqpQueueConfig): AmqpSenderWrapper = {
 
     val amqpSink: Sink[ByteString, Future[Done]] = {
       AmqpSink.simple(
@@ -41,16 +41,27 @@ class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, mat: Mater
         .run()
     }
 
-    new AmqpQueue(queue)
+    new AmqpSenderWrapper(queue)
+  }
+
+  override def createQueueSource(queueConfig: AmqpQueueConfig): Source[ReadResult, NotUsed] = {
+    AmqpSource.atMostOnceSource(
+      NamedQueueSourceSettings(connection, queueConfig.routingKey.get)
+        .withDeclaration(QueueDeclaration(queueConfig.routingKey.get))
+        .withAckRequired(false),
+      bufferSize = 10
+    )
   }
 
   private def convertToWriteSettings(connectionProvider: AmqpConnectionProvider, queueConfig: AmqpQueueConfig) = {
     val ws0 = AmqpWriteSettings(connectionProvider)
     val ws1 = queueConfig.exchange.map(ws0.withExchange).getOrElse(ws0)
-    queueConfig.routingKey.map { rk =>
-      ws1
-        .withRoutingKey(rk)
-        .withDeclaration(QueueDeclaration(rk))
-    }.getOrElse(ws1)
+    queueConfig.routingKey
+      .map { rk =>
+        ws1
+          .withRoutingKey(rk)
+          .withDeclaration(QueueDeclaration(rk))
+      }
+      .getOrElse(ws1)
   }
 }

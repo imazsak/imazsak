@@ -44,7 +44,7 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val feedbackDao: FeedbackDao[IO]                         = new FeedbackDaoImpl()
   implicit lazy val feedbackService: FeedbackService[IO]                 = new FeedbackServiceImpl[IO]()
   implicit lazy val notificationDao: NotificationDao[IO]                 = new NotificationDaoImpl()
-  implicit lazy val notificationService: NotificationService[IO]         = new NotificationServiceImpl[IO]()
+  implicit lazy val notificationService: NotificationService[IO]         = null
   implicit lazy val userService: UserService[IO]                         = new UserServiceImpl[IO]()
   implicit lazy val tokenDao: TokenDao[IO]                               = new TokenDaoImpl()
   implicit lazy val tokenService: TokenService[IO]                       = new TokenServiceImpl[IO]()
