@@ -1,24 +1,20 @@
 package hu.ksisu.imazsak.notification
 
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.Sink
 import cats.MonadError
 import cats.data.EitherT
 import cats.effect.IO
 import hu.ksisu.imazsak.Errors.{AppError, Response}
 import hu.ksisu.imazsak.core.AmqpService
-import hu.ksisu.imazsak.core.AmqpService.{AmqpQueueConfig, AmqpSenderWrapper}
+import hu.ksisu.imazsak.core.AmqpService.AmqpQueueConfig
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationService.{NotificationListResponse, PushSubscribeRequest}
-import hu.ksisu.imazsak.notification.NotificationServiceImpl._
 import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.user.UserDao.UserPushSubscribeData
 import hu.ksisu.imazsak.util.DateTimeUtil
-import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger, UserLogContext}
+import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import org.slf4j.LoggerFactory
 import spray.json._
-
-import scala.util.Try
 
 class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit notificationDao: NotificationDao[F],
@@ -32,38 +28,38 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private implicit val logger = LoggerFactory.getLogger("NotificationService")
 
-  protected lazy val amqpSender: AmqpSenderWrapper = {
-    val conf = configByName("notification_service")
-    amqpService.createSenderWrapper(conf)
-  }
+//  protected lazy val amqpSender: AmqpSenderWrapper = {
+//    val conf = configByName("notification_service")
+//    amqpService.createSenderWrapper(conf)
+//  }
 
-  protected lazy val amqpSource = {
-    val conf = configByName("notification_service")
-    amqpService
-      .createQueueSource(conf)
-      .mapConcat { readResult =>
-        Try(readResult.bytes.utf8String.parseJson.convertTo[CreateNotificationQueueMessage])
-          .map(List(_))
-          .getOrElse(List.empty)
-      }
-      .map { msg =>
-        val model = CreateNotificationData(
-          msg.userId,
-          msg.message.compactPrint,
-          date.getCurrentTimeMillis,
-          NotificationMeta(
-            isRead = false,
-            Option(msg.notificationType)
-          )
-        )
-        logger.info(s"NOTI: $model")
-      }
-      .runWith(Sink.ignore)
-  }
+//  protected lazy val amqpSource = {
+//    val conf = configByName("notification_service")
+//    amqpService
+//      .createQueueSource(conf)
+//      .mapConcat { readResult =>
+//        Try(readResult.bytes.utf8String.parseJson.convertTo[CreateNotificationQueueMessage])
+//          .map(List(_))
+//          .getOrElse(List.empty)
+//      }
+//      .map { msg =>
+//        val model = CreateNotificationData(
+//          msg.userId,
+//          msg.message.compactPrint,
+//          date.getCurrentTimeMillis,
+//          NotificationMeta(
+//            isRead = false,
+//            Option(msg.notificationType)
+//          )
+//        )
+//        logger.info(s"NOTI: $model")
+//      }
+//      .runWith(Sink.ignore)
+//  }
 
   override def init: F[Unit] = {
-    amqpSender
-    amqpSource
+//    amqpSender
+//    amqpSource
     ().pure[F]
   }
 
@@ -71,7 +67,7 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
       implicit ctx: LogContext,
       w: JsonWriter[T]
   ): Response[F, Unit] = {
-    amqpSender.send(CreateNotificationQueueMessage(notificationType, userId, message.toJson))
+//    amqpSender.send(CreateNotificationQueueMessage(notificationType, userId, message.toJson))
 
     val model = CreateNotificationData(
       userId,
