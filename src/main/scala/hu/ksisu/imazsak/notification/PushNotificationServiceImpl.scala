@@ -56,7 +56,7 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
       )
       val response = client.send(noti)
       val status   = response.getStatusLine.getStatusCode
-      if (status != 200) {
+      if (status < 200 || 300 <= status) {
         val body = Source
           .fromInputStream(
             response.getEntity.getContent
