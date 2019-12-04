@@ -68,5 +68,4 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
     }
     EitherT.right(result)
   }
-
 }
