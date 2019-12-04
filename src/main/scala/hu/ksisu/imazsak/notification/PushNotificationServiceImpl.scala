@@ -34,10 +34,26 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
   }
 
   def sendPushNotification(userId: String, message: String)(implicit ctx: UserLogContext): Response[IO, Unit] = {
+    val payload = s"""{
+                     |    "notification": {
+                     |        "title": "Imazsak TEST",
+                     |        "body": "$message",
+                     |        "icon": "assets/icon-72x72.png",
+                     |        "vibrate": [100, 50, 100],
+                     |        "data": {
+                     |            "dateOfArrival": ${System.currentTimeMillis()},
+                     |            "primaryKey": 1
+                     |        },
+                     |        "actions": [{
+                     |            "action": "explore",
+                     |            "title": "Go to the site"
+                     |        }]
+                     |    }
+                     |}""".stripMargin
     val result = userDao
       .findPushSubscribe(userId)
       .flatMap { sub =>
-        _sendPushNotification(sub, message, 86400).toOption
+        _sendPushNotification(sub, payload, 86400).toOption
       }
       .getOrElse({})
     EitherT.right(result)
