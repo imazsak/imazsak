@@ -38,7 +38,7 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
                      |    "notification": {
                      |        "title": "Imazsak TEST",
                      |        "body": "$message",
-                     |        "icon": "assets/icon-72x72.png",
+                     |        "icon": "assets/icons/icon-72x72.png",
                      |        "vibrate": [100, 50, 100],
                      |        "data": {
                      |            "dateOfArrival": ${System.currentTimeMillis()},
