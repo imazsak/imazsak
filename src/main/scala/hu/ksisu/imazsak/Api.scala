@@ -9,7 +9,7 @@ import hu.ksisu.imazsak.core.AuthHookApi
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckApi
 import hu.ksisu.imazsak.feedback.FeedbackApi
 import hu.ksisu.imazsak.group.GroupApi
-import hu.ksisu.imazsak.notification.NotificationApi
+import hu.ksisu.imazsak.notification.{NotificationApi, PushNotificationApi}
 import hu.ksisu.imazsak.user.{MeApi, UserApi}
 import hu.ksisu.imazsak.prayer.PrayerApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
@@ -49,6 +49,7 @@ object Api {
       new AdminApi(),
       new FeedbackApi(),
       new NotificationApi(),
+      new PushNotificationApi(),
       new UserApi(),
       new AuthHookApi()
     )

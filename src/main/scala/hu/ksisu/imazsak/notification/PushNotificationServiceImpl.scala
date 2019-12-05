@@ -3,19 +3,20 @@ package hu.ksisu.imazsak.notification
 import java.nio.charset.StandardCharsets
 import java.security.Security
 
+import cats.Applicative
 import cats.data.EitherT
 import cats.effect.IO
 import hu.ksisu.imazsak.Errors.Response
-import hu.ksisu.imazsak.notification.PushNotificationService.PushNotificationConfig
+import hu.ksisu.imazsak.notification.PushNotificationService.{PushNotificationConfig, PushSubscribeRequest}
 import hu.ksisu.imazsak.user.UserDao
-import hu.ksisu.imazsak.user.UserDao.UserPushSubscribeData
-import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
+import hu.ksisu.imazsak.user.UserDao.UserPushSubscriptionData
+import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger, UserLogContext}
 import nl.martijndwars.webpush._
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 
 import scala.io.Source
 
-class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userDao: UserDao[IO])
+class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userDao: UserDao[IO], ev: Applicative[IO])
     extends PushNotificationService[IO] {
   private implicit val logger = new Logger("PushNotificationService")
 
@@ -33,7 +34,20 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
     clientF.map(_ => ())
   }
 
-  def sendPushNotification(userId: String, message: String)(implicit ctx: UserLogContext): Response[IO, Unit] = {
+  override def addSubscription(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[IO, Unit] = {
+    val daoData = UserPushSubscriptionData(
+      data.subscription.endpoint,
+      data.subscription.expirationTime,
+      data.subscription.keys
+    )
+    EitherT.right(userDao.addPushSubscription(ctx.userId, data.deviceId, daoData))
+  }
+
+  override def removeSubscription(deviceId: String)(implicit ctx: LogContext): Response[IO, Unit] = {
+    EitherT.right(userDao.removePushSubscriptionByDeviceId(deviceId))
+  }
+
+  def sendNotification(userId: String, message: String)(implicit ctx: UserLogContext): Response[IO, Unit] = {
     val payload = s"""{
                      |    "notification": {
                      |        "title": "Imazsak TEST",
@@ -43,23 +57,20 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
                      |        "data": {
                      |            "dateOfArrival": ${System.currentTimeMillis()},
                      |            "primaryKey": 1
-                     |        },
-                     |        "actions": [{
-                     |            "action": "explore",
-                     |            "title": "Go to the site"
                      |        }]
                      |    }
                      |}""".stripMargin
-    val result = userDao
-      .findPushSubscribe(userId)
-      .flatMap { sub =>
-        _sendPushNotification(sub, payload, 86400).toOption
-      }
-      .getOrElse({})
-    EitherT.right(result)
+
+    import cats.instances.list._
+    import cats.syntax.traverse._
+
+    EitherT
+      .right(userDao.findPushSubscriptionsByUserId(userId))
+      .flatMap(_.toList.traverse[Response[IO, *], Unit](sub => _sendPushNotification(sub, payload, 86400)))
+      .map(_ => {})
   }
 
-  private def _sendPushNotification(subscriptionData: UserPushSubscribeData, payload: String, ttl: Int)(
+  private def _sendPushNotification(subscriptionData: UserPushSubscriptionData, payload: String, ttl: Int)(
       implicit ctx: UserLogContext
   ): Response[IO, Unit] = {
     val result = clientF.map { client =>

@@ -1,32 +1,19 @@
 package hu.ksisu.imazsak.notification
 
-import akka.actor.ActorSystem
 import cats.MonadError
 import cats.data.EitherT
-import cats.effect.IO
 import hu.ksisu.imazsak.Errors.{AppError, Response}
-import hu.ksisu.imazsak.core.AmqpService
-import hu.ksisu.imazsak.core.AmqpService.AmqpQueueConfig
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
-import hu.ksisu.imazsak.notification.NotificationService.{NotificationListResponse, PushSubscribeRequest}
-import hu.ksisu.imazsak.user.UserDao
-import hu.ksisu.imazsak.user.UserDao.UserPushSubscribeData
+import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
 import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
-import org.slf4j.LoggerFactory
 import spray.json._
 
 class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit notificationDao: NotificationDao[F],
-    userDao: UserDao[F],
-    date: DateTimeUtil,
-    amqpService: AmqpService[IO],
-    configByName: String => AmqpQueueConfig,
-    actorSystem: ActorSystem
+    date: DateTimeUtil
 ) extends NotificationService[F] {
   import cats.syntax.applicative._
-
-  private implicit val logger = LoggerFactory.getLogger("NotificationService")
 
 //  protected lazy val amqpSender: AmqpSenderWrapper = {
 //    val conf = configByName("notification_service")
@@ -101,18 +88,6 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     EitherT.right(notificationDao.setRead(ids, ctx.userId))
   }
 
-  override def pushSubscribe(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
-    val daoData = UserPushSubscribeData(
-      data.endpoint,
-      data.expirationTime,
-      data.keys
-    )
-    EitherT.right(userDao.savePushSubscribe(ctx.userId, daoData))
-  }
-
-  override def pushUnsubscribe()(implicit ctx: UserLogContext): Response[F, Unit] = {
-    EitherT.right(userDao.removePushSubscribe(ctx.userId))
-  }
 }
 
 object NotificationServiceImpl {

@@ -21,12 +21,12 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
 import hu.ksisu.imazsak.token.TokenDao.TokenData
 import hu.ksisu.imazsak.token.TokenDaoImpl
-import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData, UserPushSubscribeData}
+import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData, UserPushSubscriptionData}
 import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
-import reactivemongo.api.{Cursor, MongoDriver}
 import reactivemongo.api.bson._
+import reactivemongo.api.{Cursor, MongoDriver}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -138,25 +138,42 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
         )
         userDao.isAdmin(userId).unsafeRunSync() shouldBe true
       }
-      "#savePushSubscribe, #findPushSubscribe, #removePushSubscribe" in {
-        val userId = "secret_id"
-        val user   = UserData(userId, Some("nickname1"))
-        await(userCollection.insert.one(user))
 
-        val data = UserPushSubscribeData(
-          "end+point",
-          Some(1111L),
-          Map(
-            "a" -> "b",
-            "c" -> "d"
-          )
-        )
+      "#addPushSubscription, #findPushSubscriptionsByUserId, #removePushSubscriptionByDeviceId" in {
+        val userId1 = "secret_id1"
+        val user1   = UserData(userId1, Some("nickname1"))
+        val userId2 = "secret_id2"
+        val user2   = UserData(userId2, Some("nickname2"))
+        await(userCollection.insert.one(user1))
+        await(userCollection.insert.one(user2))
 
-        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual None
-        userDao.savePushSubscribe(userId, data).unsafeRunSync()
-        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual Some(data)
-        userDao.removePushSubscribe(userId).unsafeRunSync()
-        userDao.findPushSubscribe(userId).value.unsafeRunSync() shouldEqual None
+        val data = UserPushSubscriptionData("end+point", Some(1111L), Map("a" -> "b", "c" -> "d"))
+
+        val deviceId1 = "devid1"
+        val deviceId2 = "devid2"
+
+        userDao.findPushSubscriptionsByUserId(userId1).unsafeRunSync() shouldEqual Seq.empty
+        userDao.findPushSubscriptionsByUserId(userId2).unsafeRunSync() shouldEqual Seq.empty
+
+        userDao.addPushSubscription(userId1, deviceId1, data).unsafeRunSync()
+        userDao.addPushSubscription(userId1, deviceId2, data).unsafeRunSync()
+
+        userDao.findPushSubscriptionsByUserId(userId1).unsafeRunSync() shouldEqual Seq(data, data)
+        userDao.findPushSubscriptionsByUserId(userId2).unsafeRunSync() shouldEqual Seq.empty
+
+        userDao.addPushSubscription(userId2, deviceId2, data).unsafeRunSync()
+
+        userDao.findPushSubscriptionsByUserId(userId1).unsafeRunSync() shouldEqual Seq(data)
+        userDao.findPushSubscriptionsByUserId(userId2).unsafeRunSync() shouldEqual Seq(data)
+
+        userDao.removePushSubscriptionByDeviceId(deviceId1).unsafeRunSync()
+
+        userDao.findPushSubscriptionsByUserId(userId1).unsafeRunSync() shouldEqual Seq.empty
+        userDao.findPushSubscriptionsByUserId(userId2).unsafeRunSync() shouldEqual Seq(data)
+
+        userDao.removePushSubscriptionByDeviceId(deviceId2).unsafeRunSync()
+        userDao.findPushSubscriptionsByUserId(userId1).unsafeRunSync() shouldEqual Seq.empty
+        userDao.findPushSubscriptionsByUserId(userId2).unsafeRunSync() shouldEqual Seq.empty
       }
     }
 
