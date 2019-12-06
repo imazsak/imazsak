@@ -57,7 +57,7 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
                      |        "data": {
                      |            "dateOfArrival": ${System.currentTimeMillis()},
                      |            "primaryKey": 1
-                     |        }]
+                     |        }
                      |    }
                      |}""".stripMargin
 
