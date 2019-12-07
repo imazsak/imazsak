@@ -4,6 +4,7 @@ import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
 import cats.effect.{ContextShift, IO}
+import hu.ksisu.imazsak.notification.NotificationWorker
 import hu.ksisu.imazsak.util.LoggerUtil
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -26,6 +27,7 @@ object Main extends App {
     route = Api.createApi(services)
     server <- IO.fromFuture(IO(Http().bindAndHandle(route, "0.0.0.0", 9000)))
   } yield {
+    NotificationWorker.createWorker(services).start()
     setupShutdownHook(server)
   }
 

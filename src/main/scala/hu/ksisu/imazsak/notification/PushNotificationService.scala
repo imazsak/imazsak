@@ -8,7 +8,7 @@ import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 trait PushNotificationService[F[_]] extends Initable[F] {
   def addSubscription(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[F, Unit]
   def removeSubscription(deviceId: String)(implicit ctx: LogContext): Response[F, Unit]
-  def sendNotification(userId: String, message: String)(implicit ctx: UserLogContext): Response[F, Unit]
+  def sendNotification(userId: String, message: String)(implicit ctx: LogContext): Response[F, Unit]
 }
 
 object PushNotificationService {

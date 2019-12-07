@@ -7,10 +7,12 @@ import java.util.logging.Level
 import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.model.headers.RawHeader
 import io.opentracing.propagation.{Format, TextMapAdapter}
+import io.opentracing.util.GlobalTracer
 import io.opentracing.{Span, Tracer}
 import net.logstash.logback.marker.Markers
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
+
 import scala.collection.immutable
 
 object LoggerUtil {
@@ -31,6 +33,12 @@ object LoggerUtil {
       tracer.inject(span.context(), Format.Builtin.HTTP_HEADERS, new TextMapAdapter(collector))
       immutable.Seq(collector.asScala.map(t => RawHeader(t._1, t._2)).toSeq: _*)
     }
+  }
+
+  def createServiceContext(serviceName: String): LogContext = {
+    val tracer = GlobalTracer.get()
+    val span   = tracer.buildSpan(s"Service_$serviceName").start()
+    new LogContext(tracer, span)
   }
 
   case class UserLogContext(userId: String, override val tracer: Tracer, override val span: Span)

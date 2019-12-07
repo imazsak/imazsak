@@ -10,14 +10,20 @@ import hu.ksisu.imazsak.Errors.Response
 import hu.ksisu.imazsak.notification.PushNotificationService.{PushNotificationConfig, PushSubscribeRequest}
 import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.user.UserDao.UserPushSubscriptionData
+import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger, UserLogContext}
 import nl.martijndwars.webpush._
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import spray.json.{JsArray, JsNumber, JsObject, JsString}
 
 import scala.io.Source
 
-class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userDao: UserDao[IO], ev: Applicative[IO])
-    extends PushNotificationService[IO] {
+class PushNotificationServiceImpl(
+    implicit config: PushNotificationConfig,
+    userDao: UserDao[IO],
+    ev: Applicative[IO],
+    date: DateTimeUtil
+) extends PushNotificationService[IO] {
   private implicit val logger = new Logger("PushNotificationService")
 
   private lazy val clientF = IO {
@@ -47,19 +53,19 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
     EitherT.right(userDao.removePushSubscriptionByDeviceId(deviceId))
   }
 
-  def sendNotification(userId: String, message: String)(implicit ctx: UserLogContext): Response[IO, Unit] = {
-    val payload = s"""{
-                     |    "notification": {
-                     |        "title": "Imazsak TEST",
-                     |        "body": "$message",
-                     |        "icon": "assets/icons/icon-72x72.png",
-                     |        "vibrate": [100, 50, 100],
-                     |        "data": {
-                     |            "dateOfArrival": ${System.currentTimeMillis()},
-                     |            "primaryKey": 1
-                     |        }
-                     |    }
-                     |}""".stripMargin
+  def sendNotification(userId: String, message: String)(implicit ctx: LogContext): Response[IO, Unit] = {
+    val payload = JsObject(
+      "notification" -> JsObject(
+        "title"   -> JsString("Imazsák"),
+        "body"    -> JsString(message),
+        "icon"    -> JsString("assets/icons/icon-72x72.png"),
+        "vibrate" -> JsArray(JsNumber(100), JsNumber(50), JsNumber(100)),
+        "data" -> JsObject(
+          "dateOfArrival" -> JsNumber(date.getCurrentTimeMillis),
+          "primaryKey"    -> JsNumber(1)
+        )
+      )
+    ).compactPrint
 
     import cats.instances.list._
     import cats.syntax.traverse._
@@ -71,7 +77,7 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
   }
 
   private def _sendPushNotification(subscriptionData: UserPushSubscriptionData, payload: String, ttl: Int)(
-      implicit ctx: UserLogContext
+      implicit ctx: LogContext
   ): Response[IO, Unit] = {
     val result = clientF.map { client =>
       val noti = new Notification(
@@ -90,7 +96,7 @@ class PushNotificationServiceImpl(implicit config: PushNotificationConfig, userD
           )
           .getLines()
           .mkString("\n")
-        logger.warn(s"PUSH FAILED! $status - $body");
+        logger.warn(s"PUSH FAILED! \n $payload \n $status - $body");
       }
     }
     EitherT.right(result)
