@@ -25,16 +25,17 @@ class NotificationApi(
   def route(): Route = {
     pathPrefix("me" / "notifications") {
       get {
-        userAuthAndTrace("Notifications_List") { implicit ctx =>
-          service.listUserNotifications().toComplete
-        }
-      } ~ get {
         path("info") {
           userAuthAndTrace("Notifications_Info") { implicit ctx =>
             service.userNotificationsInfo().toComplete
           }
         }
-      } ~ post {
+      } ~
+        get {
+          userAuthAndTrace("Notifications_List") { implicit ctx =>
+            service.listUserNotifications().toComplete
+          }
+        } ~ post {
         path("read") {
           userAuthAndTrace("Notifications_Read") { implicit ctx =>
             entity(as[Ids]) { data =>
