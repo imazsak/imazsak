@@ -21,6 +21,10 @@ trait NotificationDao[F[_]] {
 
 object NotificationDao {
   case class NotificationMeta(isRead: Boolean, notificationType: Option[String])
+  object NotificationMeta {
+    val PRAYER_CREATED        = "PRAYER_CREATED"
+    val PRAYER_CLOSE_FEEDBACK = "PRAYER_CLOSE_FEEDBACK"
+  }
   case class CreateNotificationData(userId: String, message: String, createdAt: Long, meta: NotificationMeta)
   case class NotificationListData(id: String, message: String, createdAt: Long, meta: NotificationMeta)
 

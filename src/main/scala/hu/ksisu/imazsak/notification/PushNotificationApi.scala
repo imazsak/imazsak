@@ -38,12 +38,6 @@ class PushNotificationApi(
             }
           }
         }
-      } ~ {
-        path("test") {
-          userAuthAndTrace("PushNotification_Test") { implicit ctx =>
-            service.sendNotification(ctx.userId, "Hello! :)").toComplete
-          }
-        }
       }
     }
   }

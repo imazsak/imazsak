@@ -4,6 +4,7 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, NotFoundError, Response}
 import hu.ksisu.imazsak.group.GroupDao
+import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
 import hu.ksisu.imazsak.notification.NotificationService
 import hu.ksisu.imazsak.prayer.PrayerDao.{
   CreatePrayerData,
@@ -128,7 +129,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       .flatMap(_.traverse[Tmp, Unit] {
         case (userId, groupIds) =>
           createPrayerCreatedNotificationData(prayerId, data.message, groupIds).flatMap { msg =>
-            notificationService.createNotification("PRAYER_CREATED", userId, msg)
+            notificationService.createNotification(NotificationMeta.PRAYER_CREATED, userId, msg)
           }
       })
       .map(_ => {})
@@ -156,7 +157,9 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       import cats.instances.list._
       createPrayerCloseFeedbackNotificationData(prayerData, feedback).flatMap { msg =>
         prayerData.prayUsers.toList
-          .traverse[Tmp, Unit](userId => notificationService.createNotification("PRAYER_CLOSE_FEEDBACK", userId, msg))
+          .traverse[Tmp, Unit](
+            userId => notificationService.createNotification(NotificationMeta.PRAYER_CLOSE_FEEDBACK, userId, msg)
+          )
           .map(_ => {})
       }
     }

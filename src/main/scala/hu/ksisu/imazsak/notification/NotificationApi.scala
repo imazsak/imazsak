@@ -56,7 +56,7 @@ class NotificationApi(
 }
 
 object NotificationApi {
-  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta] = jsonFormat2(NotificationMeta)
+  implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta] = jsonFormat2(NotificationMeta.apply)
   implicit val notificationListDataFormat: RootJsonFormat[NotificationListResponse] = jsonFormat4(
     NotificationListResponse
   )

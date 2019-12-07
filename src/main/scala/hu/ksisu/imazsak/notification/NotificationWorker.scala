@@ -8,8 +8,8 @@ import hu.ksisu.imazsak.core.AmqpService
 import hu.ksisu.imazsak.core.AmqpService.AmqpQueueConfig
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationServiceImpl.CreateNotificationQueueMessage
-import hu.ksisu.imazsak.util.{DateTimeUtil, LoggerUtil}
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger}
+import hu.ksisu.imazsak.util.{DateTimeUtil, LoggerUtil}
 import spray.json._
 
 import scala.util.Try
@@ -73,8 +73,8 @@ class NotificationWorker(
 
   private def processNotification(model: CreateNotificationData): IO[Unit] = {
     for {
-      _ <- notificationDao.createNotification(model)
-      _ <- pushNotificationService.sendNotification(model.userId, model.message).value
+      notiId <- notificationDao.createNotification(model)
+      _      <- pushNotificationService.sendNotification(notiId, model).value
     } yield ()
   }
 
