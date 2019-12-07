@@ -4,7 +4,7 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AppError, Response}
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
-import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
+import hu.ksisu.imazsak.notification.NotificationService.{NotificationInfoResponse, NotificationListResponse}
 import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import spray.json._
@@ -88,6 +88,23 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     EitherT.right(notificationDao.setRead(ids, ctx.userId))
   }
 
+  override def userNotificationsInfo()(implicit ctx: UserLogContext): Response[F, NotificationInfoResponse] = {
+    def countToLabel(n: Int): String = {
+      if (n == 0) {
+        ""
+      } else if (n >= 10) {
+        "9+"
+      } else {
+        n.toString
+      }
+    }
+
+    // TODO: counting move to dao (not only 10)
+    listUserNotifications()
+      .map(_.filterNot(_.meta.isRead).size)
+      .map(countToLabel)
+      .map(NotificationInfoResponse)
+  }
 }
 
 object NotificationServiceImpl {

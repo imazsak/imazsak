@@ -9,7 +9,7 @@ import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.notification.NotificationApi._
 import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
-import hu.ksisu.imazsak.notification.NotificationService.NotificationListResponse
+import hu.ksisu.imazsak.notification.NotificationService.{NotificationInfoResponse, NotificationListResponse}
 import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
@@ -27,6 +27,12 @@ class NotificationApi(
       get {
         userAuthAndTrace("Notifications_List") { implicit ctx =>
           service.listUserNotifications().toComplete
+        }
+      } ~ get {
+        path("info") {
+          userAuthAndTrace("Notifications_Info") { implicit ctx =>
+            service.userNotificationsInfo().toComplete
+          }
         }
       } ~ post {
         path("read") {
@@ -53,5 +59,8 @@ object NotificationApi {
   implicit val notificationMetaFormat: RootJsonFormat[NotificationMeta] = jsonFormat2(NotificationMeta)
   implicit val notificationListDataFormat: RootJsonFormat[NotificationListResponse] = jsonFormat4(
     NotificationListResponse
+  )
+  implicit val notificationInfoResponseFormat: RootJsonFormat[NotificationInfoResponse] = jsonFormat1(
+    NotificationInfoResponse
   )
 }
