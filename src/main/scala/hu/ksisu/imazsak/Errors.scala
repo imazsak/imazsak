@@ -13,9 +13,10 @@ import scala.util.{Failure, Success}
 
 object Errors {
   trait AppError
-  case class IllegalArgumentError(message: String) extends AppError
-  case class AccessDeniedError(message: String)    extends AppError
-  case class NotFoundError(message: String)        extends AppError
+  case class IllegalArgumentError(message: String)  extends AppError
+  case class AccessDeniedError(message: String)     extends AppError
+  case class NotFoundError(message: String)         extends AppError
+  case class VapidPublicKeyChanged(message: String) extends AppError
 
   type Response[F[_], T] = EitherT[F, AppError, T]
 
@@ -45,9 +46,10 @@ object Errors {
   type ErrorHandler = PartialFunction[AppError, Route]
 
   private def defaultHandler: ErrorHandler = {
-    case NotFoundError(msg)        => complete((StatusCodes.NotFound, ErrorResponse(msg)))
-    case AccessDeniedError(msg)    => complete((StatusCodes.Forbidden, ErrorResponse(msg)))
-    case IllegalArgumentError(msg) => complete((StatusCodes.BadRequest, ErrorResponse(msg)))
+    case NotFoundError(msg)         => complete((StatusCodes.NotFound, ErrorResponse(msg)))
+    case AccessDeniedError(msg)     => complete((StatusCodes.Forbidden, ErrorResponse(msg)))
+    case IllegalArgumentError(msg)  => complete((StatusCodes.BadRequest, ErrorResponse(msg)))
+    case VapidPublicKeyChanged(msg) => complete((StatusCodes.Conflict, ErrorResponse(msg)))
   }
 
   case class ErrorResponse(error: String)

@@ -6,7 +6,7 @@ import java.security.Security
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.IO
-import hu.ksisu.imazsak.Errors.Response
+import hu.ksisu.imazsak.Errors.{Response, VapidPublicKeyChanged}
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
 import hu.ksisu.imazsak.notification.PushNotificationService.{PushNotificationConfig, PushSubscribeRequest}
 import hu.ksisu.imazsak.prayer.PrayerService._
@@ -42,13 +42,21 @@ class PushNotificationServiceImpl(
     clientF.map(_ => ())
   }
 
+  override def getPublicKey()(implicit ctx: LogContext): Response[IO, String] = {
+    EitherT.rightT(config.publicKey)
+  }
+
   override def addSubscription(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[IO, Unit] = {
-    val daoData = UserPushSubscriptionData(
-      data.subscription.endpoint,
-      data.subscription.expirationTime,
-      data.subscription.keys
-    )
-    EitherT.right(userDao.addPushSubscription(ctx.userId, data.deviceId, daoData))
+    if (data.publicKey != config.publicKey) {
+      EitherT.leftT(VapidPublicKeyChanged("Vapid public key changed!"))
+    } else {
+      val daoData = UserPushSubscriptionData(
+        data.subscription.endpoint,
+        data.subscription.expirationTime,
+        data.subscription.keys
+      )
+      EitherT.right(userDao.addPushSubscription(ctx.userId, data.deviceId, daoData))
+    }
   }
 
   override def removeSubscription(deviceId: String)(implicit ctx: LogContext): Response[IO, Unit] = {

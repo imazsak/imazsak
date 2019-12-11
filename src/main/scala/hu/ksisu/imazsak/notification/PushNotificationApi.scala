@@ -22,7 +22,13 @@ class PushNotificationApi(
 
   def route(): Route = {
     pathPrefix("me" / "push-notification") {
-      post {
+      get {
+        path("public-key") {
+          withTrace("PushNotification_GetPublicKey") { implicit ctx =>
+            service.getPublicKey().map(PublicKey).toComplete
+          }
+        }
+      } ~ post {
         path("subscribe") {
           userAuthAndTrace("PushNotification_Subscribe") { implicit ctx =>
             entity(as[PushSubscribeRequest]) { data =>
@@ -45,8 +51,10 @@ class PushNotificationApi(
 }
 
 object PushNotificationApi {
+  case class PublicKey(publicKey: String)
   case class DeviceId(deviceId: String)
+  implicit val publicKeyFormat: RootJsonFormat[PublicKey]                       = jsonFormat1(PublicKey)
   implicit val deviceIdFormat: RootJsonFormat[DeviceId]                         = jsonFormat1(DeviceId)
   implicit val pushSubscriptionFormat: RootJsonFormat[PushSubscription]         = jsonFormat3(PushSubscription)
-  implicit val pushSubscribeRequestFormat: RootJsonFormat[PushSubscribeRequest] = jsonFormat2(PushSubscribeRequest)
+  implicit val pushSubscribeRequestFormat: RootJsonFormat[PushSubscribeRequest] = jsonFormat3(PushSubscribeRequest)
 }

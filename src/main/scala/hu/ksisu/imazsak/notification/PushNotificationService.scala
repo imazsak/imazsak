@@ -7,6 +7,7 @@ import hu.ksisu.imazsak.notification.PushNotificationService.PushSubscribeReques
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 
 trait PushNotificationService[F[_]] extends Initable[F] {
+  def getPublicKey()(implicit ctx: LogContext): Response[F, String]
   def addSubscription(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[F, Unit]
   def removeSubscription(deviceId: String)(implicit ctx: LogContext): Response[F, Unit]
   def sendNotification(notificationId: String, data: CreateNotificationData)(
@@ -17,5 +18,5 @@ trait PushNotificationService[F[_]] extends Initable[F] {
 object PushNotificationService {
   case class PushNotificationConfig(publicKey: String, privateKey: String)
   case class PushSubscription(endpoint: String, expirationTime: Option[Long], keys: Map[String, String])
-  case class PushSubscribeRequest(deviceId: String, subscription: PushSubscription)
+  case class PushSubscribeRequest(publicKey: String, deviceId: String, subscription: PushSubscription)
 }
