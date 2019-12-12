@@ -37,7 +37,7 @@ lazy val core = (project in file("."))
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.0.0",
         "org.typelevel"        %% "cats-effect"              % "2.0.0",
-        "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
+        "com.typesafe.akka"    %% "akka-http"                % "10.1.11",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
         "com.typesafe.akka"    %% "akka-actor"               % "2.6.0",
