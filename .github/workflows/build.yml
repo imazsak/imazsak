@@ -24,10 +24,10 @@ jobs:
       - name: Build docker image
         run: |
           docker build \
-          -t docker.pkg.github.com/imazsak/imazsak/app:${{ github.sha }} \
+          -t docker.pkg.github.com/imazsak/imazsak/imazsak:${{ github.sha }} \
           --build-arg COMPOSE_PROJECT_NAME=${{ github.sha }} \
           -f Dockerfile-build .
       - name: Push to registry
         run: |
           docker login -u imazsak -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
-          docker push docker.pkg.github.com/imazsak/imazsak/app:${{ github.sha }}
+          docker push docker.pkg.github.com/imazsak/imazsak/imazsak:${{ github.sha }}
