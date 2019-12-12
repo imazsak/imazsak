@@ -1,0 +1,29 @@
+name: PullRequest
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pull_request:
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE_INTERACTIVE_NO_CLI: 1
+      COMPOSE_PROJECT_NAME: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Compile
+        run: docker-compose build
+      - name: Compose up
+        run: docker-compose up -d
+      - name: Test
+        run: docker-compose exec -T imazsak sbt clean compile test it:test
+      - name: Build docker image
+        run: |
+          docker build \
+          -t docker.pkg.github.com/imazsak/imazsak/imazsak:${{ github.sha }} \
+          --build-arg COMPOSE_PROJECT_NAME=${{ github.sha }} \
+          -f Dockerfile-build .
