@@ -40,12 +40,12 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-http"                % "10.1.11",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
-        "com.typesafe.akka"    %% "akka-actor"               % "2.6.0",
-        "com.typesafe.akka"    %% "akka-stream"              % "2.6.0",
-        "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.0",
-        "com.typesafe.akka"    %% "akka-testkit"             % "2.6.0" % "it,test",
+        "com.typesafe.akka"    %% "akka-actor"               % "2.6.1",
+        "com.typesafe.akka"    %% "akka-stream"              % "2.6.1",
+        "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.1",
+        "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder"  % "6.2",
+        "net.logstash.logback" % "logstash-logback-encoder"  % "6.3",
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.29",
         "com.pauldijou"        %% "jwt-core"                 % "4.2.0",
         "com.pauldijou"        %% "jwt-spray-json"           % "4.2.0",
@@ -54,16 +54,16 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-api"           % "0.33.0",
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
-        "io.jaegertracing"     % "jaeger-client"             % "1.0.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.19.3",
+        "io.jaegertracing"     % "jaeger-client"             % "1.1.0",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.19.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "1.1.2",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.64",
-        "nl.martijndwars"      % "web-push"                  % "5.0.2",
+        "nl.martijndwars"      % "web-push"                  % "5.1.0",
         "org.codehaus.janino"  % "janino"                    % "3.1.0",
         "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.2.0" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.7.1" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.10.0" % "it,test"
       )
     }
   )
