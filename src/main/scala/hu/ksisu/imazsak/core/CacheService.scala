@@ -18,6 +18,8 @@ trait CacheService[F[_]] extends Initable[F] {
 object CacheService {
   def groupListByUserKey(userId: String) = s"group_list_$userId"
 
+  def groupMemberListKey(groupId: String) = s"group_members_$groupId"
+
   def myPrayerListKey(userId: String) = s"my_prayer_list_$userId"
 
   def prayerListByGroupKey(groupId: String) = s"group_prayer_list_$groupId"

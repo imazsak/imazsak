@@ -5,9 +5,11 @@ import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, Response}
 import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.group.GroupDao.{GroupListData, GroupMember}
+import hu.ksisu.imazsak.group.GroupService.GroupUserListData
 import hu.ksisu.imazsak.group.GroupServiceImpl._
 import hu.ksisu.imazsak.token.TokenService
 import hu.ksisu.imazsak.token.TokenService.CreateTokenData
+import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
@@ -16,17 +18,35 @@ import scala.concurrent.duration._
 
 class GroupServiceImpl[F[_]: Monad](
     implicit val groupDao: GroupDao[F],
+    userDao: UserDao[F],
     tokenService: TokenService[F],
     cache: CacheService[F]
 ) extends GroupService[F] {
-  private val tokenType    = "GROUP_JOIN"
-  private val groupListTtl = Some(30.minutes)
+  private val tokenType          = "GROUP_JOIN"
+  private val groupListTtl       = Some(30.minutes)
+  private val groupMemberListTtl = Some(30.minutes)
 
   override def listGroups()(implicit ctx: UserLogContext): Response[F, Seq[GroupListData]] = {
     val result = cache.findOrSet(CacheService.groupListByUserKey(ctx.userId), groupListTtl) {
       groupDao.findGroupsByUser(ctx.userId)
     }
     EitherT.right(result)
+  }
+
+  def listGroupUsers(groupId: String)(implicit ctx: UserLogContext): Response[F, Seq[GroupUserListData]] = {
+    lazy val groupMemberList = cache.findOrSet(CacheService.groupMemberListKey(groupId), groupMemberListTtl) {
+      groupDao.findMembersByGroupId(groupId)
+    }
+
+    for {
+      memberIds <- EitherT
+        .right[AppError](groupMemberList)
+        .map(_.map(_.id))
+        .ensure(illegalGroupError(Set(groupId)))(_.contains(ctx.userId))
+      users <- EitherT.right[AppError](userDao.findUsersByIds(memberIds))
+    } yield users.map { data =>
+      GroupUserListData(data.id, data.name)
+    }
   }
 
   override def createJoinToken(groupId: String)(implicit ctx: UserLogContext): Response[F, String] = {
@@ -43,6 +63,7 @@ class GroupServiceImpl[F[_]: Monad](
       _      <- EitherT.right(groupDao.isMember(data.groupId, ctx.userId)).ensure(alreadyMember(data.groupId))(!_)
       _      <- EitherT.right(groupDao.addMemberToGroup(data.groupId, GroupMember(ctx.userId)))
       _      <- EitherT.right(cache.remove(CacheService.groupListByUserKey(ctx.userId)))
+      _      <- EitherT.right(cache.remove(CacheService.groupMemberListKey(ctx.userId)))
     } yield ()
   }
 
@@ -78,4 +99,5 @@ object GroupServiceImpl {
   case class GroupTokenData(groupId: String)
   implicit val groupTokenDataFormatter: RootJsonFormat[GroupTokenData] = jsonFormat1(GroupTokenData)
   implicit val groupListDataFormat: RootJsonFormat[GroupListData]      = jsonFormat2(GroupListData)
+  implicit val groupMemberFormat: RootJsonFormat[GroupMember]          = jsonFormat1(GroupMember)
 }
