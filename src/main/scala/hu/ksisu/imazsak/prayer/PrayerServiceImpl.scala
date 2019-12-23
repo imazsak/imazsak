@@ -19,13 +19,14 @@ import hu.ksisu.imazsak.prayer.PrayerService.{
   PrayerCloseFeedbackNotificationData,
   PrayerCreatedNotificationData
 }
+import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
+import hu.ksisu.imazsak.stat.StatService
 import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
 
 import scala.concurrent.duration._
-import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 
 class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
@@ -33,7 +34,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     groupService: GroupService[F],
     userDao: UserDao[F],
     notificationService: NotificationService[F],
-    cache: CacheService[F]
+    cache: CacheService[F],
+    stat: StatService[F]
 ) extends PrayerService[F] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
@@ -53,6 +55,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _  <- sendNewPrayerNotificationWithoutError(id, data)
       _  <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _  <- EitherT.right(invalidateGroupsListCache(data.groupIds))
+      _  <- stat.prayerCreated(data)
     } yield {}
   }
 
@@ -97,6 +100,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       prayer  <- EitherT.fromOption(prayerO, illegalAccessToPrayer(groupId, prayerId))
       _       <- EitherT.right(prayerDao.incrementPrayCount(ctx.userId, prayerId))
       _       <- EitherT.right(cache.remove(CacheService.myPrayerListKey(prayer.userId)))
+      _       <- stat.prayed(prayerId)
     } yield ()
   }
 
@@ -118,6 +122,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _          <- EitherT.right(prayerDao.delete(data.id))
       _          <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _          <- EitherT.right(invalidateGroupsListCache(prayerData.groupIds))
+      _          <- stat.prayerClosed(data)
     } yield ()
   }
 

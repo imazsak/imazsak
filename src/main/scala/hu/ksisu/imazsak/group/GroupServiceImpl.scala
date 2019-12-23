@@ -7,6 +7,7 @@ import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.group.GroupDao.{GroupListData, GroupMember}
 import hu.ksisu.imazsak.group.GroupService.GroupUserListData
 import hu.ksisu.imazsak.group.GroupServiceImpl._
+import hu.ksisu.imazsak.stat.StatService
 import hu.ksisu.imazsak.token.TokenService
 import hu.ksisu.imazsak.token.TokenService.CreateTokenData
 import hu.ksisu.imazsak.user.UserDao
@@ -20,7 +21,8 @@ class GroupServiceImpl[F[_]: Monad](
     implicit val groupDao: GroupDao[F],
     userDao: UserDao[F],
     tokenService: TokenService[F],
-    cache: CacheService[F]
+    cache: CacheService[F],
+    stat: StatService[F]
 ) extends GroupService[F] {
   private val tokenType          = "GROUP_JOIN"
   private val groupListTtl       = Some(30.minutes)
@@ -63,7 +65,8 @@ class GroupServiceImpl[F[_]: Monad](
       _      <- EitherT.right(groupDao.isMember(data.groupId, ctx.userId)).ensure(alreadyMember(data.groupId))(!_)
       _      <- EitherT.right(groupDao.addMemberToGroup(data.groupId, GroupMember(ctx.userId)))
       _      <- EitherT.right(cache.remove(CacheService.groupListByUserKey(ctx.userId)))
-      _      <- EitherT.right(cache.remove(CacheService.groupMemberListKey(ctx.userId)))
+      _      <- EitherT.right(cache.remove(CacheService.groupMemberListKey(data.groupId)))
+      _      <- stat.joinedToGroup(data.groupId)
     } yield ()
   }
 
