@@ -20,7 +20,10 @@ db.notifications.createIndex({"id": 1}, {"unique": true});
 db.notifications.createIndex({"userId": 1});
 
 db.createCollection("feedback");
-db.notifications.createIndex({"id": 1}, {"unique": true});
+db.feedback.createIndex({"id": 1}, {"unique": true});
 
 db.createCollection("tokens");
-db.users.createIndex({"tokenType": 1, "token": 1}, {"unique": true});
+db.tokens.createIndex({"tokenType": 1, "token": 1}, {"unique": true});
+
+db.createCollection("stats");
+db.stats.createIndex({"id": 1}, {"unique": true});

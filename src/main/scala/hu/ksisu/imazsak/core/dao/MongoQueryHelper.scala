@@ -92,14 +92,14 @@ object MongoQueryHelper {
     } yield result)
   }
 
-  def updateOne(selector: BSONDocument, modifier: BSONDocument)(
+  def updateOne(selector: BSONDocument, modifier: BSONDocument, upsert: Boolean = false)(
       implicit collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Unit] = {
     for {
       collection <- collectionF
-      _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert = false, multi = false)))
+      _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert, multi = false)))
     } yield ()
   }
 

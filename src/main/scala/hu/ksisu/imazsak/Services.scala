@@ -13,7 +13,7 @@ import hu.ksisu.imazsak.feedback.{FeedbackDao, FeedbackDaoImpl, FeedbackService,
 import hu.ksisu.imazsak.group.{GroupDao, GroupDaoImpl, GroupService, GroupServiceImpl}
 import hu.ksisu.imazsak.notification._
 import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerServiceImpl}
-import hu.ksisu.imazsak.stat.{StatService, StatServiceImpl}
+import hu.ksisu.imazsak.stat.{StatDao, StatDaoImpl, StatService, StatServiceImpl}
 import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
@@ -49,6 +49,7 @@ trait Services[F[_]] {
   implicit val pushNotificationService: PushNotificationService[F]
   implicit val redisService: CacheService[F]
   implicit val statService: StatService[F]
+  implicit val statDao: StatDao[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -106,4 +107,5 @@ class RealServices(
   implicit lazy val authHookService: AuthHookService[IO]                 = new AuthHookServiceImpl[IO]()
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
   implicit lazy val statService: StatService[IO]                         = new StatServiceImpl[IO]()
+  implicit lazy val statDao: StatDao[IO]                                 = new StatDaoImpl()
 }

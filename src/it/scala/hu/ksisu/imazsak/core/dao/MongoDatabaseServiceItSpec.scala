@@ -19,6 +19,7 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
   PrayerWithPrayUserData
 }
 import hu.ksisu.imazsak.prayer.PrayerDaoImpl
+import hu.ksisu.imazsak.stat.StatDaoImpl
 import hu.ksisu.imazsak.token.TokenDao.TokenData
 import hu.ksisu.imazsak.token.TokenDaoImpl
 import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData, UserPushSubscriptionData}
@@ -49,6 +50,7 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
   private val notificationDao       = new NotificationDaoImpl()
   private val feedbackDao           = new FeedbackDaoImpl()
   private val tokenDao              = new TokenDaoImpl()
+  private val statDao               = new StatDaoImpl()
 
   private val userCollection          = mongoService.getCollection("users").unsafeRunSync()
   private val groupCollection         = mongoService.getCollection("groups").unsafeRunSync()
@@ -56,6 +58,7 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
   private val notificationsCollection = mongoService.getCollection("notifications").unsafeRunSync()
   private val feedbackCollection      = mongoService.getCollection("feedback").unsafeRunSync()
   private val tokenCollection         = mongoService.getCollection("tokens").unsafeRunSync()
+  private val statsCollection         = mongoService.getCollection("stats").unsafeRunSync()
 
   override def beforeEach(): Unit = {
     idGenerator.reset()
@@ -72,6 +75,7 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
       _ <- notificationsCollection.delete.one(BSONDocument())
       _ <- feedbackCollection.delete.one(BSONDocument())
       _ <- tokenCollection.delete.one(BSONDocument())
+      _ <- statsCollection.delete.one(BSONDocument())
     } yield ())
   }
 
@@ -700,6 +704,39 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
 
         tokenDao.findByTypeAndToken("type2", "token2").value.unsafeRunSync() shouldEqual Some(data2)
         tokenDao.findByTypeAndToken("type1", "token2").value.unsafeRunSync() shouldEqual None
+      }
+    }
+    "StatDao" when {
+      def getAllStat(): Map[String, BSONDocument] = {
+        val result = await(
+          statsCollection
+            .find(BSONDocument(), None)
+            .cursor[BSONDocument]()
+            .collect[Seq](-1, Cursor.FailOnError[Seq[BSONDocument]]())
+        )
+        result.map(doc => doc.getId -> doc).toMap
+      }
+      "#incrementStat" in {
+        val key1     = "stat-key"
+        val dateKey1 = "2010-05"
+        val dateKey2 = "2010-06"
+
+        getAllStat().isEmpty shouldEqual true
+
+        statDao.incrementStat(key1, dateKey1, counter = 1).unsafeRunSync()
+
+        val resultMap = getAllStat()
+        resultMap(key1).get("total") shouldEqual Some(BSONLong(1))
+        resultMap(key1).get(dateKey1) shouldEqual Some(BSONLong(1))
+        resultMap(key1).get(dateKey2) shouldEqual None
+
+        statDao.incrementStat(key1, dateKey1, counter = 2).unsafeRunSync()
+        statDao.incrementStat(key1, dateKey2, counter = 2).unsafeRunSync()
+
+        val resultMap2 = getAllStat()
+        resultMap2(key1).get("total") shouldEqual Some(BSONLong(5))
+        resultMap2(key1).get(dateKey1) shouldEqual Some(BSONLong(3))
+        resultMap2(key1).get(dateKey2) shouldEqual Some(BSONLong(2))
       }
     }
   }
