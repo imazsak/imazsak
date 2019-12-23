@@ -26,4 +26,4 @@ db.createCollection("tokens");
 db.tokens.createIndex({"tokenType": 1, "token": 1}, {"unique": true});
 
 db.createCollection("stats");
-db.stats.createIndex({"id": 1}, {"unique": true});
+db.getCollection("stats").createIndex({"id": 1}, {"unique": true});
