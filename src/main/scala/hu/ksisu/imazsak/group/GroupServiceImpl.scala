@@ -31,7 +31,7 @@ class GroupServiceImpl[F[_]: Monad](
 
   override def createJoinToken(groupId: String)(implicit ctx: UserLogContext): Response[F, String] = {
     for {
-      _     <- EitherT.right(groupDao.isMember(groupId, ctx.userId)).ensure(illegalGroupError(groupId))(identity)
+      _     <- EitherT.right(groupDao.isMember(groupId, ctx.userId)).ensure(illegalGroupError(Set(groupId)))(identity)
       token <- EitherT.right(tokenService.createToken(createTokenData(groupId)))
     } yield token
   }
@@ -46,12 +46,25 @@ class GroupServiceImpl[F[_]: Monad](
     } yield ()
   }
 
+  override def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {
+    for {
+      _      <- EitherT.cond(groupIds.nonEmpty, (), noGroupError)
+      groups <- listGroups()
+      illegalGroups = groupIds.toSet -- groups.map(_.id).toSet
+      _ <- EitherT.cond(illegalGroups.isEmpty, (), illegalGroupError(illegalGroups))
+    } yield ()
+  }
+
   private def createTokenData(groupId: String): CreateTokenData[GroupTokenData] = {
     CreateTokenData(tokenType, Some(GroupTokenData(groupId)))
   }
 
-  private def illegalGroupError(groupId: String)(implicit ctx: UserLogContext): AppError = {
-    AccessDeniedError(s"User ${ctx.userId} not member in: $groupId}")
+  private def illegalGroupError(groups: Set[String])(implicit ctx: UserLogContext): AppError = {
+    AccessDeniedError(s"User ${ctx.userId} not member in: ${groups.mkString("[,", ",", "]")}")
+  }
+
+  private def noGroupError: AppError = {
+    IllegalArgumentError("Must have at least one group to create a new prayer!")
   }
 
   private def alreadyMember(groupId: String)(implicit ctx: UserLogContext): AppError = {

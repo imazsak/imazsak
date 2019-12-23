@@ -4,7 +4,7 @@ import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, NotFoundError, Response}
 import hu.ksisu.imazsak.core.CacheService
-import hu.ksisu.imazsak.group.GroupDao
+import hu.ksisu.imazsak.group.{GroupDao, GroupService}
 import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
 import hu.ksisu.imazsak.notification.NotificationService
 import hu.ksisu.imazsak.prayer.PrayerDao.{
@@ -30,6 +30,7 @@ import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
     groupDao: GroupDao[F],
+    groupService: GroupService[F],
     userDao: UserDao[F],
     notificationService: NotificationService[F],
     cache: CacheService[F]
@@ -47,7 +48,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
     for {
       _  <- checkMessage(data.message)
-      _  <- checkGroups(data.groupIds)
+      _  <- groupService.checkGroups(data.groupIds)
       id <- EitherT.right(prayerDao.createPrayer(model))
       _  <- sendNewPrayerNotificationWithoutError(id, data)
       _  <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
@@ -85,7 +86,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       prayerDao.findByGroup(groupId)
     }
     for {
-      _      <- checkGroups(Seq(groupId))
+      _      <- groupService.checkGroups(Seq(groupId))
       result <- EitherT.right(groupList)
     } yield result
   }
@@ -101,7 +102,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   override def next10(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Seq[Next10PrayerListData]] = {
     for {
-      _      <- checkGroups(groupIds)
+      _      <- groupService.checkGroups(groupIds)
       result <- EitherT.right(prayerDao.findNextsByGroups(groupIds, ctx.userId, Some(10)))
     } yield {
       result.flatMap { x =>
@@ -117,15 +118,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _          <- EitherT.right(prayerDao.delete(data.id))
       _          <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _          <- EitherT.right(invalidateGroupsListCache(prayerData.groupIds))
-    } yield ()
-  }
-
-  private def checkGroups(groupIds: Seq[String])(implicit ctx: UserLogContext): Response[F, Unit] = {
-    for {
-      _      <- EitherT.cond(groupIds.nonEmpty, (), noGroupError)
-      groups <- EitherT.right(groupDao.findGroupsByUser(ctx.userId))
-      illegalGroups = groupIds.toSet -- groups.map(_.id).toSet
-      _ <- EitherT.cond(illegalGroups.isEmpty, (), illegalGroupError(illegalGroups))
     } yield ()
   }
 
@@ -217,14 +209,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private def noMessageError: AppError = {
     IllegalArgumentError("Must have add message to create a new prayer!")
-  }
-
-  private def noGroupError: AppError = {
-    IllegalArgumentError("Must have at least one group to create a new prayer!")
-  }
-
-  private def illegalGroupError(groups: Set[String])(implicit ctx: UserLogContext): AppError = {
-    AccessDeniedError(s"User ${ctx.userId} not member in: ${groups.mkString("[,", ",", "]")}")
   }
 
   private def illegalAccessToPrayer(groupId: String, prayerId: String): AppError = {
