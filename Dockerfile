@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt:8u222_1.3.4_2.13.1 as builder
+FROM hseeberger/scala-sbt:8u222_1.3.5_2.13.1 as builder
 WORKDIR /app
 COPY build.sbt /app/build.sbt
 COPY project /app/project
