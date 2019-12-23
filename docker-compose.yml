@@ -4,6 +4,8 @@ services:
     image: mongo:4.2.2
     volumes:
     - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
+  redis:
+    image: redis:5.0.7
   imazsak:
     build:
       context: .
@@ -12,5 +14,6 @@ services:
     command: sleep 9999
     depends_on:
       - db
+      - redis
     environment:
       - DB_URI=mongodb://db/imazsak
