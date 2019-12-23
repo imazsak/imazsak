@@ -115,11 +115,10 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   ): Response[F, Unit] = {
     import cats.instances.list._
     val usersWithGroupIds = data.groupIds.toList
-      .flatTraverse(
-        id =>
-          groupDao
-            .findMembersByGroupId(id)
-            .map(_.map(_.id -> id).toList)
+      .flatTraverse(id =>
+        groupDao
+          .findMembersByGroupId(id)
+          .map(_.map(_.id -> id).toList)
       )
       .map(_.groupMap(_._1)(_._2))
       .map(_.filter(_._1 != ctx.userId).toList)
@@ -157,8 +156,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       import cats.instances.list._
       createPrayerCloseFeedbackNotificationData(prayerData, feedback).flatMap { msg =>
         prayerData.prayUsers.toList
-          .traverse[Tmp, Unit](
-            userId => notificationService.createNotification(NotificationMeta.PRAYER_CLOSE_FEEDBACK, userId, msg)
+          .traverse[Tmp, Unit](userId =>
+            notificationService.createNotification(NotificationMeta.PRAYER_CLOSE_FEEDBACK, userId, msg)
           )
           .map(_ => {})
       }

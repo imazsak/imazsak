@@ -17,7 +17,7 @@ import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServic
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.AsyncDriver
 
 import scala.concurrent.ExecutionContext
 
@@ -77,7 +77,7 @@ class RealServices(
   import configService._
 
   implicit lazy val healthCheckService: HealthCheckService[IO]           = new HealthCheckServiceImpl[IO]
-  implicit lazy val mongoDriver: MongoDriver                             = new MongoDriver()
+  implicit lazy val mongoDriver: AsyncDriver                             = new AsyncDriver()
   implicit lazy val databaseService: MongoDatabaseService[IO]            = new MongoDatabaseServiceImpl()
   implicit lazy val httpWrapper: HttpWrapper[IO]                         = new AkkaHttpWrapper()
   implicit lazy val idGenerator: IdGenerator                             = new IdGeneratorImpl

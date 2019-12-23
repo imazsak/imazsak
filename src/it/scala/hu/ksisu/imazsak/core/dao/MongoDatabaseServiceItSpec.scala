@@ -26,7 +26,7 @@ import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.bson._
-import reactivemongo.api.{Cursor, MongoDriver}
+import reactivemongo.api.{Cursor, AsyncDriver}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +37,7 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
   private val conf = new ServerConfigImpl[Try]
 
   private implicit val idGenerator  = new IdGeneratorCounterImpl
-  private implicit val mongoDriver  = new MongoDriver()
+  private implicit val mongoDriver  = new AsyncDriver()
   private implicit val mongoConfig  = MongoConfig(conf.getMongoConfig.uri)
   private implicit val contextShift = IO.contextShift(implicitly[ExecutionContext])
   private implicit val mongoService = new MongoDatabaseServiceImpl()

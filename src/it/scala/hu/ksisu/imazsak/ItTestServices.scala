@@ -14,7 +14,7 @@ import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerS
 import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.AsyncDriver
 
 import scala.concurrent.ExecutionContext
 
@@ -23,7 +23,7 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val configService: ServerConfig[IO] = new ServerConfigImpl[IO]
   import configService._
   implicit lazy val healthCheckService: HealthCheckService[IO] = new HealthCheckServiceImpl[IO]
-  implicit lazy val mongoDriver                                = new MongoDriver()
+  implicit lazy val mongoDriver                                = new AsyncDriver()
   implicit lazy val databaseService: MongoDatabaseService[IO]  = new MongoDatabaseServiceImpl()
 
   implicit lazy val idGenerator: IdGenerator      = new IdGeneratorCounterImpl
