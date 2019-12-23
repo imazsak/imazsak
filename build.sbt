@@ -35,7 +35,7 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.0.0",
+        "org.typelevel"        %% "cats-core"                % "2.1.0",
         "org.typelevel"        %% "cats-effect"              % "2.0.0",
         "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
@@ -55,15 +55,16 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.1.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.19.4",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.19.5",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "1.1.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "1.1.2",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.64",
         "nl.martijndwars"      % "web-push"                  % "5.1.0",
         "org.codehaus.janino"  % "janino"                    % "3.1.0",
-        "org.scalatest"        %% "scalatest"                % "3.1.0" % "it,test",
+        "com.github.etaty"     %% "rediscala"                % "1.9.0",
+        "org.scalatest"        %% "scalatest"                % "3.0.8" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.2.4" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.10.0" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.10.1" % "it,test"
       )
     }
   )

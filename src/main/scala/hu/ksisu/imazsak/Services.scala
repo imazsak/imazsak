@@ -17,7 +17,7 @@ import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServic
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
-import reactivemongo.api.MongoDriver
+import reactivemongo.api.AsyncDriver
 
 import scala.concurrent.ExecutionContext
 
@@ -42,11 +42,11 @@ trait Services[F[_]] {
   implicit val feedbackService: FeedbackService[F]
   implicit val notificationDao: NotificationDao[F]
   implicit val notificationService: NotificationService[F]
-  implicit val userService: UserService[F]
   implicit val tokenDao: TokenDao[F]
   implicit val tokenService: TokenService[F]
   implicit val authHookService: AuthHookService[F]
   implicit val pushNotificationService: PushNotificationService[F]
+  implicit val redisService: CacheService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -63,6 +63,7 @@ trait Services[F[_]] {
       _ <- initialize(tokenService, "token")
       _ <- initialize(notificationService, "notification")
       _ <- initialize(pushNotificationService, "push")
+      _ <- initialize(redisService, "redis")
     } yield ()
   }
 }
@@ -76,8 +77,9 @@ class RealServices(
   implicit lazy val configService: ServerConfig[IO] = new ServerConfigImpl[IO]
   import configService._
 
+  implicit lazy val redisService: CacheService[IO]                       = new RedisServiceImpl()
   implicit lazy val healthCheckService: HealthCheckService[IO]           = new HealthCheckServiceImpl[IO]
-  implicit lazy val mongoDriver: MongoDriver                             = new MongoDriver()
+  implicit lazy val mongoDriver: AsyncDriver                             = new AsyncDriver()
   implicit lazy val databaseService: MongoDatabaseService[IO]            = new MongoDatabaseServiceImpl()
   implicit lazy val httpWrapper: HttpWrapper[IO]                         = new AkkaHttpWrapper()
   implicit lazy val idGenerator: IdGenerator                             = new IdGeneratorImpl
@@ -97,7 +99,6 @@ class RealServices(
   implicit lazy val feedbackService: FeedbackService[IO]                 = new FeedbackServiceImpl[IO]()
   implicit lazy val notificationDao: NotificationDao[IO]                 = new NotificationDaoImpl()
   implicit lazy val notificationService: NotificationService[IO]         = new NotificationServiceImpl[IO]()
-  implicit lazy val userService: UserService[IO]                         = new UserServiceImpl[IO]()
   implicit lazy val tokenDao: TokenDao[IO]                               = new TokenDaoImpl()
   implicit lazy val tokenService: TokenService[IO]                       = new TokenServiceImpl[IO]()
   implicit lazy val authHookService: AuthHookService[IO]                 = new AuthHookServiceImpl[IO]()

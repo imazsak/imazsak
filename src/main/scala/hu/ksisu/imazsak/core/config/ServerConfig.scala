@@ -8,6 +8,7 @@ import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl.JwtConfig
+import hu.ksisu.imazsak.core.impl.RedisServiceImpl.RedisConfig
 import hu.ksisu.imazsak.notification.PushNotificationService.PushNotificationConfig
 
 import scala.io.Source
@@ -29,6 +30,8 @@ trait ServerConfig[F[_]] extends Initable[F] {
   implicit def getPushNotificationConfig: PushNotificationConfig
 
   implicit def getAmqpQueueConfig(name: String): AmqpQueueConfig
+
+  implicit def getRedisConfig: RedisConfig
 }
 
 class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig[F] {
@@ -108,4 +111,13 @@ class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig
     fromFile.getOrElse(fromConfig)
   }
 
+  override implicit def getRedisConfig: RedisConfig = {
+    val config = conf.getConfig("redis")
+    RedisConfig(
+      config.getString("host"),
+      config.getInt("port"),
+      Try(readFromFileOrConf(config, "password")).toOption,
+      Try(config.getInt("database")).toOption
+    )
+  }
 }

@@ -6,6 +6,10 @@ services:
       - 27017:27017
     volumes:
     - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
+  redis:
+    image: redis:5.0.7
+    ports:
+    - 6379:6379
   nginx:
     image: nginx:stable-alpine
     volumes:
@@ -14,7 +18,7 @@ services:
     - ./scripts/nginx/cert.pem:/etc/nginx/ssl/cert.pem
     network_mode: "host"
   jaeger:
-    image: jaegertracing/all-in-one:1.15
+    image: jaegertracing/all-in-one:1.16
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
     ports:

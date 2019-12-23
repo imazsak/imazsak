@@ -5,6 +5,7 @@ import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.notification.NotificationDao._
 import hu.ksisu.imazsak.util.IdGenerator
+import reactivemongo.api.ReadConcern
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.bson.{BSON, document}
 
@@ -45,5 +46,15 @@ class NotificationDaoImpl(
     val selector = byIds(ids) ++ byUserId(userId)
     val modifier = document("$set" -> document("meta.isRead" -> true))
     MongoQueryHelper.updateMultiple(selector, modifier)
+  }
+
+  override def countNotReadByUser(userId: String, limit: Option[Int]): IO[Long] = {
+    val selector = byUserId(userId) ++ document("meta.isRead" -> false)
+    for {
+      collection <- collectionF
+      count <- IO.fromFuture(
+        IO(collection.count(Some(selector), limit, skip = 0, hint = None, readConcern = ReadConcern.Local))
+      )
+    } yield count
   }
 }

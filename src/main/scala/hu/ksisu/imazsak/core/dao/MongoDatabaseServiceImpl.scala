@@ -5,7 +5,7 @@ import cats.effect.{ContextShift, IO}
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
+import reactivemongo.api.{AsyncDriver, DefaultDB, MongoConnection}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -14,7 +14,7 @@ class MongoDatabaseServiceImpl(
     implicit config: MongoConfig,
     ec: ExecutionContext,
     cs: ContextShift[IO],
-    driver: MongoDriver
+    driver: AsyncDriver
 ) extends MongoDatabaseService[IO] {
   import cats.instances.future._
 
@@ -22,7 +22,7 @@ class MongoDatabaseServiceImpl(
     val result: EitherT[Future, Throwable, DefaultDB] = for {
       uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
       dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
-      connection <- EitherT.fromEither(driver.connection(uri, None, strictUri = false).toEither)
+      connection <- EitherT(driver.connect(uri).map(Right(_)).recover(Left(_)))
       db         <- EitherT.right(connection.database(dbname))
     } yield db
 

@@ -3,14 +3,14 @@ package hu.ksisu.imazsak
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.config.ServerConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
-import hu.ksisu.imazsak.core.impl.JwtServiceImpl
+import hu.ksisu.imazsak.core.impl.{JwtServiceImpl, RedisServiceImpl}
 import hu.ksisu.imazsak.core.{AmqpService, AuthHookService}
 import hu.ksisu.imazsak.notification.PushNotificationService
 import org.slf4j.LoggerFactory
 
 import scala.util.{Success, Try}
 
-class InitiableSpec extends TestBase {
+class InitableSpec extends TestBase {
 
   trait TestScope {
     var called = false
@@ -33,11 +33,12 @@ class InitiableSpec extends TestBase {
       override def getAuthHookConfig: AuthHookService.AuthHookConfig                         = ???
       override def getPushNotificationConfig: PushNotificationService.PushNotificationConfig = ???
       override def getAmqpQueueConfig(name: String): AmqpService.AmqpQueueConfig             = ???
+      override def getRedisConfig: RedisServiceImpl.RedisConfig                              = ???
     }
   }
   import cats.instances.try_._
 
-  "Initiable" should {
+  "Initable" should {
     "#initializeIfEnabled" should {
       "call init if enabled" in new TestScope {
         Initable.initializeIfEnabled(service, "modulename") shouldEqual Success(())

@@ -32,7 +32,7 @@ object PrayerDao {
   case class MyPrayerListData(id: String, message: String, groupIds: Seq[String], prayCount: Int, createdAt: Long)
   case class GroupPrayerListData(id: String, userId: String, message: String)
   case class PrayerListData(id: String, userId: String, groupIds: Seq[String], message: String)
-  case class PrayerWithPrayUserData(userId: String, message: String, prayUsers: Seq[String])
+  case class PrayerWithPrayUserData(userId: String, message: String, prayUsers: Seq[String], groupIds: Seq[String])
 
   implicit val createPrayerDataWriter: BSONDocumentWriter[CreatePrayerData]       = Macros.writer[CreatePrayerData]
   implicit val groupPrayerListDataReader: BSONDocumentReader[GroupPrayerListData] = Macros.reader[GroupPrayerListData]
@@ -66,6 +66,6 @@ object PrayerDao {
   )
 
   val prayerWithPrayUserDataProjector: Option[BSONDocument] = Option(
-    document("userId" -> 1, "message" -> 1, "prayUsers" -> 1)
+    document("userId" -> 1, "message" -> 1, "prayUsers" -> 1, "groupIds" -> 1)
   )
 }

@@ -14,6 +14,7 @@ trait NotificationDao[F[_]] {
   def createNotification(data: CreateNotificationData): F[String]
   def findByUser(userId: String): F[Seq[NotificationListData]]
   def findByUserOrderByDateDesc(userId: String, limit: Option[Int] = None): F[Seq[NotificationListData]]
+  def countNotReadByUser(userId: String, limit: Option[Int] = None): F[Long]
   def updateMeta(id: String, meta: NotificationMeta): F[Unit]
   def setRead(ids: Seq[String], userId: String): F[Unit]
   def deleteByIds(ids: Seq[String], userId: Option[String] = None): F[Int]

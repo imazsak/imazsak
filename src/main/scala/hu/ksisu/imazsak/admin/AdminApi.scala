@@ -10,7 +10,7 @@ import hu.ksisu.imazsak.admin.AdminApi._
 import hu.ksisu.imazsak.admin.AdminService.{AddUserToGroupRequest, CreateGroupRequest}
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.group.GroupDao.{GroupAdminListData, GroupMember}
-import hu.ksisu.imazsak.user.UserApi._
+import hu.ksisu.imazsak.user.UserDao.UserAdminListData
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -56,4 +56,5 @@ object AdminApi {
   implicit val groupAdminListDataFormat: RootJsonFormat[GroupAdminListData]       = jsonFormat3(GroupAdminListData)
   implicit val addUserToGroupRequestFormat: RootJsonFormat[AddUserToGroupRequest] = jsonFormat2(AddUserToGroupRequest)
   implicit val createGroupRequestFormat: RootJsonFormat[CreateGroupRequest]       = jsonFormat2(CreateGroupRequest)
+  implicit val userAdminListDataFormat: RootJsonFormat[UserAdminListData]         = jsonFormat2(UserAdminListData)
 }
