@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.prayer
 import cats.MonadError
 import cats.data.EitherT
 import hu.ksisu.imazsak.Errors.{AccessDeniedError, AppError, IllegalArgumentError, NotFoundError, Response}
+import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.group.GroupDao
 import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
 import hu.ksisu.imazsak.notification.NotificationService
@@ -20,12 +21,17 @@ import hu.ksisu.imazsak.prayer.PrayerService.{
 }
 import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
+import spray.json.DefaultJsonProtocol._
+import spray.json.RootJsonFormat
+import scala.concurrent.duration._
+import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 
 class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     implicit prayerDao: PrayerDao[F],
     groupDao: GroupDao[F],
     userDao: UserDao[F],
-    notificationService: NotificationService[F]
+    notificationService: NotificationService[F],
+    cache: CacheService[F]
 ) extends PrayerService[F] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
@@ -33,6 +39,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   private type Tmp[T] = Response[F, T]
 
   private implicit val logger = new Logger("PrayerServiceImpl")
+  private val myListTtl       = Some(30.minutes)
 
   override def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
@@ -41,6 +48,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _  <- checkGroups(data.groupIds)
       id <- EitherT.right(prayerDao.createPrayer(model))
       _  <- sendNewPrayerNotificationWithoutError(id, data)
+      _  <- EitherT.right(cache.remove(myListKey(ctx.userId)))
     } yield {}
   }
 
@@ -61,7 +69,10 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
-    EitherT.right(prayerDao.findPrayerByUser(ctx.userId))
+    val result = cache.findOrSet(myListKey(ctx.userId), myListTtl) {
+      prayerDao.findPrayerByUser(ctx.userId)
+    }
+    EitherT.right(result)
   }
 
   override def listGroupPrayers(
@@ -97,6 +108,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       prayerData <- loadPrayerAndCheckPrayerBelongsToCurrentUser(data.id)
       _          <- sendFeedbackToUsers(prayerData, data.message.getOrElse(""))
       _          <- EitherT.right(prayerDao.delete(data.id))
+      _          <- EitherT.right(cache.remove(myListKey(ctx.userId)))
     } yield ()
   }
 
@@ -213,4 +225,10 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   private def notTheCurrentUsersPrayer(prayerId: String)(implicit ctx: UserLogContext): AppError = {
     AccessDeniedError(s"Prayer $prayerId not belongs to user ${ctx.userId}")
   }
+
+  private def myListKey(userId: String) = s"my_prayer_list_$userId"
+}
+
+object PrayerServiceImpl {
+  implicit val myPrayerListDataFormat: RootJsonFormat[MyPrayerListData] = jsonFormat5(MyPrayerListData)
 }
