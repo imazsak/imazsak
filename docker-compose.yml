@@ -17,3 +17,4 @@ services:
       - redis
     environment:
       - DB_URI=mongodb://db/imazsak
+      - REDIS_HOST=redis
