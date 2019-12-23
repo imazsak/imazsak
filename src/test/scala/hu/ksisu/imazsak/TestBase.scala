@@ -3,13 +3,15 @@ package hu.ksisu.imazsak
 import akka.actor.ActorSystem
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import io.opentracing.noop.NoopTracerFactory
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.MockitoSugar
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-trait TestBase extends WordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
+trait TestBase extends AnyWordSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {
 
   implicit lazy val dummyLogContext = {
     val tracer = NoopTracerFactory.create()

@@ -9,7 +9,9 @@ import cats.effect.IO
 import hu.ksisu.imazsak.AwaitUtil
 import hu.ksisu.imazsak.core.config.ServerConfigImpl
 import hu.ksisu.imazsak.core.impl.RedisServiceImpl
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -17,7 +19,7 @@ import scala.util.Try
 
 class RedisServiceSpec
     extends TestKit(ActorSystem("RedisServiceSpec"))
-    with WordSpecLike
+    with AnyWordSpecLike
     with Matchers
     with AwaitUtil
     with BeforeAndAfterAll {

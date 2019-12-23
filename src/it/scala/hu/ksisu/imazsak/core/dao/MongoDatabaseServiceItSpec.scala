@@ -24,7 +24,9 @@ import hu.ksisu.imazsak.token.TokenDaoImpl
 import hu.ksisu.imazsak.user.UserDao.{UserAdminListData, UserData, UserPushSubscriptionData}
 import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
-import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import reactivemongo.api.bson._
 import reactivemongo.api.{AsyncDriver, Cursor}
 
@@ -32,7 +34,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
-class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUtil with BeforeAndAfterEach {
+class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with AwaitUtil with BeforeAndAfterEach {
   import cats.instances.try_._
   private val conf = new ServerConfigImpl[Try]
 

@@ -7,7 +7,6 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import cats.effect.IO
 import hu.ksisu.imazsak.{Api, TestBase}
 import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import spray.json.{JsObject, JsString}
 

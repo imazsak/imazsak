@@ -4,7 +4,6 @@ import hu.ksisu.imazsak.core.config.ServerConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckService.HealthCheckResult
 import hu.ksisu.imazsak.{BuildInfo, TestBase}
-import org.mockito.Mockito.when
 
 import scala.util.{Failure, Success, Try}
 
