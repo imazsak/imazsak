@@ -22,7 +22,7 @@ class StatServiceImpl[F[_]: Applicative](
   import cats.syntax.applicative._
 
   protected lazy val amqpSender: AmqpSenderWrapper = {
-    val conf = configByName("stats_service")
+    val conf = configByName("stat_service")
     amqpService.createSenderWrapper(conf)
   }
 

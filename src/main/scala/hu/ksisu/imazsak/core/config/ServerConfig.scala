@@ -85,7 +85,7 @@ class ServerConfigImpl[F[_]: MonadError[*[_], Throwable]]() extends ServerConfig
   override implicit def getAmqpQueueConfig(name: String): AmqpQueueConfig = {
     val path: String = name match {
       case "notification_service" => "pushNotification.amqp"
-      case "stats_service"        => "stats.amqp"
+      case "stat_service"        => "stat.amqp"
       case _                      => throw new IllegalArgumentException(s"$name unknown AMQP type.")
     }
     AmqpQueueConfig(conf.getConfig(path))
