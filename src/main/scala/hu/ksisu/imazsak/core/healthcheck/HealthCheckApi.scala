@@ -20,10 +20,6 @@ class HealthCheckApi(implicit service: HealthCheckService[IO], val jwtService: J
           }
         }
       }
-    } ~ path("test") {
-      userAuth { id =>
-        complete(s"hello $id")
-      }
     }
   }
 }
