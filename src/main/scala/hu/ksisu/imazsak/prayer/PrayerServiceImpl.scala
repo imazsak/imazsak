@@ -23,6 +23,7 @@ import hu.ksisu.imazsak.user.UserDao
 import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
+
 import scala.concurrent.duration._
 import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 
@@ -40,6 +41,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private implicit val logger = new Logger("PrayerServiceImpl")
   private val myListTtl       = Some(30.minutes)
+  private val groupListTtl    = Some(30.minutes)
 
   override def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
@@ -49,6 +51,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       id <- EitherT.right(prayerDao.createPrayer(model))
       _  <- sendNewPrayerNotificationWithoutError(id, data)
       _  <- EitherT.right(cache.remove(myListKey(ctx.userId)))
+      _  <- EitherT.right(invalidateGroupsListCache(data.groupIds))
     } yield {}
   }
 
@@ -78,17 +81,21 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   override def listGroupPrayers(
       groupId: String
   )(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]] = {
+    lazy val groupList = cache.findOrSet(groupListKey(groupId), groupListTtl) {
+      prayerDao.findByGroup(groupId)
+    }
     for {
       _      <- checkGroups(Seq(groupId))
-      result <- EitherT.right(prayerDao.findByGroup(groupId))
+      result <- EitherT.right(groupList)
     } yield result
   }
 
   override def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit] = {
     for {
-      prayers <- listGroupPrayers(groupId)
-      _       <- EitherT.cond(prayers.exists(_.id == prayerId), (), illegalAccessToPrayer(groupId, prayerId))
+      prayerO <- listGroupPrayers(groupId).map(_.find(_.id == prayerId))
+      prayer  <- EitherT.fromOption(prayerO, illegalAccessToPrayer(groupId, prayerId))
       _       <- EitherT.right(prayerDao.incrementPrayCount(ctx.userId, prayerId))
+      _       <- EitherT.right(cache.remove(myListKey(prayer.userId)))
     } yield ()
   }
 
@@ -109,6 +116,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _          <- sendFeedbackToUsers(prayerData, data.message.getOrElse(""))
       _          <- EitherT.right(prayerDao.delete(data.id))
       _          <- EitherT.right(cache.remove(myListKey(ctx.userId)))
+      _          <- EitherT.right(invalidateGroupsListCache(prayerData.groupIds))
     } yield ()
   }
 
@@ -198,6 +206,11 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       .ensure(notTheCurrentUsersPrayer(prayerId))(_.userId == ctx.userId)
   }
 
+  private def invalidateGroupsListCache(groupIds: Seq[String]): F[List[Unit]] = {
+    import cats.instances.list._
+    groupIds.toList.traverse[F, Unit](id => cache.remove(groupListKey(id)))
+  }
+
   private def checkMessage(message: String): Response[F, Unit] = {
     EitherT.cond(message.trim.length > 5, (), noMessageError)
   }
@@ -219,7 +232,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   private def notFound(prayerId: String): AppError = {
-    NotFoundError(s"Prayer ${prayerId}not found")
+    NotFoundError(s"Prayer ${prayerId} not found")
   }
 
   private def notTheCurrentUsersPrayer(prayerId: String)(implicit ctx: UserLogContext): AppError = {
@@ -227,8 +240,14 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   private def myListKey(userId: String) = s"my_prayer_list_$userId"
+
+  private def groupListKey(groupId: String) = s"group_prayer_list_$groupId"
 }
 
 object PrayerServiceImpl {
-  implicit val myPrayerListDataFormat: RootJsonFormat[MyPrayerListData] = jsonFormat5(MyPrayerListData)
+  implicit val myPrayerListDataFormat: RootJsonFormat[MyPrayerListData]       = jsonFormat5(MyPrayerListData)
+  implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData] = jsonFormat3(GroupPrayerListData)
+  implicit val prayerWithPrayUserDataFormat: RootJsonFormat[PrayerWithPrayUserData] = jsonFormat4(
+    PrayerWithPrayUserData
+  )
 }
