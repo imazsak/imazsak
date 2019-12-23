@@ -50,5 +50,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val tokenService: TokenService[IO]                       = new TokenServiceImpl[IO]()
   implicit lazy val authHookService: AuthHookService[IO]                 = new AuthHookServiceImpl[IO]()
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
-  override implicit val redisService: RedisService[IO]                   = null
+  override implicit val redisService: CacheService[IO]                   = null
 }

@@ -5,7 +5,7 @@ import hu.ksisu.imazsak.Initable
 import hu.ksisu.imazsak.notification.NotificationDao.NotificationMeta
 import hu.ksisu.imazsak.notification.NotificationService.{NotificationInfoResponse, NotificationListResponse}
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
-import spray.json.{JsValue, JsonWriter}
+import spray.json._
 
 trait NotificationService[F[_]] extends Initable[F] {
   def createNotification[T](notificationType: String, userId: String, message: T)(
@@ -19,6 +19,10 @@ trait NotificationService[F[_]] extends Initable[F] {
 }
 
 object NotificationService {
+  import spray.json.DefaultJsonProtocol._
   case class NotificationListResponse(id: String, message: JsValue, createdAt: Long, meta: NotificationMeta)
   case class NotificationInfoResponse(c: String)
+  implicit val notificationInfoResponseFormat: RootJsonFormat[NotificationInfoResponse] = jsonFormat1(
+    NotificationInfoResponse
+  )
 }

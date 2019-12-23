@@ -47,7 +47,7 @@ trait Services[F[_]] {
   implicit val tokenService: TokenService[F]
   implicit val authHookService: AuthHookService[F]
   implicit val pushNotificationService: PushNotificationService[F]
-  implicit val redisService: RedisService[F]
+  implicit val redisService: CacheService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -78,7 +78,7 @@ class RealServices(
   implicit lazy val configService: ServerConfig[IO] = new ServerConfigImpl[IO]
   import configService._
 
-  implicit lazy val redisService: RedisService[IO]                       = new RedisServiceImpl()
+  implicit lazy val redisService: CacheService[IO]                       = new RedisServiceImpl()
   implicit lazy val healthCheckService: HealthCheckService[IO]           = new HealthCheckServiceImpl[IO]
   implicit lazy val mongoDriver: AsyncDriver                             = new AsyncDriver()
   implicit lazy val databaseService: MongoDatabaseService[IO]            = new MongoDatabaseServiceImpl()

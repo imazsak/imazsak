@@ -3,8 +3,8 @@ package hu.ksisu.imazsak
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.config.ServerConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
-import hu.ksisu.imazsak.core.impl.JwtServiceImpl
-import hu.ksisu.imazsak.core.{AmqpService, AuthHookService, RedisService}
+import hu.ksisu.imazsak.core.impl.{JwtServiceImpl, RedisServiceImpl}
+import hu.ksisu.imazsak.core.{AmqpService, AuthHookService}
 import hu.ksisu.imazsak.notification.PushNotificationService
 import org.slf4j.LoggerFactory
 
@@ -33,7 +33,7 @@ class InitableSpec extends TestBase {
       override def getAuthHookConfig: AuthHookService.AuthHookConfig                         = ???
       override def getPushNotificationConfig: PushNotificationService.PushNotificationConfig = ???
       override def getAmqpQueueConfig(name: String): AmqpService.AmqpQueueConfig             = ???
-      override implicit def getRedisConfig: RedisService.RedisConfig                         = ???
+      override def getRedisConfig: RedisServiceImpl.RedisConfig                              = ???
     }
   }
   import cats.instances.try_._

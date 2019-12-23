@@ -5,10 +5,10 @@ import hu.ksisu.imazsak.Initable
 import hu.ksisu.imazsak.core.AmqpService.{AmqpConfig, AmqpQueueConfig}
 import hu.ksisu.imazsak.core.AuthHookService.AuthHookConfig
 import hu.ksisu.imazsak.core.Errors.WrongConfig
-import hu.ksisu.imazsak.core.RedisService.RedisConfig
 import hu.ksisu.imazsak.core.TracerService.TracerServiceConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import hu.ksisu.imazsak.core.impl.JwtServiceImpl.JwtConfig
+import hu.ksisu.imazsak.core.impl.RedisServiceImpl.RedisConfig
 import hu.ksisu.imazsak.notification.PushNotificationService.PushNotificationConfig
 
 import scala.io.Source
