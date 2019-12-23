@@ -23,7 +23,7 @@ class GroupServiceImpl[F[_]: Monad](
   private val groupListTtl = Some(30.minutes)
 
   override def listGroups()(implicit ctx: UserLogContext): Response[F, Seq[GroupListData]] = {
-    val result = cache.findOrSet(groupListKey(ctx.userId), groupListTtl) {
+    val result = cache.findOrSet(CacheService.groupListByUserKey(ctx.userId), groupListTtl) {
       groupDao.findGroupsByUser(ctx.userId)
     }
     EitherT.right(result)
@@ -42,7 +42,7 @@ class GroupServiceImpl[F[_]: Monad](
       data   <- EitherT.fromOption(tokenO, invalidToken)
       _      <- EitherT.right(groupDao.isMember(data.groupId, ctx.userId)).ensure(alreadyMember(data.groupId))(!_)
       _      <- EitherT.right(groupDao.addMemberToGroup(data.groupId, GroupMember(ctx.userId)))
-      _      <- EitherT.right(cache.remove(groupListKey(ctx.userId)))
+      _      <- EitherT.right(cache.remove(CacheService.groupListByUserKey(ctx.userId)))
     } yield ()
   }
 
@@ -59,8 +59,6 @@ class GroupServiceImpl[F[_]: Monad](
   }
 
   private val invalidToken: AppError = IllegalArgumentError("Invalid Token")
-
-  private def groupListKey(userId: String) = s"group_list_$userId"
 }
 
 object GroupServiceImpl {

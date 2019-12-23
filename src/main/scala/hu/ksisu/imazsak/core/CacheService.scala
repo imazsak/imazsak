@@ -14,3 +14,11 @@ trait CacheService[F[_]] extends Initable[F] {
 
   def remove(key: String): F[Unit]
 }
+
+object CacheService {
+  def groupListByUserKey(userId: String) = s"group_list_$userId"
+
+  def myPrayerListKey(userId: String) = s"my_prayer_list_$userId"
+
+  def prayerListByGroupKey(groupId: String) = s"group_prayer_list_$groupId"
+}

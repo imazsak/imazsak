@@ -50,7 +50,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _  <- checkGroups(data.groupIds)
       id <- EitherT.right(prayerDao.createPrayer(model))
       _  <- sendNewPrayerNotificationWithoutError(id, data)
-      _  <- EitherT.right(cache.remove(myListKey(ctx.userId)))
+      _  <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _  <- EitherT.right(invalidateGroupsListCache(data.groupIds))
     } yield {}
   }
@@ -72,7 +72,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   override def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]] = {
-    val result = cache.findOrSet(myListKey(ctx.userId), myListTtl) {
+    val result = cache.findOrSet(CacheService.myPrayerListKey(ctx.userId), myListTtl) {
       prayerDao.findPrayerByUser(ctx.userId)
     }
     EitherT.right(result)
@@ -81,7 +81,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   override def listGroupPrayers(
       groupId: String
   )(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]] = {
-    lazy val groupList = cache.findOrSet(groupListKey(groupId), groupListTtl) {
+    lazy val groupList = cache.findOrSet(CacheService.prayerListByGroupKey(groupId), groupListTtl) {
       prayerDao.findByGroup(groupId)
     }
     for {
@@ -95,7 +95,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       prayerO <- listGroupPrayers(groupId).map(_.find(_.id == prayerId))
       prayer  <- EitherT.fromOption(prayerO, illegalAccessToPrayer(groupId, prayerId))
       _       <- EitherT.right(prayerDao.incrementPrayCount(ctx.userId, prayerId))
-      _       <- EitherT.right(cache.remove(myListKey(prayer.userId)))
+      _       <- EitherT.right(cache.remove(CacheService.myPrayerListKey(prayer.userId)))
     } yield ()
   }
 
@@ -115,7 +115,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       prayerData <- loadPrayerAndCheckPrayerBelongsToCurrentUser(data.id)
       _          <- sendFeedbackToUsers(prayerData, data.message.getOrElse(""))
       _          <- EitherT.right(prayerDao.delete(data.id))
-      _          <- EitherT.right(cache.remove(myListKey(ctx.userId)))
+      _          <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _          <- EitherT.right(invalidateGroupsListCache(prayerData.groupIds))
     } yield ()
   }
@@ -208,7 +208,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
   private def invalidateGroupsListCache(groupIds: Seq[String]): F[List[Unit]] = {
     import cats.instances.list._
-    groupIds.toList.traverse[F, Unit](id => cache.remove(groupListKey(id)))
+    groupIds.toList.traverse[F, Unit](id => cache.remove(CacheService.prayerListByGroupKey(id)))
   }
 
   private def checkMessage(message: String): Response[F, Unit] = {
@@ -238,10 +238,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   private def notTheCurrentUsersPrayer(prayerId: String)(implicit ctx: UserLogContext): AppError = {
     AccessDeniedError(s"Prayer $prayerId not belongs to user ${ctx.userId}")
   }
-
-  private def myListKey(userId: String) = s"my_prayer_list_$userId"
-
-  private def groupListKey(groupId: String) = s"group_prayer_list_$groupId"
 }
 
 object PrayerServiceImpl {
