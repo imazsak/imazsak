@@ -55,7 +55,7 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   override def userNotificationsInfo()(implicit ctx: UserLogContext): Response[F, NotificationInfoResponse] = {
-    def countToLabel(n: Int): String = {
+    def countToLabel(n: Long): String = {
       if (n == 0) {
         ""
       } else if (n >= 10) {
@@ -65,9 +65,8 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
       }
     }
 
-    // TODO: counting move to dao (not only 10)
-    listUserNotifications()
-      .map(_.filterNot(_.meta.isRead).size)
+    EitherT
+      .right(notificationDao.countNotReadByUser(ctx.userId, Some(10)))
       .map(countToLabel)
       .map(NotificationInfoResponse)
   }

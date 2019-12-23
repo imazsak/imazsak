@@ -26,7 +26,7 @@ import hu.ksisu.imazsak.user.UserDaoImpl
 import hu.ksisu.imazsak.util.IdGeneratorCounterImpl
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
 import reactivemongo.api.bson._
-import reactivemongo.api.{Cursor, AsyncDriver}
+import reactivemongo.api.{AsyncDriver, Cursor}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -598,27 +598,35 @@ class MongoDatabaseServiceItSpec extends WordSpecLike with Matchers with AwaitUt
           NotificationListData("3", "message3", createdAt = 3, NotificationMeta(true, Some("type2")))
         )
       }
-      "#setRead" in {
-        val data1 = CreateNotificationData("user_id1", "message1", createdAt = 1, NotificationMeta(false, None))
-        val data2 =
-          CreateNotificationData("user_id2", "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
-        val data3 =
-          CreateNotificationData("user_id1", "message3", createdAt = 3, NotificationMeta(false, Some("type2")))
-        val data4 =
-          CreateNotificationData("user_id1", "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
+      "#setRead #countNotReadByUser" in {
+        val userId1 = "user_id1"
+        val userId2 = "user_id2"
+
+        notificationDao.countNotReadByUser(userId1).unsafeRunSync() shouldEqual 0L
+
+        val data1 = CreateNotificationData(userId1, "message1", createdAt = 1, NotificationMeta(false, None))
+        val data2 = CreateNotificationData(userId2, "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
+        val data3 = CreateNotificationData(userId1, "message3", createdAt = 3, NotificationMeta(false, Some("type2")))
+        val data4 = CreateNotificationData(userId1, "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
         notificationDao.createNotification(data1).unsafeRunSync() shouldEqual "1"
         notificationDao.createNotification(data2).unsafeRunSync() shouldEqual "2"
         notificationDao.createNotification(data3).unsafeRunSync() shouldEqual "3"
         notificationDao.createNotification(data4).unsafeRunSync() shouldEqual "4"
-        notificationDao.setRead(Seq("1", "3"), "user_id1").unsafeRunSync()
-        notificationDao.findByUser("user_id1").unsafeRunSync() shouldEqual Seq(
+
+        notificationDao.countNotReadByUser(userId1).unsafeRunSync() shouldEqual 3L
+        notificationDao.countNotReadByUser(userId1, Some(2)).unsafeRunSync() shouldEqual 2L
+        notificationDao.countNotReadByUser(userId2).unsafeRunSync() shouldEqual 1L
+
+        notificationDao.setRead(Seq("1", "3"), userId1).unsafeRunSync()
+        notificationDao.findByUser(userId1).unsafeRunSync() shouldEqual Seq(
           NotificationListData("1", "message1", createdAt = 1, NotificationMeta(true, None)),
           NotificationListData("3", "message3", createdAt = 3, NotificationMeta(true, Some("type2"))),
           NotificationListData("4", "message4", createdAt = 4, NotificationMeta(false, Some("type3")))
         )
-        notificationDao.findByUser("user_id2").unsafeRunSync() shouldEqual Seq(
+        notificationDao.findByUser(userId2).unsafeRunSync() shouldEqual Seq(
           NotificationListData("2", "message2", createdAt = 2, NotificationMeta(false, Some("type1")))
         )
+        notificationDao.countNotReadByUser(userId1).unsafeRunSync() shouldEqual 1L
       }
 
     }
