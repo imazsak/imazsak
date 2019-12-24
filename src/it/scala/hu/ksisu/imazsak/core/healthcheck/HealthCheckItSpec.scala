@@ -19,6 +19,7 @@ class HealthCheckItSpec extends RouteTestBase {
           true,
           BuildInfo.version,
           true,
+          true,
           BuildInfo.builtAtString,
           BuildInfo.builtAtMillis,
           BuildInfo.commitHash

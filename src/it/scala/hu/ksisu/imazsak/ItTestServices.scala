@@ -16,8 +16,10 @@ import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServic
 import hu.ksisu.imazsak.user._
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.AsyncDriver
+import spray.json.JsonFormat
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 
 class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val cs: ContextShift[IO]            = IO.contextShift(ec)
@@ -50,7 +52,14 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val tokenService: TokenService[IO]                       = new TokenServiceImpl[IO]()
   implicit lazy val authHookService: AuthHookService[IO]                 = new AuthHookServiceImpl[IO]()
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
-  implicit lazy val redisService: CacheService[IO]                       = null
-  implicit lazy val statService: StatService[IO]                         = null
-  implicit lazy val statDao: StatDao[IO]                                 = new StatDaoImpl()
+  implicit lazy val redisService: CacheService[IO] = new CacheService[IO] {
+    override def checkStatus(): IO[Boolean] = IO(true)
+    override def findOrSet[T](key: String, ttl: Option[FiniteDuration])(valueF: => IO[T])(
+        implicit format: JsonFormat[T]
+    ): IO[T]                                   = ???
+    override def remove(key: String): IO[Unit] = ???
+    override def init: IO[Unit]                = ???
+  }
+  implicit lazy val statService: StatService[IO] = null
+  implicit lazy val statDao: StatDao[IO]         = new StatDaoImpl()
 }

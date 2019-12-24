@@ -11,10 +11,11 @@ object HealthCheckService {
   final case class HealthCheckResult(
       success: Boolean,
       version: String,
+      redis: Boolean,
       database: Boolean,
       buildAtString: String,
       buildAtMillis: Long,
       commitHash: Option[String]
   )
-  implicit val healthCheckResultFormat = jsonFormat6(HealthCheckResult)
+  implicit val healthCheckResultFormat = jsonFormat7(HealthCheckResult)
 }

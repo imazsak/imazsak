@@ -1,5 +1,6 @@
 package hu.ksisu.imazsak.core.healthcheck
 
+import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.core.config.ServerConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckService.HealthCheckResult
@@ -13,16 +14,19 @@ class HealthCheckServiceSpec extends TestBase {
     import cats.instances.try_._
     implicit val configService: ServerConfig[Try]               = mock[ServerConfig[Try]]
     implicit val databaseServiceMock: MongoDatabaseService[Try] = mock[MongoDatabaseService[Try]]
+    implicit val cacheServiceMock: CacheService[Try]            = mock[CacheService[Try]]
     val service                                                 = new HealthCheckServiceImpl[Try]()
   }
 
   "#getStatus" when {
     "ok" in new TestScope {
       when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
+      when(cacheServiceMock.checkStatus()).thenReturn(Success(true))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         true,
         BuildInfo.version,
+        true,
         true,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
@@ -31,11 +35,27 @@ class HealthCheckServiceSpec extends TestBase {
     }
     "db failed" in new TestScope {
       when(databaseServiceMock.checkStatus()).thenReturn(Success(false))
+      when(cacheServiceMock.checkStatus()).thenReturn(Success(true))
+
+      service.getStatus.get shouldEqual HealthCheckResult(
+        false,
+        BuildInfo.version,
+        true,
+        false,
+        BuildInfo.builtAtString,
+        BuildInfo.builtAtMillis,
+        BuildInfo.commitHash
+      )
+    }
+    "cache failed" in new TestScope {
+      when(databaseServiceMock.checkStatus()).thenReturn(Success(true))
+      when(cacheServiceMock.checkStatus()).thenReturn(Success(false))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
         false,
+        true,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash
@@ -43,10 +63,12 @@ class HealthCheckServiceSpec extends TestBase {
     }
     "db check failed" in new TestScope {
       when(databaseServiceMock.checkStatus()).thenReturn(Failure(new Exception))
+      when(cacheServiceMock.checkStatus()).thenReturn(Success(true))
 
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
+        true,
         false,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
