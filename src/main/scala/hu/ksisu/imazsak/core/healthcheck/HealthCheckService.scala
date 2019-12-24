@@ -3,6 +3,7 @@ package hu.ksisu.imazsak.core.healthcheck
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckService.HealthCheckResult
 
 trait HealthCheckService[F[_]] {
+  def addModule(name: String, check: () => F[Boolean]): Unit
   def getStatus: F[HealthCheckResult]
 }
 
@@ -11,11 +12,10 @@ object HealthCheckService {
   final case class HealthCheckResult(
       success: Boolean,
       version: String,
-      redis: Boolean,
-      database: Boolean,
+      modules: Map[String, Boolean],
       buildAtString: String,
       buildAtMillis: Long,
       commitHash: Option[String]
   )
-  implicit val healthCheckResultFormat = jsonFormat7(HealthCheckResult)
+  implicit val healthCheckResultFormat = jsonFormat6(HealthCheckResult)
 }

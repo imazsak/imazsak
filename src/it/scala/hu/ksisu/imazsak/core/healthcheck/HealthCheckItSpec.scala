@@ -18,8 +18,10 @@ class HealthCheckItSpec extends RouteTestBase {
         responseAs[HealthCheckResult] shouldEqual HealthCheckResult(
           true,
           BuildInfo.version,
-          true,
-          true,
+          Map(
+            "redis"    -> true,
+            "database" -> true
+          ),
           BuildInfo.builtAtString,
           BuildInfo.builtAtMillis,
           BuildInfo.commitHash

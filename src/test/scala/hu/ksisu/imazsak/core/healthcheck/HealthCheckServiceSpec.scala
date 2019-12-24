@@ -26,8 +26,10 @@ class HealthCheckServiceSpec extends TestBase {
       service.getStatus.get shouldEqual HealthCheckResult(
         true,
         BuildInfo.version,
-        true,
-        true,
+        Map(
+          "database" -> true,
+          "redis"    -> true
+        ),
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash
@@ -40,8 +42,10 @@ class HealthCheckServiceSpec extends TestBase {
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
-        true,
-        false,
+        Map(
+          "database" -> false,
+          "redis"    -> true
+        ),
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash
@@ -54,8 +58,10 @@ class HealthCheckServiceSpec extends TestBase {
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
-        false,
-        true,
+        Map(
+          "database" -> true,
+          "redis"    -> false
+        ),
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash
@@ -68,8 +74,10 @@ class HealthCheckServiceSpec extends TestBase {
       service.getStatus.get shouldEqual HealthCheckResult(
         false,
         BuildInfo.version,
-        true,
-        false,
+        Map(
+          "database" -> false,
+          "redis"    -> true
+        ),
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash

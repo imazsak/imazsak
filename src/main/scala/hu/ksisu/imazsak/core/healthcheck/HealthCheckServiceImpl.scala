@@ -13,23 +13,33 @@ class HealthCheckServiceImpl[F[_]](
 ) extends HealthCheckService[F] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
-  import cats.syntax.flatMap._
+  import cats.syntax.traverse._
+  import cats.instances.list._
+
+  val services = new scala.collection.concurrent.TrieMap[String, () => F[Boolean]]()
+  addModule("database", () => databaseService.checkStatus())
+  addModule("redis", () => redisService.checkStatus())
 
   def getStatus: F[HealthCheckResult] = {
     for {
-      dbStatus    <- databaseService.checkStatus().recover { case _ => false }
-      redisStatus <- redisService.checkStatus().recover { case _    => false }
+      serviceResults <- services.toList.traverse {
+        case (name, check) =>
+          check().recover { case _ => false }.map(result => (name, result))
+      }
     } yield {
-      val success = dbStatus && redisStatus
+      val success = serviceResults.forall(_._2)
       HealthCheckResult(
         success,
         BuildInfo.version,
-        redisStatus,
-        dbStatus,
+        serviceResults.toMap,
         BuildInfo.builtAtString,
         BuildInfo.builtAtMillis,
         BuildInfo.commitHash
       )
     }
+  }
+
+  override def addModule(name: String, check: () => F[Boolean]): Unit = {
+    services += (name -> check)
   }
 }

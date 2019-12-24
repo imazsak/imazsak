@@ -1,11 +1,14 @@
 package hu.ksisu.imazsak.notification
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import cats.effect.IO
 import hu.ksisu.imazsak.Services
 import hu.ksisu.imazsak.core.AmqpService
 import hu.ksisu.imazsak.core.AmqpService.AmqpQueueConfig
+import hu.ksisu.imazsak.core.healthcheck.HealthCheckService
 import hu.ksisu.imazsak.notification.NotificationDao.{CreateNotificationData, NotificationMeta}
 import hu.ksisu.imazsak.notification.NotificationServiceImpl.CreateNotificationQueueMessage
 import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, Logger}
@@ -28,20 +31,28 @@ class NotificationWorker(
     amqpService: AmqpService[IO],
     configByName: String => AmqpQueueConfig,
     actorSystem: ActorSystem,
-    date: DateTimeUtil
+    date: DateTimeUtil,
+    healthCheckService: HealthCheckService[IO]
 ) {
   import actorSystem.dispatcher
   private val logger                          = new Logger("NotificationWorker")
   private implicit val logContext: LogContext = LoggerUtil.createServiceContext("NotificationWorker")
 
+  private val status = new AtomicBoolean(false)
+
   def start(): Unit = {
+    healthCheckService.addModule("notification_worker", () => IO(status.get()))
+    status.set(true)
     logger.info("NotificationWorker started")
     notificationStream
       .map(_ => {
         logger.warn("NotificationWorker stopped")
+        status.set(false)
       })
       .recover {
-        case x => logger.error("NotificationWorker failed!", x)
+        case x =>
+          logger.error("NotificationWorker failed!", x)
+          status.set(false)
       }
   }
 
