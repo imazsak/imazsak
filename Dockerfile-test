@@ -4,4 +4,4 @@ COPY project /app/project
 WORKDIR /app
 RUN sbt update test:update it:update
 COPY . .
-RUN sbt compile test:compile it:compile stage
+RUN sbt compile stage
