@@ -20,7 +20,7 @@ jobs:
       - name: Compose up
         run: docker-compose up -d
       - name: Test
-        run: docker-compose exec -T imazsak sbt clean compile test it:test
+        run: docker-compose exec -T imazsak sbt test it:test
       - name: Build docker image
         run: |
           docker build \
