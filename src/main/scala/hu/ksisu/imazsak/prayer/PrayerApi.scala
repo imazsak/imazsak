@@ -8,7 +8,14 @@ import hu.ksisu.imazsak.Api
 import hu.ksisu.imazsak.Errors._
 import hu.ksisu.imazsak.core.{AuthDirectives, JwtService}
 import hu.ksisu.imazsak.prayer.PrayerApi._
-import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData, PrayerCloseRequest}
+import hu.ksisu.imazsak.prayer.PrayerDao.PrayerUpdateData
+import hu.ksisu.imazsak.prayer.PrayerService.{
+  CreatePrayerRequest,
+  Next10PrayerListData,
+  PrayerCloseRequest,
+  PrayerDetailsResponse,
+  PrayerUpdateRequest
+}
 import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 import hu.ksisu.imazsak.util.ApiHelper._
 import hu.ksisu.imazsak.util.LoggerUtil.Logger
@@ -37,6 +44,12 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
           service.listGroupPrayers(groupId).toComplete
         }
       }
+    } ~ get {
+      path("prayers" / Segment) { prayerId =>
+        userAuthAndTrace("Prayer_Details") { implicit ctx =>
+          service.getPrayerDetails(prayerId).toComplete
+        }
+      }
     } ~ post {
       path("groups" / Segment / "prayers" / Segment / "pray") { (groupId, prayerId) =>
         entity(as[JsObject]) { _ =>
@@ -55,8 +68,16 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
       } ~ post {
         path("prayers" / "close") {
           entity(as[PrayerCloseRequest]) { data =>
-            userAuthAndTrace("Prayer_close") { implicit ctx =>
+            userAuthAndTrace("Prayer_Close") { implicit ctx =>
               service.close(data).toComplete
+            }
+          }
+        }
+      } ~ post {
+        path("prayers" / "update") {
+          entity(as[PrayerUpdateRequest]) { data =>
+            userAuthAndTrace("Prayer_Update") { implicit ctx =>
+              service.addUpdateToPrayer(data).toComplete
             }
           }
         }
@@ -66,7 +87,10 @@ class PrayerApi(implicit service: PrayerService[IO], val jwtService: JwtService[
 }
 
 object PrayerApi {
-  implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest]   = jsonFormat2(CreatePrayerRequest)
-  implicit val next10PrayerListDataFormat: RootJsonFormat[Next10PrayerListData] = jsonFormat4(Next10PrayerListData)
-  implicit val prayerCloseRequestFormat: RootJsonFormat[PrayerCloseRequest]     = jsonFormat2(PrayerCloseRequest)
+  implicit val createPrayerRequestFormat: RootJsonFormat[CreatePrayerRequest]     = jsonFormat2(CreatePrayerRequest)
+  implicit val next10PrayerListDataFormat: RootJsonFormat[Next10PrayerListData]   = jsonFormat4(Next10PrayerListData)
+  implicit val prayerCloseRequestFormat: RootJsonFormat[PrayerCloseRequest]       = jsonFormat2(PrayerCloseRequest)
+  implicit val prayerUpdateDataFormat: RootJsonFormat[PrayerUpdateData]           = jsonFormat2(PrayerUpdateData)
+  implicit val prayerDetailsResponseFormat: RootJsonFormat[PrayerDetailsResponse] = jsonFormat5(PrayerDetailsResponse)
+  implicit val prayerUpdateRequestFormat: RootJsonFormat[PrayerUpdateRequest]     = jsonFormat2(PrayerUpdateRequest)
 }
