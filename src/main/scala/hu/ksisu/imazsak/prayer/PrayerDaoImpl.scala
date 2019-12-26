@@ -7,7 +7,7 @@ import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.prayer.PrayerDao._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.bson.{BSONDocument, BSONNull, document}
+import reactivemongo.api.bson.{BSON, BSONDocument, BSONNull, document, array}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,6 +21,15 @@ class PrayerDaoImpl(
 
   override def createPrayer(data: CreatePrayerData): IO[String] = {
     MongoQueryHelper.insert(data)
+  }
+
+  override def addUpdate(prayerId: String, data: PrayerUpdateData): IO[Unit] = {
+    val modifier = document("$push" -> document("updates" -> BSON.write(data).getOrElse(document())))
+    MongoQueryHelper.updateOne(byId(prayerId), modifier)
+  }
+
+  override def findByIdWithUpdates(prayerId: String): OptionT[IO, PrayerDetailsData] = {
+    MongoQueryHelper.findOne[PrayerDetailsData](byId(prayerId), prayerDetailsDataProjector)
   }
 
   override def findPrayerByUser(userId: String): IO[Seq[MyPrayerListData]] = {
@@ -80,7 +89,7 @@ class PrayerDaoImpl(
     MongoQueryHelper
       .findOne[BSONDocument](byId(prayerId), prayerWithPrayUserDataProjector)
       .subflatMap { doc =>
-        (document("prayUsers" -> Seq()) ++ doc).asOpt[PrayerWithPrayUserData]
+        (document("prayUsers" -> array()) ++ doc).asOpt[PrayerWithPrayUserData]
       }
   }
 
