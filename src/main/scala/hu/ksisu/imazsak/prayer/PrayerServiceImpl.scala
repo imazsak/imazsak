@@ -11,17 +11,22 @@ import hu.ksisu.imazsak.prayer.PrayerDao.{
   CreatePrayerData,
   GroupPrayerListData,
   MyPrayerListData,
+  PrayerDetailsData,
+  PrayerUpdateData,
   PrayerWithPrayUserData
 }
 import hu.ksisu.imazsak.prayer.PrayerService.{
   CreatePrayerRequest,
   Next10PrayerListData,
   PrayerCloseFeedbackNotificationData,
-  PrayerCreatedNotificationData
+  PrayerCreatedNotificationData,
+  PrayerDetailsResponse,
+  PrayerUpdateRequest
 }
 import hu.ksisu.imazsak.prayer.PrayerServiceImpl._
 import hu.ksisu.imazsak.stat.StatService
 import hu.ksisu.imazsak.user.UserDao
+import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.{Logger, UserLogContext}
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
@@ -35,16 +40,18 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     userDao: UserDao[F],
     notificationService: NotificationService[F],
     cache: CacheService[F],
-    stat: StatService[F]
+    stat: StatService[F],
+    date: DateTimeUtil
 ) extends PrayerService[F] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
   import cats.syntax.traverse._
   private type Tmp[T] = Response[F, T]
 
-  private implicit val logger = new Logger("PrayerServiceImpl")
-  private val myListTtl       = Some(30.minutes)
-  private val groupListTtl    = Some(30.minutes)
+  private implicit val logger  = new Logger("PrayerServiceImpl")
+  private val myListTtl        = Some(30.minutes)
+  private val prayerDetailsTtl = Some(30.minutes)
+  private val groupListTtl     = Some(30.minutes)
 
   override def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
     val model = CreatePrayerData(ctx.userId, data.message, data.groupIds)
@@ -57,6 +64,26 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _  <- EitherT.right(invalidateGroupsListCache(data.groupIds))
       _  <- stat.prayerCreated(data)
     } yield {}
+  }
+
+  override def getPrayerDetails(prayerId: String)(implicit ctx: UserLogContext): Response[F, PrayerDetailsResponse] = {
+    val prayerO = cache.findOrSet(CacheService.prayerDetailsKey(prayerId), prayerDetailsTtl) {
+      prayerDao.findByIdWithUpdates(prayerId).value
+    }
+    for {
+      prayer <- EitherT.fromOptionF(prayerO, notFound(prayerId))
+      _      <- groupService.checkGroups(prayer.groupIds)
+    } yield {
+      PrayerDetailsResponse(prayer.id, prayer.userId, prayer.message, prayer.createdAt, prayer.updates)
+    }
+  }
+
+  override def addUpdateToPrayer(data: PrayerUpdateRequest)(implicit ctx: UserLogContext): Response[F, Unit] = {
+    for {
+      _ <- loadPrayerAndCheckPrayerBelongsToCurrentUser(data.id)
+      _ <- EitherT.right(prayerDao.addUpdate(data.id, PrayerUpdateData(data.message, date.getCurrentTimeMillis)))
+      _ <- EitherT.right(cache.remove(CacheService.prayerDetailsKey(data.id)))
+    } yield ()
   }
 
   private def sendNewPrayerNotificationWithoutError(id: String, data: CreatePrayerRequest)(
@@ -122,6 +149,7 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
       _          <- EitherT.right(prayerDao.delete(data.id))
       _          <- EitherT.right(cache.remove(CacheService.myPrayerListKey(ctx.userId)))
       _          <- EitherT.right(invalidateGroupsListCache(prayerData.groupIds))
+      _          <- EitherT.right(cache.remove(CacheService.prayerDetailsKey(data.id)))
       _          <- stat.prayerClosed(data)
     } yield ()
   }
@@ -232,6 +260,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 object PrayerServiceImpl {
   implicit val myPrayerListDataFormat: RootJsonFormat[MyPrayerListData]       = jsonFormat5(MyPrayerListData)
   implicit val groupPrayerListDataFormat: RootJsonFormat[GroupPrayerListData] = jsonFormat3(GroupPrayerListData)
+  implicit val prayerUpdateDataFormat: RootJsonFormat[PrayerUpdateData]       = jsonFormat2(PrayerUpdateData)
+  implicit val prayerDetailsDataFormat: RootJsonFormat[PrayerDetailsData]     = jsonFormat6(PrayerDetailsData)
   implicit val prayerWithPrayUserDataFormat: RootJsonFormat[PrayerWithPrayUserData] = jsonFormat4(
     PrayerWithPrayUserData
   )

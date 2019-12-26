@@ -1,12 +1,20 @@
 package hu.ksisu.imazsak.prayer
 
 import hu.ksisu.imazsak.Errors.Response
-import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData}
-import hu.ksisu.imazsak.prayer.PrayerService.{CreatePrayerRequest, Next10PrayerListData, PrayerCloseRequest}
+import hu.ksisu.imazsak.prayer.PrayerDao.{GroupPrayerListData, MyPrayerListData, PrayerUpdateData}
+import hu.ksisu.imazsak.prayer.PrayerService.{
+  CreatePrayerRequest,
+  Next10PrayerListData,
+  PrayerCloseRequest,
+  PrayerDetailsResponse,
+  PrayerUpdateRequest
+}
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
 trait PrayerService[F[_]] {
   def createPrayer(data: CreatePrayerRequest)(implicit ctx: UserLogContext): Response[F, Unit]
+  def getPrayerDetails(prayerId: String)(implicit ctx: UserLogContext): Response[F, PrayerDetailsResponse]
+  def addUpdateToPrayer(data: PrayerUpdateRequest)(implicit ctx: UserLogContext): Response[F, Unit]
   def listMyPrayers()(implicit ctx: UserLogContext): Response[F, Seq[MyPrayerListData]]
   def listGroupPrayers(groupId: String)(implicit ctx: UserLogContext): Response[F, Seq[GroupPrayerListData]]
   def pray(groupId: String, prayerId: String)(implicit ctx: UserLogContext): Response[F, Unit]
@@ -21,7 +29,14 @@ object PrayerService {
   case class CreatePrayerRequest(message: String, groupIds: Seq[String])
   case class Next10PrayerListData(id: String, userId: String, groupId: String, message: String)
   case class PrayerCloseRequest(id: String, message: Option[String])
-
+  case class PrayerUpdateRequest(id: String, message: String)
+  case class PrayerDetailsResponse(
+      id: String,
+      userId: String,
+      message: String,
+      createdAt: Long,
+      updates: Seq[PrayerUpdateData]
+  )
   case class PrayerCreatedNotificationData(
       prayerId: String,
       userName: Option[String],

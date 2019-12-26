@@ -546,12 +546,13 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
         result shouldEqual None
       }
       "#addUpdate and #findByIdWithUpdates" in {
-        val prayer1 = CreatePrayerData("user_1", "message1", Seq("group_1", "group_2"))
+        val groups  = Seq("group_1", "group_2")
+        val prayer1 = CreatePrayerData("user_1", "message1", groups)
         prayerDao.createPrayer(prayer1).unsafeRunSync() shouldEqual "1"
 
         val result1 = prayerDao.findByIdWithUpdates("1").value.unsafeRunSync()
         result1.map(_.copy(createdAt = 0)) shouldEqual Some(
-          PrayerDetailsData("1", "user_1", "message1", 0, Seq())
+          PrayerDetailsData("1", "user_1", groups, "message1", 0, Seq())
         )
 
         val update1 = PrayerUpdateData("message2", 2)
@@ -559,7 +560,7 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
 
         val result2 = prayerDao.findByIdWithUpdates("1").value.unsafeRunSync()
         result2.map(_.copy(createdAt = 0)) shouldEqual Some(
-          PrayerDetailsData("1", "user_1", "message1", 0, Seq(update1))
+          PrayerDetailsData("1", "user_1", groups, "message1", 0, Seq(update1))
         )
 
         val update2 = PrayerUpdateData("message3", 3)
@@ -567,7 +568,7 @@ class MongoDatabaseServiceItSpec extends AnyWordSpecLike with Matchers with Awai
 
         val result3 = prayerDao.findByIdWithUpdates("1").value.unsafeRunSync()
         result3.map(_.copy(createdAt = 0)) shouldEqual Some(
-          PrayerDetailsData("1", "user_1", "message1", 0, Seq(update1, update2))
+          PrayerDetailsData("1", "user_1", groups, "message1", 0, Seq(update1, update2))
         )
       }
     }

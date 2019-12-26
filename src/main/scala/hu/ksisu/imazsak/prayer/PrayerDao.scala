@@ -37,6 +37,7 @@ object PrayerDao {
   case class PrayerDetailsData(
       id: String,
       userId: String,
+      groupIds: Seq[String],
       message: String,
       createdAt: Long,
       updates: Seq[PrayerUpdateData]
@@ -73,14 +74,18 @@ object PrayerDao {
   implicit val prayerDetailsDataReader: BSONDocumentReader[PrayerDetailsData] =
     BSONDocumentReader.from((bson: BSONDocument) => {
       for {
-        id       <- bson.getAsTry[String]("id")
-        userId   <- bson.getAsTry[String]("userId")
-        message  <- bson.getAsTry[String]("message")
-        objectId <- bson.getAsTry[BSONObjectID]("_id")
+        id            <- bson.getAsTry[String]("id")
+        userId        <- bson.getAsTry[String]("userId")
+        groupIdsArray <- bson.getAsTry[BSONArray]("groupIds")
+        message       <- bson.getAsTry[String]("message")
+        objectId      <- bson.getAsTry[BSONObjectID]("_id")
       } yield {
-        val updates         = bson.getAsOpt[Seq[PrayerUpdateData]]("updates").getOrElse(Seq.empty)
+        val updates = bson.getAsOpt[Seq[PrayerUpdateData]]("updates").getOrElse(Seq.empty)
+        val groupIds = groupIdsArray.values.collect {
+          case BSONString(groupId) => groupId
+        }
         val createdAtMillis = objectId.time
-        PrayerDetailsData(id, userId, message, createdAtMillis, updates)
+        PrayerDetailsData(id, userId, groupIds, message, createdAtMillis, updates)
       }
     })
 
@@ -88,7 +93,7 @@ object PrayerDao {
     document("id" -> 1, "groupIds" -> 1, "message" -> 1, "prayCount" -> 1, "_id" -> 1)
   )
   val prayerDetailsDataProjector: Option[BSONDocument] = Option(
-    document("id" -> 1, "userId" -> 1, "message" -> 1, "updates" -> 1, "_id" -> 1)
+    document("id" -> 1, "userId" -> 1, "groupIds" -> 1, "message" -> 1, "updates" -> 1, "_id" -> 1)
   )
   val groupPrayerListDataProjector: Option[BSONDocument] = Option(document("id" -> 1, "userId" -> 1, "message" -> 1))
   val prayerListDataProjector: Option[BSONDocument] = Option(

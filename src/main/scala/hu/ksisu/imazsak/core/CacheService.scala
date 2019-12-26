@@ -22,5 +22,7 @@ object CacheService {
 
   def myPrayerListKey(userId: String) = s"my_prayer_list_$userId"
 
+  def prayerDetailsKey(prayerId: String) = s"prayer_details_$prayerId"
+
   def prayerListByGroupKey(groupId: String) = s"group_prayer_list_$groupId"
 }
