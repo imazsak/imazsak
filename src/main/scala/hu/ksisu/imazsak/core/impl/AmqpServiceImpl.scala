@@ -46,14 +46,16 @@ class AmqpServiceImpl[F[_]: Applicative](implicit config: AmqpConfig, mat: Mater
 
   override def createQueueSource(queueConfig: AmqpQueueConfig): Source[ReadResult, NotUsed] = {
     AmqpSource.atMostOnceSource(
-      NamedQueueSourceSettings(connection, queueConfig.routingKey.get).withAckRequired(false),
+      NamedQueueSourceSettings(connection, queueConfig.queueName)
+        .withDeclaration(QueueDeclaration(queueConfig.queueName))
+        .withAckRequired(false),
       bufferSize = 10
     )
   }
 
   private def convertToWriteSettings(connectionProvider: AmqpConnectionProvider, queueConfig: AmqpQueueConfig) = {
-    val ws0 = AmqpWriteSettings(connectionProvider)
-    val ws1 = queueConfig.exchange.map(ws0.withExchange).getOrElse(ws0)
-    queueConfig.routingKey.map(ws1.withRoutingKey).getOrElse(ws1)
+    AmqpWriteSettings(connectionProvider)
+      .withRoutingKey(queueConfig.queueName)
+      .withDeclaration(QueueDeclaration(queueConfig.queueName))
   }
 }

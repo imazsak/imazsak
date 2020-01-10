@@ -8,8 +8,6 @@ import com.typesafe.config.Config
 import hu.ksisu.imazsak.Initable
 import hu.ksisu.imazsak.core.AmqpService.{AmqpQueueConfig, AmqpSenderWrapper}
 
-import scala.util.Try
-
 trait AmqpService[F[_]] extends Initable[F] {
   def createSenderWrapper(queueConfig: AmqpQueueConfig): AmqpSenderWrapper
   def createQueueSource(queueConfig: AmqpQueueConfig): Source[ReadResult, NotUsed]
@@ -18,13 +16,12 @@ trait AmqpService[F[_]] extends Initable[F] {
 object AmqpService {
   case class AmqpConfig(uri: String)
 
-  case class AmqpQueueConfig(routingKey: Option[String], exchange: Option[String], bufferSize: Int)
+  case class AmqpQueueConfig(queueName: String, bufferSize: Int)
 
   object AmqpQueueConfig {
     def apply(config: Config): AmqpQueueConfig = {
       AmqpQueueConfig(
-        Try(config.getString("routing-key")).toOption,
-        Try(config.getString("exchange")).toOption,
+        config.getString("queue-name"),
         config.getInt("buffer-size")
       )
     }
