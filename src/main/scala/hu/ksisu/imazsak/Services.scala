@@ -16,7 +16,7 @@ import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerS
 import hu.ksisu.imazsak.stat.{StatDao, StatDaoImpl, StatService, StatServiceImpl}
 import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
-import hu.ksisu.imazsak.username.{UserNameServiceImpl, UsernameSearchService}
+import hu.ksisu.imazsak.username.{UsernameSearchServiceImpl, UsernameSearchService}
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
 import reactivemongo.api.AsyncDriver
@@ -110,5 +110,5 @@ class RealServices(
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
   implicit lazy val statService: StatService[IO]                         = new StatServiceImpl[IO]()
   implicit lazy val statDao: StatDao[IO]                                 = new StatDaoImpl()
-  implicit lazy val usernameSearchService: UsernameSearchService[IO]     = new UserNameServiceImpl[IO]()
+  implicit lazy val usernameSearchService: UsernameSearchService[IO]     = new UsernameSearchServiceImpl[IO]()
 }

@@ -14,7 +14,7 @@ import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerS
 import hu.ksisu.imazsak.stat.{StatDao, StatDaoImpl, StatService}
 import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
-import hu.ksisu.imazsak.username.{UserNameServiceImpl, UsernameSearchService}
+import hu.ksisu.imazsak.username.{UsernameSearchServiceImpl, UsernameSearchService}
 import hu.ksisu.imazsak.util._
 import reactivemongo.api.AsyncDriver
 import spray.json.JsonFormat
@@ -63,5 +63,5 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   }
   implicit lazy val statService: StatService[IO]                         = null
   implicit lazy val statDao: StatDao[IO]                                 = new StatDaoImpl()
-  override implicit val usernameSearchService: UsernameSearchService[IO] = new UserNameServiceImpl[IO]()
+  override implicit val usernameSearchService: UsernameSearchService[IO] = new UsernameSearchServiceImpl[IO]()
 }

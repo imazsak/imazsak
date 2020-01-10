@@ -8,7 +8,7 @@ import hu.ksisu.imazsak.user.UserDao.UserAdminListData
 import hu.ksisu.imazsak.username.UsernameSearchService.UsernameData
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 
-class UserNameServiceImpl[F[_]: Monad](implicit groupDao: GroupDao[F], userDao: UserDao[F])
+class UsernameSearchServiceImpl[F[_]: Monad](implicit groupDao: GroupDao[F], userDao: UserDao[F])
     extends UsernameSearchService[F] {
   import cats.syntax.flatMap._
   import cats.syntax.functor._
@@ -24,8 +24,8 @@ class UserNameServiceImpl[F[_]: Monad](implicit groupDao: GroupDao[F], userDao: 
       users         <- userDao.findUsersByIds(accessibleIds)
     } yield {
       users.collect {
-        case UserAdminListData(id, Some(name)) => UsernameData(id, name)
-      }
+        case UserAdminListData(id, Some(name)) if id != ctx.userId => UsernameData(id, name)
+      }.distinct
     }
 
     EitherT.right(result)
