@@ -16,6 +16,7 @@ import hu.ksisu.imazsak.prayer.{PrayerDao, PrayerDaoImpl, PrayerService, PrayerS
 import hu.ksisu.imazsak.stat.{StatDao, StatDaoImpl, StatService, StatServiceImpl}
 import hu.ksisu.imazsak.token.{TokenDao, TokenDaoImpl, TokenService, TokenServiceImpl}
 import hu.ksisu.imazsak.user._
+import hu.ksisu.imazsak.username.{UserNameServiceImpl, UsernameSearchService}
 import hu.ksisu.imazsak.util._
 import org.slf4j.Logger
 import reactivemongo.api.AsyncDriver
@@ -50,6 +51,7 @@ trait Services[F[_]] {
   implicit val redisService: CacheService[F]
   implicit val statService: StatService[F]
   implicit val statDao: StatDao[F]
+  implicit val usernameSearchService: UsernameSearchService[F]
 
   def init()(implicit logger: Logger, ev: MonadError[F, Throwable]): F[Unit] = {
     import Initable._
@@ -108,4 +110,5 @@ class RealServices(
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
   implicit lazy val statService: StatService[IO]                         = new StatServiceImpl[IO]()
   implicit lazy val statDao: StatDao[IO]                                 = new StatDaoImpl()
+  implicit lazy val usernameSearchService: UsernameSearchService[IO]     = new UserNameServiceImpl[IO]()
 }

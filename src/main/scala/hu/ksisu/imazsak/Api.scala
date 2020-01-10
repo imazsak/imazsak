@@ -12,6 +12,7 @@ import hu.ksisu.imazsak.group.GroupApi
 import hu.ksisu.imazsak.notification.{NotificationApi, PushNotificationApi}
 import hu.ksisu.imazsak.user.MeApi
 import hu.ksisu.imazsak.prayer.PrayerApi
+import hu.ksisu.imazsak.username.UsernameSearchApi
 import hu.ksisu.imazsak.util.LoggerUtil.LogContext
 import hu.ksisu.imazsak.util.TracingDirectives._
 import io.opentracing.Tracer
@@ -50,7 +51,8 @@ object Api {
       new FeedbackApi(),
       new NotificationApi(),
       new PushNotificationApi(),
-      new AuthHookApi()
+      new AuthHookApi(),
+      new UsernameSearchApi()
     )
 
     cors() {
