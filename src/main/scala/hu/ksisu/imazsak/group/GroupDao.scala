@@ -15,6 +15,7 @@ trait GroupDao[F[_]] {
   def findGroupsByUser(userId: String): F[Seq[GroupListData]]
   def findGroupByName(name: String): OptionT[F, GroupListData]
   def findMembersByGroupId(groupId: String): F[Seq[GroupMember]]
+  def findMembersByUserId(userId: String): F[Seq[GroupMember]]
   def isMember(groupId: String, userId: String): F[Boolean]
   def addMemberToGroup(groupId: String, member: GroupMember): F[Unit]
   def allGroup(): F[Seq[GroupAdminListData]]
