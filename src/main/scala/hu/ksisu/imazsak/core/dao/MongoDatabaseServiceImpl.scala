@@ -20,7 +20,7 @@ class MongoDatabaseServiceImpl(
 
   private lazy val database: Future[DefaultDB] = {
     val result: EitherT[Future, Throwable, DefaultDB] = for {
-      uri        <- EitherT.fromEither(MongoConnection.parseURI(config.uri).toEither)
+      uri        <- EitherT(MongoConnection.fromString(config.uri).map(Right(_)).recover(Left(_)))
       dbname     <- EitherT.fromOption(uri.db, WrongConfig("Database name not found!"))
       connection <- EitherT(driver.connect(uri).map(Right(_)).recover(Left(_)))
       db         <- EitherT.right(connection.database(dbname))
