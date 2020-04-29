@@ -7,7 +7,7 @@ services:
     volumes:
     - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
   redis:
-    image: redis:5.0.7
+    image: redis:5.0.9
     ports:
     - 6379:6379
   nginx:
