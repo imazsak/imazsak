@@ -64,7 +64,7 @@ lazy val core = (project in file("."))
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.1.1" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.3.3" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.13.11" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.14.0" % "it,test"
       )
     }
   )
