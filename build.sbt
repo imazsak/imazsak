@@ -45,7 +45,7 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.1",
         "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
-        "net.logstash.logback" % "logstash-logback-encoder"  % "6.3",
+        "net.logstash.logback" % "logstash-logback-encoder"  % "6.4",
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.30",
         "com.pauldijou"        %% "jwt-core"                 % "4.3.0",
         "com.pauldijou"        %% "jwt-spray-json"           % "4.3.0",
@@ -55,16 +55,16 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.2.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.20.10",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.0",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.0",
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.65.01",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.20.11",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.1",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.1",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.65",
         "nl.martijndwars"      % "web-push"                  % "5.1.0",
         "org.codehaus.janino"  % "janino"                    % "3.1.2",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.1.2" % "it,test",
         "org.mockito"          % "mockito-core"              % "3.3.3" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.14.3" % "it,test"
+        "org.mockito"          %% "mockito-scala"            % "1.14.4" % "it,test"
       )
     }
   )
