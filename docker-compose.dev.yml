@@ -30,7 +30,7 @@ services:
     - 14268:14268
     - 9411:9411
   rabbitmq:
-    image: rabbitmq:3.8.2-management
+    image: rabbitmq:3.8.5-management
     hostname: "rabbitmq"
     ports:
     - 5672:5672
