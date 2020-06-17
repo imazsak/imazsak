@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mongo:4.2.6
+    image: mongo:4.2.8
     volumes:
     - ./scripts/databases/mongo.js:/docker-entrypoint-initdb.d/database.js:ro
   redis:
