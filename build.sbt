@@ -49,8 +49,8 @@ lazy val core = (project in file("."))
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.30",
         "com.pauldijou"        %% "jwt-core"                 % "4.3.0",
         "com.pauldijou"        %% "jwt-spray-json"           % "4.3.0",
-        "commons-codec"        % "commons-codec"             % "1.14",
-        "ch.megard"            %% "akka-http-cors"           % "1.1.0",
+        "commons-codec"        % "commons-codec"             % "1.15",
+        "ch.megard"            %% "akka-http-cors"           % "1.0.0",
         "io.opentracing"       % "opentracing-api"           % "0.33.0",
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
@@ -62,9 +62,9 @@ lazy val core = (project in file("."))
         "nl.martijndwars"      % "web-push"                  % "5.1.0",
         "org.codehaus.janino"  % "janino"                    % "3.1.2",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
-        "org.scalatest"        %% "scalatest"                % "3.2.0" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.4.6" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.14.8" % "it,test"
+        "org.scalatest"        %% "scalatest"                % "3.2.2" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.5.7" % "it,test",
+        "org.mockito"          %% "mockito-scala"            % "1.15.0" % "it,test"
       )
     }
   )
