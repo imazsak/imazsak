@@ -11,8 +11,8 @@ import reactivemongo.api.bson.{BSON, BSONDocument, BSONNull, document, array}
 
 import scala.concurrent.ExecutionContext
 
-class PrayerDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[IO],
+class PrayerDaoImpl(implicit
+    mongoDatabaseService: MongoDatabaseService[IO],
     idGenerator: IdGenerator,
     ec: ExecutionContext,
     cs: ContextShift[IO]
@@ -41,7 +41,7 @@ class PrayerDaoImpl(
   }
 
   override def incrementPrayCount(userId: String, prayerId: String): IO[Unit] = {
-    val incrementPrayCounter = document("$inc"      -> document("prayCount" -> 1))
+    val incrementPrayCounter = document("$inc" -> document("prayCount" -> 1))
     val addUserToPrayUsers   = document("$addToSet" -> document("prayUsers" -> userId))
     MongoQueryHelper.updateOne(byId(prayerId), incrementPrayCounter ++ addUserToPrayUsers)
   }
@@ -51,7 +51,7 @@ class PrayerDaoImpl(
       excludedUserId: String,
       limit: Option[Int]
   ): IO[Seq[PrayerListData]] = {
-    val selector      = document("groupIds"  -> document("$in" -> groupIds), "userId" -> document("$ne" -> excludedUserId))
+    val selector      = document("groupIds" -> document("$in" -> groupIds), "userId" -> document("$ne" -> excludedUserId))
     val prayIsNull    = document("prayCount" -> BSONNull)
     val prayIsNotNull = document("prayCount" -> document("$ne" -> BSONNull))
     val byPrayCount   = document("prayCount" -> 1)
@@ -63,10 +63,11 @@ class PrayerDaoImpl(
       MongoQueryHelper
         .list[PrayerListData](selector ++ prayIsNotNull, prayerListDataProjector, Some(byPrayCount), limit)
     }
-    def secondPartLimit(firstPartCount: Int): Option[Int] = limit.map {
-      case oLimit if oLimit > firstPartCount => oLimit - firstPartCount
-      case _                                 => 0
-    }
+    def secondPartLimit(firstPartCount: Int): Option[Int] =
+      limit.map {
+        case oLimit if oLimit > firstPartCount => oLimit - firstPartCount
+        case _                                 => 0
+      }
 
     for {
       firstPart  <- firstPartQuery

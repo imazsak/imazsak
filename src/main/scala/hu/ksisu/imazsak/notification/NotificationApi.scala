@@ -15,8 +15,8 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
-class NotificationApi(
-    implicit service: NotificationService[IO],
+class NotificationApi(implicit
+    service: NotificationService[IO],
     val jwtService: JwtService[IO]
 ) extends Api
     with AuthDirectives {

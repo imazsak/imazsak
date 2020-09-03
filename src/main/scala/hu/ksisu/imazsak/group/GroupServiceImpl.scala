@@ -17,8 +17,8 @@ import spray.json.RootJsonFormat
 
 import scala.concurrent.duration._
 
-class GroupServiceImpl[F[_]: Monad](
-    implicit val groupDao: GroupDao[F],
+class GroupServiceImpl[F[_]: Monad](implicit
+    val groupDao: GroupDao[F],
     userDao: UserDao[F],
     tokenService: TokenService[F],
     cache: CacheService[F],
@@ -41,10 +41,11 @@ class GroupServiceImpl[F[_]: Monad](
     }
 
     for {
-      memberIds <- EitherT
-        .right[AppError](groupMemberList)
-        .map(_.map(_.id))
-        .ensure(illegalGroupError(Set(groupId)))(_.contains(ctx.userId))
+      memberIds <-
+        EitherT
+          .right[AppError](groupMemberList)
+          .map(_.map(_.id))
+          .ensure(illegalGroupError(Set(groupId)))(_.contains(ctx.userId))
       users <- EitherT.right[AppError](userDao.findUsersByIds(memberIds))
     } yield users.map { data =>
       GroupUserListData(data.id, data.name)

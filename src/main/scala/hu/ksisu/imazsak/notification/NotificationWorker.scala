@@ -25,8 +25,8 @@ object NotificationWorker {
   }
 }
 
-class NotificationWorker(
-    implicit notificationDao: NotificationDao[IO],
+class NotificationWorker(implicit
+    notificationDao: NotificationDao[IO],
     pushNotificationService: PushNotificationService[IO],
     amqpService: AmqpService[IO],
     configByName: String => AmqpQueueConfig,

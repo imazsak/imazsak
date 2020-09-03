@@ -18,9 +18,10 @@ class RedisServiceImpl(implicit val config: RedisConfig, as: ActorSystem, cs: Co
     Seq(RedisServer(config.host, config.port, config.password, config.database))
   )
 
-  override def init: IO[Unit] = IO {
-    checkStatus().map(_ => ())
-  }
+  override def init: IO[Unit] =
+    IO {
+      checkStatus().map(_ => ())
+    }
 
   override def checkStatus(): IO[Boolean] = {
     IO.fromFuture(IO(client.ping())).redeem(_ => false, _ => true)

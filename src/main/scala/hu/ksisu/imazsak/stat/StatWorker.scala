@@ -26,8 +26,8 @@ object StatWorker {
   }
 }
 
-class StatWorker(
-    implicit statDao: StatDao[IO],
+class StatWorker(implicit
+    statDao: StatDao[IO],
     amqpService: AmqpService[IO],
     configByName: String => AmqpQueueConfig,
     actorSystem: ActorSystem,

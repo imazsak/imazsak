@@ -7,8 +7,8 @@ object BsonHelper {
 
   implicit class ModelWrapper[T](model: T) {
 
-    def toBsonWithNewId(
-        implicit writer: BSONDocumentWriter[T],
+    def toBsonWithNewId(implicit
+        writer: BSONDocumentWriter[T],
         idGenerator: IdGenerator
     ): BSONDocument = {
       val id = idGenerator.generate()

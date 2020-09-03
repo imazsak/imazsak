@@ -6,15 +6,14 @@ import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckService.HealthCheckResult
 
-class HealthCheckServiceImpl[F[_]](
-    implicit F: MonadError[F, Throwable],
+class HealthCheckServiceImpl[F[_]](implicit
+    F: MonadError[F, Throwable],
     databaseService: MongoDatabaseService[F],
     redisService: CacheService[F]
 ) extends HealthCheckService[F] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
   import cats.syntax.traverse._
-  import cats.instances.list._
 
   val services = new scala.collection.concurrent.TrieMap[String, () => F[Boolean]]()
   addModule("database", () => databaseService.checkStatus())

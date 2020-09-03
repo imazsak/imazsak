@@ -24,9 +24,10 @@ class AuthDirectivesSpec extends TestBase with ScalatestRouteTest with BeforeAnd
       override def route(): Route             = ???
     }
 
-    def route(): Route = authDirectives.userAuth { userId =>
-      complete(userId)
-    }
+    def route(): Route =
+      authDirectives.userAuth { userId =>
+        complete(userId)
+      }
   }
 
   "AuthDirectives" should {
