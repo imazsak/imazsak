@@ -55,15 +55,15 @@ lazy val core = (project in file("."))
         "io.opentracing"       % "opentracing-util"          % "0.33.0",
         "io.opentracing"       % "opentracing-noop"          % "0.33.0",
         "io.jaegertracing"     % "jaeger-client"             % "1.4.0",
-        "org.reactivemongo"    %% "reactivemongo"            % "0.20.12",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.1",
-        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.1",
+        "org.reactivemongo"    %% "reactivemongo"            % "0.20.11",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.2",
+        "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.2",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.66",
         "nl.martijndwars"      % "web-push"                  % "5.1.0",
         "org.codehaus.janino"  % "janino"                    % "3.1.2",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.2.2" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.5.10" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.5.11" % "it,test",
         "org.mockito"          %% "mockito-scala"            % "1.15.0" % "it,test"
       )
     }
