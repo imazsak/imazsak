@@ -59,7 +59,7 @@ lazy val core = (project in file("."))
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.2",
         "org.bouncycastle"     % "bcprov-jdk15on"            % "1.67",
-        "nl.martijndwars"      % "web-push"                  % "5.1.0",
+        "nl.martijndwars"      % "web-push"                  % "5.1.1",
         "org.codehaus.janino"  % "janino"                    % "3.1.2",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.2.2" % "it,test",
