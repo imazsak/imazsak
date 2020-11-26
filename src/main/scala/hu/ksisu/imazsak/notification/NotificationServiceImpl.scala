@@ -11,8 +11,8 @@ import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import spray.json._
 import scala.concurrent.duration._
 
-class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit notificationDao: NotificationDao[F],
+class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    notificationDao: NotificationDao[F],
     cache: CacheService[F],
     amqpService: AmqpService[F],
     configByName: String => AmqpQueueConfig
@@ -32,8 +32,8 @@ class NotificationServiceImpl[F[_]: MonadError[*[_], Throwable]](
     ().pure[F]
   }
 
-  def createNotification[T](notificationType: String, userId: String, message: T)(
-      implicit ctx: LogContext,
+  def createNotification[T](notificationType: String, userId: String, message: T)(implicit
+      ctx: LogContext,
       w: JsonWriter[T]
   ): Response[F, Unit] = {
     for {

@@ -23,8 +23,8 @@ trait AuthDirectives {
   private def validateAndGetId(token: String, admin: Boolean): Future[Option[String]] = {
     OptionT(jwtService.validateAndDecode(token))
       .subflatMap(_.fields.get("id"))
-      .collect {
-        case JsString(id) => id
+      .collect { case JsString(id) =>
+        id
       }
       .value
       .unsafeToFuture()

@@ -26,8 +26,8 @@ object StatWorker {
   }
 }
 
-class StatWorker(
-    implicit statDao: StatDao[IO],
+class StatWorker(implicit
+    statDao: StatDao[IO],
     amqpService: AmqpService[IO],
     configByName: String => AmqpQueueConfig,
     actorSystem: ActorSystem,
@@ -49,10 +49,9 @@ class StatWorker(
         logger.warn("StatWorker stopped")
         status.set(false)
       })
-      .recover {
-        case x =>
-          logger.error("StatWorker failed!", x)
-          status.set(false)
+      .recover { case x =>
+        logger.error("StatWorker failed!", x)
+        status.set(false)
       }
   }
 

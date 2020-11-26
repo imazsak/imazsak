@@ -29,8 +29,8 @@ object UserDao {
   implicit val userPushSubscriptionDataReader: BSONDocumentHandler[UserPushSubscriptionData] =
     Macros.handler[UserPushSubscriptionData]
 
-  val userDataProjector: Option[BSONDocument]             = Option(document("id"      -> 1, "name" -> 1))
-  val userAdminListDataProjector: Option[BSONDocument]    = Option(document("id"      -> 1, "name" -> 1))
+  val userDataProjector: Option[BSONDocument]             = Option(document("id" -> 1, "name" -> 1))
+  val userAdminListDataProjector: Option[BSONDocument]    = Option(document("id" -> 1, "name" -> 1))
   val isAdminProjector: Option[BSONDocument]              = Option(document("isAdmin" -> 1))
-  val findPushSubscriptionProjector: Option[BSONDocument] = Option(document("push"    -> 1))
+  val findPushSubscriptionProjector: Option[BSONDocument] = Option(document("push" -> 1))
 }

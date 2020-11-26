@@ -7,8 +7,8 @@ import hu.ksisu.imazsak.token.TokenDao.TokenData
 import hu.ksisu.imazsak.token.TokenService.CreateTokenData
 import hu.ksisu.imazsak.util.{DateTimeUtil, IdGenerator}
 
-class TokenServiceImpl[F[_]: Monad](
-    implicit idGenerator: IdGenerator,
+class TokenServiceImpl[F[_]: Monad](implicit
+    idGenerator: IdGenerator,
     dateTimeUtil: DateTimeUtil,
     tokenDao: TokenDao[F]
 ) extends TokenService[F] {
@@ -35,8 +35,8 @@ class TokenServiceImpl[F[_]: Monad](
     tokenDao.create(tokenData).map(_ => token)
   }
 
-  override def validateAndGetTokenData[T](tokenType: String, token: String)(
-      implicit r: JsonReader[T]
+  override def validateAndGetTokenData[T](tokenType: String, token: String)(implicit
+      r: JsonReader[T]
   ): Response[F, Option[T]] = {
     val tokenFromDb: EitherT[F, AppError, TokenData] = tokenDao
       .findByTypeAndToken(tokenType, token)
