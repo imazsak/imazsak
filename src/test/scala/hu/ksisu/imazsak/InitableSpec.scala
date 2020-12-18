@@ -36,7 +36,6 @@ class InitableSpec extends TestBase {
       override def getRedisConfig: RedisServiceImpl.RedisConfig                              = ???
     }
   }
-  import cats.instances.try_._
 
   "Initable" should {
     "#initializeIfEnabled" should {

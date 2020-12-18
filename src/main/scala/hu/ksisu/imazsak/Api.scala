@@ -41,8 +41,8 @@ object Api {
     val modules = configService.getEnabledModules
     logger.info(s"Load api for modules: ${modules.mkString(",")}")
 
-    val api = modules.collect {
-      case "health" => new HealthCheckApi()
+    val api = modules.collect { case "health" =>
+      new HealthCheckApi()
     } ++ Seq(
       new MeApi(),
       new GroupApi(),

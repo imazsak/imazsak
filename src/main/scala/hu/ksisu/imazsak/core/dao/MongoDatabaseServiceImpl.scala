@@ -10,13 +10,12 @@ import reactivemongo.api.{AsyncDriver, DefaultDB, MongoConnection}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class MongoDatabaseServiceImpl(
-    implicit config: MongoConfig,
+class MongoDatabaseServiceImpl(implicit
+    config: MongoConfig,
     ec: ExecutionContext,
     cs: ContextShift[IO],
     driver: AsyncDriver
 ) extends MongoDatabaseService[IO] {
-  import cats.instances.future._
 
   private lazy val database: Future[DefaultDB] = {
     val result: EitherT[Future, Throwable, DefaultDB] = for {

@@ -17,8 +17,8 @@ import spray.json.RootJsonFormat
 
 import scala.concurrent.duration._
 
-class GroupServiceImpl[F[_]: Monad](
-    implicit val groupDao: GroupDao[F],
+class GroupServiceImpl[F[_]: Monad](implicit
+    val groupDao: GroupDao[F],
     userDao: UserDao[F],
     tokenService: TokenService[F],
     cache: CacheService[F],
