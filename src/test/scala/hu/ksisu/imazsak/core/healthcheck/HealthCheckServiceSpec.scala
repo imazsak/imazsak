@@ -11,7 +11,6 @@ import scala.util.{Failure, Success, Try}
 class HealthCheckServiceSpec extends TestBase {
 
   trait TestScope {
-    import cats.instances.try_._
     implicit val configService: ServerConfig[Try]               = mock[ServerConfig[Try]]
     implicit val databaseServiceMock: MongoDatabaseService[Try] = mock[MongoDatabaseService[Try]]
     implicit val cacheServiceMock: CacheService[Try]            = mock[CacheService[Try]]

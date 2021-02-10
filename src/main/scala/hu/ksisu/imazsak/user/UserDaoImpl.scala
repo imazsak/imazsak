@@ -57,7 +57,7 @@ class UserDaoImpl(implicit mongoDatabaseService: MongoDatabaseService[IO], ec: E
 
   override def removePushSubscriptionByDeviceId(deviceId: String): IO[Unit] = {
     val selector = document("push.deviceId" -> deviceId)
-    val modifier = document("$pull"         -> document("push" -> document("deviceId" -> deviceId)))
+    val modifier = document("$pull" -> document("push" -> document("deviceId" -> deviceId)))
     MongoQueryHelper.updateMultiple(selector, modifier)
   }
 }

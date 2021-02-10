@@ -14,8 +14,8 @@ import hu.ksisu.imazsak.util.DateTimeUtil
 import hu.ksisu.imazsak.util.LoggerUtil.UserLogContext
 import spray.json._
 
-class StatServiceImpl[F[_]: Applicative](
-    implicit amqpService: AmqpService[F],
+class StatServiceImpl[F[_]: Applicative](implicit
+    amqpService: AmqpService[F],
     configByName: String => AmqpQueueConfig,
     dateTimeUtil: DateTimeUtil
 ) extends StatService[F] {
