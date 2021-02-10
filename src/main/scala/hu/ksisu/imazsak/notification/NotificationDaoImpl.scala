@@ -11,8 +11,8 @@ import reactivemongo.api.bson.{BSON, document}
 
 import scala.concurrent.ExecutionContext
 
-class NotificationDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[IO],
+class NotificationDaoImpl(implicit
+    mongoDatabaseService: MongoDatabaseService[IO],
     idGenerator: IdGenerator,
     ec: ExecutionContext,
     cs: ContextShift[IO]

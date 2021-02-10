@@ -12,8 +12,8 @@ import reactivemongo.api.bson.{BSON, BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 
-class GroupDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[IO],
+class GroupDaoImpl(implicit
+    mongoDatabaseService: MongoDatabaseService[IO],
     idGenerator: IdGenerator,
     ec: ExecutionContext,
     cs: ContextShift[IO]

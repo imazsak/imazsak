@@ -64,8 +64,8 @@ object PrayerDao {
         objectId      <- bson.getAsTry[BSONObjectID]("_id")
       } yield {
         val createdAtMillis = objectId.time
-        val groupIds = groupIdsArray.values.collect {
-          case BSONString(groupId) => groupId
+        val groupIds = groupIdsArray.values.collect { case BSONString(groupId) =>
+          groupId
         }
         MyPrayerListData(id, message, groupIds, prayCount, createdAtMillis)
       }
@@ -81,8 +81,8 @@ object PrayerDao {
         objectId      <- bson.getAsTry[BSONObjectID]("_id")
       } yield {
         val updates = bson.getAsOpt[Seq[PrayerUpdateData]]("updates").getOrElse(Seq.empty)
-        val groupIds = groupIdsArray.values.collect {
-          case BSONString(groupId) => groupId
+        val groupIds = groupIdsArray.values.collect { case BSONString(groupId) =>
+          groupId
         }
         val createdAtMillis = objectId.time
         PrayerDetailsData(id, userId, groupIds, message, createdAtMillis, updates)
