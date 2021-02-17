@@ -6,7 +6,6 @@ import hu.ksisu.imazsak.core.impl.JwtServiceImpl.JwtConfig
 import scala.util.Try
 
 class ServerConfigSpec extends TestBase {
-  import cats.instances.try_._
 
   "#isModuleEnabled" should {
     val service        = new ServerConfigImpl[Try]()
