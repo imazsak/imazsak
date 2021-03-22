@@ -35,8 +35,8 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.4.2",
-        "org.typelevel"        %% "cats-effect"              % "2.3.3",
+        "org.typelevel"        %% "cats-core"                % "2.1.1",
+        "org.typelevel"        %% "cats-effect"              % "2.4.0",
         "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
@@ -62,9 +62,9 @@ lazy val core = (project in file("."))
         "nl.martijndwars"      % "web-push"                  % "5.1.1",
         "org.codehaus.janino"  % "janino"                    % "3.1.3",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
-        "org.scalatest"        %% "scalatest"                % "3.2.3" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.7.7" % "it,test",
-        "org.mockito"          %% "mockito-scala"            % "1.16.25" % "it,test"
+        "org.scalatest"        %% "scalatest"                % "3.2.6" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.8.0" % "it,test",
+        "org.mockito"          %% "mockito-scala"            % "1.16.32" % "it,test"
       )
     }
   )
