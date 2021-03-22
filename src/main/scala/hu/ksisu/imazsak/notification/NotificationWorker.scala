@@ -25,8 +25,8 @@ object NotificationWorker {
   }
 }
 
-class NotificationWorker(
-    implicit notificationDao: NotificationDao[IO],
+class NotificationWorker(implicit
+    notificationDao: NotificationDao[IO],
     pushNotificationService: PushNotificationService[IO],
     amqpService: AmqpService[IO],
     configByName: String => AmqpQueueConfig,
@@ -49,10 +49,9 @@ class NotificationWorker(
         logger.warn("NotificationWorker stopped")
         status.set(false)
       })
-      .recover {
-        case x =>
-          logger.error("NotificationWorker failed!", x)
-          status.set(false)
+      .recover { case x =>
+        logger.error("NotificationWorker failed!", x)
+        status.set(false)
       }
   }
 
@@ -75,8 +74,8 @@ class NotificationWorker(
             Option(msg.notificationType)
           )
         )
-        processNotification(model).unsafeToFuture().recover {
-          case x => logger.warn("Notification process failed", x)
+        processNotification(model).unsafeToFuture().recover { case x =>
+          logger.warn("Notification process failed", x)
         }
       }
       .runWith(Sink.ignore)
