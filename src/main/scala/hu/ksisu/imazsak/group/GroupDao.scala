@@ -35,7 +35,7 @@ object GroupDao {
   implicit val groupMemberListDataReader: BSONDocumentReader[GroupMemberListData] = Macros.reader[GroupMemberListData]
   implicit val createGroupDataWriter: BSONDocumentWriter[CreateGroupData]         = Macros.writer[CreateGroupData]
 
-  val groupListDataProjector: Option[BSONDocument]       = Option(document("id"      -> 1, "name" -> 1))
-  val groupAdminListDataProjector: Option[BSONDocument]  = Option(document("id"      -> 1, "name" -> 1, "members" -> 1))
+  val groupListDataProjector: Option[BSONDocument]       = Option(document("id" -> 1, "name" -> 1))
+  val groupAdminListDataProjector: Option[BSONDocument]  = Option(document("id" -> 1, "name" -> 1, "members" -> 1))
   val groupMemberListDataProjector: Option[BSONDocument] = Option(document("members" -> 1))
 }

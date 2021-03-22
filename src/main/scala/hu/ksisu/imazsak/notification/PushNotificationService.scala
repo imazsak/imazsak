@@ -10,8 +10,8 @@ trait PushNotificationService[F[_]] extends Initable[F] {
   def getPublicKey()(implicit ctx: LogContext): Response[F, String]
   def addSubscription(data: PushSubscribeRequest)(implicit ctx: UserLogContext): Response[F, Unit]
   def removeSubscription(deviceId: String)(implicit ctx: LogContext): Response[F, Unit]
-  def sendNotification(notificationId: String, data: CreateNotificationData)(
-      implicit ctx: LogContext
+  def sendNotification(notificationId: String, data: CreateNotificationData)(implicit
+      ctx: LogContext
   ): Response[F, Unit]
 }
 

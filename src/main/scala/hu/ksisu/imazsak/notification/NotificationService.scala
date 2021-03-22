@@ -8,8 +8,8 @@ import hu.ksisu.imazsak.util.LoggerUtil.{LogContext, UserLogContext}
 import spray.json._
 
 trait NotificationService[F[_]] extends Initable[F] {
-  def createNotification[T](notificationType: String, userId: String, message: T)(
-      implicit ctx: LogContext,
+  def createNotification[T](notificationType: String, userId: String, message: T)(implicit
+      ctx: LogContext,
       w: JsonWriter[T]
   ): Response[F, Unit]
   def listUserNotifications()(implicit ctx: UserLogContext): Response[F, Seq[NotificationListResponse]]

@@ -15,8 +15,8 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
-class NotificationApi(
-    implicit service: NotificationService[IO],
+class NotificationApi(implicit
+    service: NotificationService[IO],
     val jwtService: JwtService[IO]
 ) extends Api
     with AuthDirectives {
@@ -36,21 +36,21 @@ class NotificationApi(
             service.listUserNotifications().toComplete
           }
         } ~ post {
-        path("read") {
-          userAuthAndTrace("Notifications_Read") { implicit ctx =>
-            entity(as[Ids]) { data =>
-              service.setUserRead(data.ids).toComplete
-            }
-          }
-        } ~
-          path("delete") {
-            userAuthAndTrace("Notifications_Delete") { implicit ctx =>
+          path("read") {
+            userAuthAndTrace("Notifications_Read") { implicit ctx =>
               entity(as[Ids]) { data =>
-                service.deleteUserNotifications(data.ids).toComplete
+                service.setUserRead(data.ids).toComplete
               }
             }
-          }
-      }
+          } ~
+            path("delete") {
+              userAuthAndTrace("Notifications_Delete") { implicit ctx =>
+                entity(as[Ids]) { data =>
+                  service.deleteUserNotifications(data.ids).toComplete
+                }
+              }
+            }
+        }
     }
   }
 

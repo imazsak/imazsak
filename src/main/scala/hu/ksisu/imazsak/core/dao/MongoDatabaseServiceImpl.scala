@@ -10,8 +10,8 @@ import reactivemongo.api.{AsyncDriver, DefaultDB, MongoConnection}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class MongoDatabaseServiceImpl(
-    implicit config: MongoConfig,
+class MongoDatabaseServiceImpl(implicit
+    config: MongoConfig,
     ec: ExecutionContext,
     cs: ContextShift[IO],
     driver: AsyncDriver

@@ -55,8 +55,8 @@ class ItTestServices(implicit ec: ExecutionContext) extends Services[IO] {
   implicit lazy val pushNotificationService: PushNotificationService[IO] = new PushNotificationServiceImpl()
   implicit lazy val redisService: CacheService[IO] = new CacheService[IO] {
     override def checkStatus(): IO[Boolean] = IO(true)
-    override def findOrSet[T](key: String, ttl: Option[FiniteDuration])(valueF: => IO[T])(
-        implicit format: JsonFormat[T]
+    override def findOrSet[T](key: String, ttl: Option[FiniteDuration])(valueF: => IO[T])(implicit
+        format: JsonFormat[T]
     ): IO[T]                                   = ???
     override def remove(key: String): IO[Unit] = ???
     override def init: IO[Unit]                = ???
