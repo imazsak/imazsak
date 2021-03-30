@@ -66,7 +66,6 @@ class PushNotificationServiceImpl(implicit
   def sendNotification(notificationId: String, data: CreateNotificationData)(implicit
       ctx: LogContext
   ): Response[IO, Unit] = {
-    import cats.instances.list._
     import cats.syntax.traverse._
 
     val payload = createPushMessage(notificationId, data)

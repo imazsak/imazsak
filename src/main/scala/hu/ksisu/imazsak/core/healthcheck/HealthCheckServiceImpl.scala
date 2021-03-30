@@ -14,7 +14,6 @@ class HealthCheckServiceImpl[F[_]](implicit
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
   import cats.syntax.traverse._
-  import cats.instances.list._
 
   val services = new scala.collection.concurrent.TrieMap[String, () => F[Boolean]]()
   addModule("database", () => databaseService.checkStatus())

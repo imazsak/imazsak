@@ -157,7 +157,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
   private def sendNewPrayerNotification(prayerId: String, data: CreatePrayerRequest)(implicit
       ctx: UserLogContext
   ): Response[F, Unit] = {
-    import cats.instances.list._
     val usersWithGroupIds = data.groupIds.toList
       .flatTraverse(id =>
         groupDao
@@ -196,7 +195,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
     if (feedback.trim.isEmpty) {
       EitherT.rightT({})
     } else {
-      import cats.instances.list._
       createPrayerCloseFeedbackNotificationData(prayerData, feedback).flatMap { msg =>
         prayerData.prayUsers.toList
           .traverse[Tmp, Unit](userId =>
@@ -230,7 +228,6 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
   }
 
   private def invalidateGroupsListCache(groupIds: Seq[String]): F[List[Unit]] = {
-    import cats.instances.list._
     groupIds.toList.traverse[F, Unit](id => cache.remove(CacheService.prayerListByGroupKey(id)))
   }
 
