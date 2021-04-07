@@ -8,8 +8,8 @@ import reactivemongo.api.bson.collection.BSONCollection
 
 import scala.concurrent.ExecutionContext
 
-class FeedbackDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[IO],
+class FeedbackDaoImpl(implicit
+    mongoDatabaseService: MongoDatabaseService[IO],
     idGenerator: IdGenerator,
     ec: ExecutionContext,
     cs: ContextShift[IO]

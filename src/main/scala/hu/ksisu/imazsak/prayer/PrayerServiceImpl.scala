@@ -33,8 +33,8 @@ import spray.json.RootJsonFormat
 
 import scala.concurrent.duration._
 
-class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
-    implicit prayerDao: PrayerDao[F],
+class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](implicit
+    prayerDao: PrayerDao[F],
     groupDao: GroupDao[F],
     groupService: GroupService[F],
     userDao: UserDao[F],
@@ -86,18 +86,17 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     } yield ()
   }
 
-  private def sendNewPrayerNotificationWithoutError(id: String, data: CreatePrayerRequest)(
-      implicit ctx: UserLogContext
+  private def sendNewPrayerNotificationWithoutError(id: String, data: CreatePrayerRequest)(implicit
+      ctx: UserLogContext
   ): Response[F, Unit] = {
     val result = sendNewPrayerNotification(id, data)
-      .recover {
-        case error => logger.warn(s"sendNewPrayerNotification failed! $error")
+      .recover { case error =>
+        logger.warn(s"sendNewPrayerNotification failed! $error")
       }
       .value
-      .recover {
-        case ex =>
-          logger.warn(s"sendNewPrayerNotification failed!", ex)
-          Right({})
+      .recover { case ex =>
+        logger.warn(s"sendNewPrayerNotification failed!", ex)
+        Right({})
       }
     EitherT(result)
   }
@@ -155,8 +154,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
   }
 
   // TODO: refactor the whole function
-  private def sendNewPrayerNotification(prayerId: String, data: CreatePrayerRequest)(
-      implicit ctx: UserLogContext
+  private def sendNewPrayerNotification(prayerId: String, data: CreatePrayerRequest)(implicit
+      ctx: UserLogContext
   ): Response[F, Unit] = {
     import cats.instances.list._
     val usersWithGroupIds = data.groupIds.toList
@@ -170,17 +169,16 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
 
     EitherT
       .right(usersWithGroupIds)
-      .flatMap(_.traverse[Tmp, Unit] {
-        case (userId, groupIds) =>
-          createPrayerCreatedNotificationData(prayerId, data.message, groupIds).flatMap { msg =>
-            notificationService.createNotification(NotificationMeta.PRAYER_CREATED, userId, msg)
-          }
+      .flatMap(_.traverse[Tmp, Unit] { case (userId, groupIds) =>
+        createPrayerCreatedNotificationData(prayerId, data.message, groupIds).flatMap { msg =>
+          notificationService.createNotification(NotificationMeta.PRAYER_CREATED, userId, msg)
+        }
       })
       .map(_ => {})
   }
 
-  private def createPrayerCreatedNotificationData(prayerId: String, message: String, groupIds: Seq[String])(
-      implicit ctx: UserLogContext
+  private def createPrayerCreatedNotificationData(prayerId: String, message: String, groupIds: Seq[String])(implicit
+      ctx: UserLogContext
   ): Response[F, PrayerCreatedNotificationData] = {
     val userNameFO = userDao
       .findUserData(ctx.userId)
@@ -192,8 +190,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     EitherT.right(result)
   }
 
-  private def sendFeedbackToUsers(prayerData: PrayerWithPrayUserData, feedback: String)(
-      implicit ctx: UserLogContext
+  private def sendFeedbackToUsers(prayerData: PrayerWithPrayUserData, feedback: String)(implicit
+      ctx: UserLogContext
   ): Response[F, Unit] = {
     if (feedback.trim.isEmpty) {
       EitherT.rightT({})
@@ -209,8 +207,8 @@ class PrayerServiceImpl[F[_]: MonadError[*[_], Throwable]](
     }
   }
 
-  private def createPrayerCloseFeedbackNotificationData(prayerData: PrayerWithPrayUserData, feedback: String)(
-      implicit ctx: UserLogContext
+  private def createPrayerCloseFeedbackNotificationData(prayerData: PrayerWithPrayUserData, feedback: String)(implicit
+      ctx: UserLogContext
   ): Response[F, PrayerCloseFeedbackNotificationData] = {
     val userNameFO = userDao
       .findUserData(ctx.userId)

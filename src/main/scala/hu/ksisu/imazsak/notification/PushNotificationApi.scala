@@ -13,8 +13,8 @@ import hu.ksisu.imazsak.util.LoggerUtil.Logger
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
 
-class PushNotificationApi(
-    implicit service: PushNotificationService[IO],
+class PushNotificationApi(implicit
+    service: PushNotificationService[IO],
     val jwtService: JwtService[IO]
 ) extends Api
     with AuthDirectives {

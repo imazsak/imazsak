@@ -9,8 +9,8 @@ import reactivemongo.api.bson.{BSONDocument, document}
 
 import scala.concurrent.ExecutionContext
 
-class TokenDaoImpl(
-    implicit mongoDatabaseService: MongoDatabaseService[IO],
+class TokenDaoImpl(implicit
+    mongoDatabaseService: MongoDatabaseService[IO],
     ec: ExecutionContext,
     cs: ContextShift[IO]
 ) extends TokenDao[IO] {

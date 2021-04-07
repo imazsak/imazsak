@@ -11,8 +11,8 @@ import reactivemongo.api.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWri
 import scala.concurrent.ExecutionContext
 
 object MongoQueryHelper {
-  def insert[T](data: T)(
-      implicit collectionF: IO[BSONCollection],
+  def insert[T](data: T)(implicit
+      collectionF: IO[BSONCollection],
       writer: BSONDocumentWriter[T],
       idGenerator: IdGenerator,
       ec: ExecutionContext,
@@ -30,8 +30,8 @@ object MongoQueryHelper {
       projector: Option[BSONDocument] = None,
       sort: Option[BSONDocument] = None,
       limit: Option[Int] = None
-  )(
-      implicit collectionF: IO[BSONCollection],
+  )(implicit
+      collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
       ec: ExecutionContext,
       cs: ContextShift[IO]
@@ -60,8 +60,8 @@ object MongoQueryHelper {
       sorter: BSONDocument,
       projector: Option[BSONDocument] = None,
       limit: Option[Int] = None
-  )(
-      implicit collectionF: IO[BSONCollection],
+  )(implicit
+      collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
       ec: ExecutionContext,
       cs: ContextShift[IO]
@@ -80,8 +80,8 @@ object MongoQueryHelper {
     } yield groups
   }
 
-  def findOne[T](selector: BSONDocument, projector: Option[BSONDocument] = None)(
-      implicit collectionF: IO[BSONCollection],
+  def findOne[T](selector: BSONDocument, projector: Option[BSONDocument] = None)(implicit
+      collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
       ec: ExecutionContext,
       cs: ContextShift[IO]
@@ -92,8 +92,8 @@ object MongoQueryHelper {
     } yield result)
   }
 
-  def updateOne(selector: BSONDocument, modifier: BSONDocument, upsert: Boolean = false)(
-      implicit collectionF: IO[BSONCollection],
+  def updateOne(selector: BSONDocument, modifier: BSONDocument, upsert: Boolean = false)(implicit
+      collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Unit] = {
@@ -103,8 +103,8 @@ object MongoQueryHelper {
     } yield ()
   }
 
-  def updateMultiple(selector: BSONDocument, modifier: BSONDocument)(
-      implicit collectionF: IO[BSONCollection],
+  def updateMultiple(selector: BSONDocument, modifier: BSONDocument)(implicit
+      collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Unit] = {
@@ -114,24 +114,24 @@ object MongoQueryHelper {
     } yield ()
   }
 
-  def deleteOne(selector: BSONDocument)(
-      implicit collectionF: IO[BSONCollection],
+  def deleteOne(selector: BSONDocument)(implicit
+      collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Int] = {
     deleteMultipleWithLimit(selector, Some(1))
   }
 
-  def deleteMultiple(selector: BSONDocument)(
-      implicit collectionF: IO[BSONCollection],
+  def deleteMultiple(selector: BSONDocument)(implicit
+      collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Int] = {
     deleteMultipleWithLimit(selector, None)
   }
 
-  private def deleteMultipleWithLimit(selector: BSONDocument, limit: Option[Int])(
-      implicit collectionF: IO[BSONCollection],
+  private def deleteMultipleWithLimit(selector: BSONDocument, limit: Option[Int])(implicit
+      collectionF: IO[BSONCollection],
       ec: ExecutionContext,
       cs: ContextShift[IO]
   ): IO[Int] = {
