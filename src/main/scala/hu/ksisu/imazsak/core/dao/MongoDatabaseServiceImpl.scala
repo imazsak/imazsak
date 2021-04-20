@@ -16,7 +16,6 @@ class MongoDatabaseServiceImpl(implicit
     cs: ContextShift[IO],
     driver: AsyncDriver
 ) extends MongoDatabaseService[IO] {
-  import cats.instances.future._
 
   private lazy val database: Future[DefaultDB] = {
     val result: EitherT[Future, Throwable, DefaultDB] = for {
