@@ -15,7 +15,8 @@ object MongoQueryHelper {
       collectionF: IO[BSONCollection],
       writer: BSONDocumentWriter[T],
       idGenerator: IdGenerator,
-      ec: ExecutionContext): IO[String] = {
+      ec: ExecutionContext
+  ): IO[String] = {
     val model = data.toBsonWithNewId
     for {
       collection <- collectionF
@@ -28,10 +29,7 @@ object MongoQueryHelper {
       projector: Option[BSONDocument] = None,
       sort: Option[BSONDocument] = None,
       limit: Option[Int] = None
-  )(implicit
-      collectionF: IO[BSONCollection],
-      reader: BSONDocumentReader[T],
-      ec: ExecutionContext): IO[Seq[T]] = {
+  )(implicit collectionF: IO[BSONCollection], reader: BSONDocumentReader[T], ec: ExecutionContext): IO[Seq[T]] = {
     def createQuery(collection: BSONCollection): IO[Seq[T]] = {
       val find   = collection.find(selector, projector)
       val sorted = sort.fold(find)(find.sort)
@@ -56,10 +54,7 @@ object MongoQueryHelper {
       sorter: BSONDocument,
       projector: Option[BSONDocument] = None,
       limit: Option[Int] = None
-  )(implicit
-      collectionF: IO[BSONCollection],
-      reader: BSONDocumentReader[T],
-      ec: ExecutionContext): IO[Seq[T]] = {
+  )(implicit collectionF: IO[BSONCollection], reader: BSONDocumentReader[T], ec: ExecutionContext): IO[Seq[T]] = {
     for {
       collection <- collectionF
       groups <- IO.fromFuture(
@@ -77,7 +72,8 @@ object MongoQueryHelper {
   def findOne[T](selector: BSONDocument, projector: Option[BSONDocument] = None)(implicit
       collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
-      ec: ExecutionContext): OptionT[IO, T] = {
+      ec: ExecutionContext
+  ): OptionT[IO, T] = {
     OptionT(for {
       collection <- collectionF
       result     <- IO.fromFuture(IO(collection.find(selector, projector).one[T]))
@@ -86,7 +82,8 @@ object MongoQueryHelper {
 
   def updateOne(selector: BSONDocument, modifier: BSONDocument, upsert: Boolean = false)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext): IO[Unit] = {
+      ec: ExecutionContext
+  ): IO[Unit] = {
     for {
       collection <- collectionF
       _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert, multi = false)))
@@ -95,28 +92,28 @@ object MongoQueryHelper {
 
   def updateMultiple(selector: BSONDocument, modifier: BSONDocument)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext): IO[Unit] = {
+      ec: ExecutionContext
+  ): IO[Unit] = {
     for {
       collection <- collectionF
       _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert = false, multi = true)))
     } yield ()
   }
 
-  def deleteOne(selector: BSONDocument)(implicit
-      collectionF: IO[BSONCollection],
-      ec: ExecutionContext): IO[Int] = {
+  def deleteOne(selector: BSONDocument)(implicit collectionF: IO[BSONCollection], ec: ExecutionContext): IO[Int] = {
     deleteMultipleWithLimit(selector, Some(1))
   }
 
-  def deleteMultiple(selector: BSONDocument)(implicit
-      collectionF: IO[BSONCollection],
-      ec: ExecutionContext): IO[Int] = {
+  def deleteMultiple(
+      selector: BSONDocument
+  )(implicit collectionF: IO[BSONCollection], ec: ExecutionContext): IO[Int] = {
     deleteMultipleWithLimit(selector, None)
   }
 
   private def deleteMultipleWithLimit(selector: BSONDocument, limit: Option[Int])(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext): IO[Int] = {
+      ec: ExecutionContext
+  ): IO[Int] = {
     for {
       collection <- collectionF
       result     <- IO.fromFuture(IO(collection.delete.one(selector, limit = limit)))
