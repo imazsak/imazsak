@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.FileStoreService
 
 import scala.concurrent.ExecutionContext

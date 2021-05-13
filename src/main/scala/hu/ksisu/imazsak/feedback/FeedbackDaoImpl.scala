@@ -1,6 +1,6 @@
 package hu.ksisu.imazsak.feedback
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.feedback.FeedbackDao.CreateFeedbackData
 import hu.ksisu.imazsak.util.IdGenerator
