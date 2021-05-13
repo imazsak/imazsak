@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.group
 
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.MongoProjectors._
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
