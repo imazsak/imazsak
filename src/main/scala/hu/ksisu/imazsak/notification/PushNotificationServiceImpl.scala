@@ -20,8 +20,8 @@ import spray.json._
 
 import scala.io.Source
 
-class PushNotificationServiceImpl(
-    implicit config: PushNotificationConfig,
+class PushNotificationServiceImpl(implicit
+    config: PushNotificationConfig,
     userDao: UserDao[IO],
     ev: Applicative[IO],
     date: DateTimeUtil
@@ -63,8 +63,8 @@ class PushNotificationServiceImpl(
     EitherT.right(userDao.removePushSubscriptionByDeviceId(deviceId))
   }
 
-  def sendNotification(notificationId: String, data: CreateNotificationData)(
-      implicit ctx: LogContext
+  def sendNotification(notificationId: String, data: CreateNotificationData)(implicit
+      ctx: LogContext
   ): Response[IO, Unit] = {
     import cats.instances.list._
     import cats.syntax.traverse._
@@ -110,8 +110,8 @@ class PushNotificationServiceImpl(
     }
   }
 
-  private def _sendPushNotification(subscriptionData: UserPushSubscriptionData, payload: String, ttl: Int)(
-      implicit ctx: LogContext
+  private def _sendPushNotification(subscriptionData: UserPushSubscriptionData, payload: String, ttl: Int)(implicit
+      ctx: LogContext
   ): Response[IO, Unit] = {
     val result = clientF.map { client =>
       val noti = new Notification(

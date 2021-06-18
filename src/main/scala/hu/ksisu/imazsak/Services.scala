@@ -73,8 +73,8 @@ trait Services[F[_]] {
   }
 }
 
-class RealServices(
-    implicit ec: ExecutionContext,
+class RealServices(implicit
+    ec: ExecutionContext,
     actorSystem: ActorSystem,
     cs: ContextShift[IO]
 ) extends Services[IO] {

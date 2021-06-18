@@ -6,8 +6,8 @@ import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService
 import hu.ksisu.imazsak.core.healthcheck.HealthCheckService.HealthCheckResult
 
-class HealthCheckServiceImpl[F[_]](
-    implicit F: MonadError[F, Throwable],
+class HealthCheckServiceImpl[F[_]](implicit
+    F: MonadError[F, Throwable],
     databaseService: MongoDatabaseService[F],
     redisService: CacheService[F]
 ) extends HealthCheckService[F] {
@@ -22,9 +22,8 @@ class HealthCheckServiceImpl[F[_]](
 
   def getStatus: F[HealthCheckResult] = {
     for {
-      serviceResults <- services.toList.traverse {
-        case (name, check) =>
-          check().recover { case _ => false }.map(result => (name, result))
+      serviceResults <- services.toList.traverse { case (name, check) =>
+        check().recover { case _ => false }.map(result => (name, result))
       }
     } yield {
       val success = serviceResults.forall(_._2)
