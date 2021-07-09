@@ -46,7 +46,7 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.6",
-        "org.slf4j"            % "jul-to-slf4j"              % "1.7.30",
+        "org.slf4j"            % "jul-to-slf4j"              % "1.7.31",
         "com.pauldijou"        %% "jwt-core"                 % "5.0.0",
         "com.pauldijou"        %% "jwt-spray-json"           % "5.0.0",
         "commons-codec"        % "commons-codec"             % "1.15",
@@ -58,12 +58,12 @@ lazy val core = (project in file("."))
         "org.reactivemongo"    %% "reactivemongo"            % "0.20.13",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.2",
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.68",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.69",
         "nl.martijndwars"      % "web-push"                  % "5.1.1",
         "org.codehaus.janino"  % "janino"                    % "3.1.4",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.2.9" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.10.0" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.11.2" % "it,test",
         "org.mockito"          %% "mockito-scala"            % "1.16.37" % "it,test"
       )
     }
