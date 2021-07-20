@@ -46,9 +46,9 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
         "ch.qos.logback"       % "logback-classic"           % "1.2.3",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.6",
-        "org.slf4j"            % "jul-to-slf4j"              % "1.7.31",
-        "com.pauldijou"        %% "jwt-core"                 % "6.0.0",
-        "com.pauldijou"        %% "jwt-spray-json"           % "6.0.0",
+        "org.slf4j"            % "jul-to-slf4j"              % "1.7.32",
+        "com.pauldijou"        %% "jwt-core"                 % "5.0.0",
+        "com.pauldijou"        %% "jwt-spray-json"           % "5.0.0",
         "commons-codec"        % "commons-codec"             % "1.15",
         "ch.megard"            %% "akka-http-cors"           % "1.0.0",
         "io.opentracing"       % "opentracing-api"           % "0.33.0",
@@ -63,7 +63,7 @@ lazy val core = (project in file("."))
         "org.codehaus.janino"  % "janino"                    % "3.1.4",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
         "org.scalatest"        %% "scalatest"                % "3.2.9" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.11.1" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.11.2" % "it,test",
         "org.mockito"          %% "mockito-scala"            % "1.16.37" % "it,test"
       )
     }
