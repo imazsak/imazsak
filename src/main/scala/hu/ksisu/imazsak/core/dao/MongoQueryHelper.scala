@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.core.dao
 
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.BsonHelper._
 import hu.ksisu.imazsak.util.IdGenerator
 import reactivemongo.api.Cursor
@@ -15,9 +15,7 @@ object MongoQueryHelper {
       collectionF: IO[BSONCollection],
       writer: BSONDocumentWriter[T],
       idGenerator: IdGenerator,
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[String] = {
+      ec: ExecutionContext): IO[String] = {
     val model = data.toBsonWithNewId
     for {
       collection <- collectionF
@@ -33,9 +31,7 @@ object MongoQueryHelper {
   )(implicit
       collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Seq[T]] = {
+      ec: ExecutionContext): IO[Seq[T]] = {
     def createQuery(collection: BSONCollection): IO[Seq[T]] = {
       val find   = collection.find(selector, projector)
       val sorted = sort.fold(find)(find.sort)
@@ -63,9 +59,7 @@ object MongoQueryHelper {
   )(implicit
       collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Seq[T]] = {
+      ec: ExecutionContext): IO[Seq[T]] = {
     for {
       collection <- collectionF
       groups <- IO.fromFuture(
@@ -83,9 +77,7 @@ object MongoQueryHelper {
   def findOne[T](selector: BSONDocument, projector: Option[BSONDocument] = None)(implicit
       collectionF: IO[BSONCollection],
       reader: BSONDocumentReader[T],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): OptionT[IO, T] = {
+      ec: ExecutionContext): OptionT[IO, T] = {
     OptionT(for {
       collection <- collectionF
       result     <- IO.fromFuture(IO(collection.find(selector, projector).one[T]))
@@ -94,9 +86,7 @@ object MongoQueryHelper {
 
   def updateOne(selector: BSONDocument, modifier: BSONDocument, upsert: Boolean = false)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Unit] = {
+      ec: ExecutionContext): IO[Unit] = {
     for {
       collection <- collectionF
       _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert, multi = false)))
@@ -105,9 +95,7 @@ object MongoQueryHelper {
 
   def updateMultiple(selector: BSONDocument, modifier: BSONDocument)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Unit] = {
+      ec: ExecutionContext): IO[Unit] = {
     for {
       collection <- collectionF
       _          <- IO.fromFuture(IO(collection.update.one(selector, modifier, upsert = false, multi = true)))
@@ -116,25 +104,19 @@ object MongoQueryHelper {
 
   def deleteOne(selector: BSONDocument)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Int] = {
+      ec: ExecutionContext): IO[Int] = {
     deleteMultipleWithLimit(selector, Some(1))
   }
 
   def deleteMultiple(selector: BSONDocument)(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Int] = {
+      ec: ExecutionContext): IO[Int] = {
     deleteMultipleWithLimit(selector, None)
   }
 
   private def deleteMultipleWithLimit(selector: BSONDocument, limit: Option[Int])(implicit
       collectionF: IO[BSONCollection],
-      ec: ExecutionContext,
-      cs: ContextShift[IO]
-  ): IO[Int] = {
+      ec: ExecutionContext): IO[Int] = {
     for {
       collection <- collectionF
       result     <- IO.fromFuture(IO(collection.delete.one(selector, limit = limit)))
