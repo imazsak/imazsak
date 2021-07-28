@@ -36,7 +36,7 @@ lazy val core = (project in file("."))
     libraryDependencies ++= {
       Seq(
         "org.typelevel"        %% "cats-core"                % "2.1.1",
-        "org.typelevel"        %% "cats-effect"              % "3.2.0",
+        "org.typelevel"        %% "cats-effect"              % "2.5.2",
         "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
@@ -44,7 +44,7 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-stream"              % "2.6.1",
         "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.1",
         "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
-        "ch.qos.logback"       % "logback-classic"           % "1.2.3",
+        "ch.qos.logback"       % "logback-classic"           % "1.2.5",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.6",
         "org.slf4j"            % "jul-to-slf4j"              % "1.7.32",
         "com.pauldijou"        %% "jwt-core"                 % "5.0.0",
