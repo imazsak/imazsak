@@ -35,8 +35,8 @@ lazy val core = (project in file("."))
     ),
     libraryDependencies ++= {
       Seq(
-        "org.typelevel"        %% "cats-core"                % "2.6.1",
-        "org.typelevel"        %% "cats-effect"              % "2.5.1",
+        "org.typelevel"        %% "cats-core"                % "2.1.1",
+        "org.typelevel"        %% "cats-effect"              % "2.5.2",
         "com.typesafe.akka"    %% "akka-http"                % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-spray-json"     % "10.1.10",
         "com.typesafe.akka"    %% "akka-http-testkit"        % "10.1.10" % "it,test",
@@ -44,9 +44,9 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"    %% "akka-stream"              % "2.6.1",
         "com.typesafe.akka"    %% "akka-slf4j"               % "2.6.1",
         "com.typesafe.akka"    %% "akka-testkit"             % "2.6.1" % "it,test",
-        "ch.qos.logback"       % "logback-classic"           % "1.2.3",
+        "ch.qos.logback"       % "logback-classic"           % "1.2.5",
         "net.logstash.logback" % "logstash-logback-encoder"  % "6.6",
-        "org.slf4j"            % "jul-to-slf4j"              % "1.7.30",
+        "org.slf4j"            % "jul-to-slf4j"              % "1.7.32",
         "com.pauldijou"        %% "jwt-core"                 % "5.0.0",
         "com.pauldijou"        %% "jwt-spray-json"           % "5.0.0",
         "commons-codec"        % "commons-codec"             % "1.15",
@@ -58,12 +58,12 @@ lazy val core = (project in file("."))
         "org.reactivemongo"    %% "reactivemongo"            % "0.20.13",
         "com.lightbend.akka"   %% "akka-stream-alpakka-amqp" % "2.0.2",
         "com.lightbend.akka"   %% "akka-stream-alpakka-s3"   % "2.0.2",
-        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.68",
+        "org.bouncycastle"     % "bcprov-jdk15on"            % "1.69",
         "nl.martijndwars"      % "web-push"                  % "5.1.1",
         "org.codehaus.janino"  % "janino"                    % "3.1.4",
         "com.github.etaty"     %% "rediscala"                % "1.9.0",
-        "org.scalatest"        %% "scalatest"                % "3.2.8" % "it,test",
-        "org.mockito"          % "mockito-core"              % "3.10.0" % "it,test",
+        "org.scalatest"        %% "scalatest"                % "3.2.9" % "it,test",
+        "org.mockito"          % "mockito-core"              % "3.11.2" % "it,test",
         "org.mockito"          %% "mockito-scala"            % "1.16.37" % "it,test"
       )
     }
@@ -75,7 +75,7 @@ addCommandAlias("testAll", "test it:test")
 enablePlugins(JavaAppPackaging)
 enablePlugins(BuildInfoPlugin)
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.12.0" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.0" cross CrossVersion.full)
 addCompilerPlugin("io.tryp"       % "splain"          % "0.5.8" cross CrossVersion.patch)
 
 cancelable in Global := true
