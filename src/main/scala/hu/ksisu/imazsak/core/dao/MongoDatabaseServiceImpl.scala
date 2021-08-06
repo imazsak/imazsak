@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.core.dao
 
 import cats.data.EitherT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.Errors.WrongConfig
 import hu.ksisu.imazsak.core.dao.MongoDatabaseService.MongoConfig
 import reactivemongo.api.bson.collection.BSONCollection
@@ -37,7 +37,7 @@ class MongoDatabaseServiceImpl(implicit
 
   override def checkStatus(): IO[Boolean] = {
     databaseIo.flatMap { db =>
-      IO.async { cb =>
+      IO.async_ { cb =>
         db.ping().onComplete {
           case Success(r) => cb(Right(r))
           case Failure(_) => cb(Right(false))

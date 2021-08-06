@@ -3,7 +3,7 @@ package hu.ksisu.imazsak
 import akka.Done
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.http.scaladsl.Http
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.notification.NotificationWorker
 import hu.ksisu.imazsak.stat.StatWorker
 import hu.ksisu.imazsak.util.LoggerUtil
