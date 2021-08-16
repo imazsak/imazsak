@@ -1,6 +1,6 @@
 package hu.ksisu.imazsak.stat
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import reactivemongo.api.bson.collection.BSONCollection
