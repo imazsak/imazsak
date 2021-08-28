@@ -3,7 +3,7 @@ package hu.ksisu.imazsak.core.impl
 import akka.actor.ActorSystem
 import akka.util.ByteString
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.CacheService
 import hu.ksisu.imazsak.core.impl.RedisServiceImpl._
 import redis.{ByteStringFormatter, RedisClientPool, RedisServer}

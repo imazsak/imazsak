@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.prayer
 
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.MongoSelectors._
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.prayer.PrayerDao._
