@@ -2,7 +2,7 @@ package hu.ksisu.imazsak
 
 import akka.actor.ActorSystem
 import cats.MonadError
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.admin.{AdminService, AdminServiceImpl}
 import hu.ksisu.imazsak.core._
 import hu.ksisu.imazsak.core.config.{ServerConfig, ServerConfigImpl}
