@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.util
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.TestBase
 
 class AkkaHttpWrapperSpec extends TestBase {

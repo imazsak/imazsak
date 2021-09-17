@@ -1,7 +1,7 @@
 package hu.ksisu.imazsak.token
 
 import cats.data.OptionT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import hu.ksisu.imazsak.core.dao.{MongoDatabaseService, MongoQueryHelper}
 import hu.ksisu.imazsak.token.TokenDao.TokenData
 import reactivemongo.api.bson.collection.BSONCollection
