@@ -44,7 +44,7 @@ lazy val core = (project in file("."))
         "com.typesafe.akka"   %% "akka-stream"              % "2.6.1",
         "com.typesafe.akka"   %% "akka-slf4j"               % "2.6.1",
         "com.typesafe.akka"   %% "akka-testkit"             % "2.6.1"   % "it,test",
-        "ch.qos.logback"       % "logback-classic"          % "1.2.7",
+        "ch.qos.logback"       % "logback-classic"          % "1.2.8",
         "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
         "org.slf4j"            % "jul-to-slf4j"             % "1.7.32",
         "com.pauldijou"       %% "jwt-core"                 % "5.0.0",
