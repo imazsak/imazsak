@@ -78,7 +78,7 @@ enablePlugins(BuildInfoPlugin)
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)
 addCompilerPlugin("io.tryp"        % "splain"         % "0.5.8" cross CrossVersion.patch)
 
-cancelable in Global := true
+(Global / cancelable) := true
 
 lazy val buildInfoSettings = Seq(
   buildInfoKeys := Seq[BuildInfoKey](
