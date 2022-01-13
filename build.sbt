@@ -1,7 +1,7 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.8",
   organization := "hu.ksisu",
   scalafmtOnCompile := true,
   version := "0.1.0"
