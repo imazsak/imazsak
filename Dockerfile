@@ -8,7 +8,7 @@ RUN sbt stage && \
     chmod -R u=rX,g=rX /app/target/universal/stage && \
     chmod u+x,g+x /app/target/universal/stage/bin/imazsak
 
-FROM openjdk:8-alpine
+FROM openjdk:18-alpine
 USER root
 RUN apk add --no-cache bash && \
     adduser -S -u 1001 imazsak
