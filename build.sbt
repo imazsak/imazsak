@@ -50,7 +50,7 @@ lazy val core = (project in file("."))
         "com.pauldijou"       %% "jwt-core"                 % "5.0.0",
         "com.pauldijou"       %% "jwt-spray-json"           % "5.0.0",
         "commons-codec"        % "commons-codec"            % "1.15",
-        "ch.megard"           %% "akka-http-cors"           % "1.0.0",
+        "ch.megard"           %% "akka-http-cors"           % "1.1.2",
         "io.opentracing"       % "opentracing-api"          % "0.33.0",
         "io.opentracing"       % "opentracing-util"         % "0.33.0",
         "io.opentracing"       % "opentracing-noop"         % "0.33.0",
